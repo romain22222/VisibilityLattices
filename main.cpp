@@ -38,7 +38,7 @@ IntegerComputer<Integer> ic;
 std::vector<int> digital_dimensions;
 SH3::SurfelRange surfels;
 std::vector<Point> pointels;
-std::size_t pointel_idx;
+std::size_t pointel_idx = 0;
 Point selected_point;
 CountedPtr<SH3::ImplicitShape3D> implicit_shape(nullptr);
 CountedPtr<SH3::BinaryImage> binary_image(nullptr);
@@ -133,7 +133,8 @@ public:
 Visibility visibility = Visibility();
 
 void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
-  vp.resize(vq.size());
+  vp.clear();
+  vp.reserve(vq.size());
   for (const auto & i : vq)
     vp.emplace_back(gridstep * (i[0] - 0.5),
                     gridstep * (i[1] - 0.5),
@@ -141,7 +142,8 @@ void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
 }
 
 void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) {
-  vq.resize(vp.size());
+  vq.clear();
+  vq.reserve(vp.size());
   for (const auto & i : vp)
     vq.emplace_back(Integer(i[0] / gridstep + 0.5),
                     Integer(i[1] / gridstep + 0.5),
@@ -527,11 +529,6 @@ void myCallback() {
   ImGui::SameLine();
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
-
-
-
-
-
 
 
 int main(int argc, char *argv[]) {
