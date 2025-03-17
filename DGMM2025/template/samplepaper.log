@@ -1,0 +1,320 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024/Homebrew) (preloaded format=pdflatex 2024.7.14)  23 JAN 2025 09:42
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**samplepaper.tex
+(./samplepaper.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-02-20>
+(./llncs.cls
+Document Class: llncs 2024/01/29 v2.24 
+ LaTeX document class for Lecture Notes in Computer Science
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/base/articl
+e.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/base/size10
+.clo
+File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count188
+\c@section=\count189
+\c@subsection=\count190
+\c@subsubsection=\count191
+\c@paragraph=\count192
+\c@subparagraph=\count193
+\c@figure=\count194
+\c@table=\count195
+\abovecaptionskip=\skip48
+\belowcaptionskip=\skip49
+\bibindent=\dimen140
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/tools/multi
+col.sty
+Package: multicol 2023/03/30 v1.9f multicolumn formatting (FMi)
+\c@tracingmulticols=\count196
+\mult@box=\box51
+\multicol@leftmargin=\dimen141
+\c@unbalance=\count197
+\c@collectmore=\count198
+\doublecol@number=\count199
+\multicoltolerance=\count266
+\multicolpretolerance=\count267
+\full@width=\dimen142
+\page@free=\dimen143
+\premulticols=\dimen144
+\postmulticols=\dimen145
+\multicolsep=\skip50
+\multicolbaselineskip=\skip51
+\partial@page=\box52
+\last@line=\box53
+\mc@boxedresult=\box54
+\maxbalancingoverflow=\dimen146
+\mult@rightbox=\box55
+\mult@grightbox=\box56
+\mult@firstbox=\box57
+\mult@gfirstbox=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\@tempa=\box90
+\@tempa=\box91
+\@tempa=\box92
+\@tempa=\box93
+\@tempa=\box94
+\c@minrows=\count268
+\c@columnbadness=\count269
+\c@finalcolumnbadness=\count270
+\last@try=\dimen147
+\multicolovershoot=\dimen148
+\multicolundershoot=\dimen149
+\mult@nat@firstbox=\box95
+\colbreak@box=\box96
+\mc@col@check@num=\count271
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/oberdiek/al
+iascnt.sty
+Package: aliascnt 2018/09/07 v1.5 Alias counters (HO)
+)
+\c@chapter=\count272
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 379.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 380.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 381.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 382.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 383.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 384.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 385.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 386.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 387.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 388.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 389.
+LaTeX Info: Redefining \vec on input line 394.
+\tocchpnum=\dimen150
+\tocsecnum=\dimen151
+\tocsectotal=\dimen152
+\tocsubsecnum=\dimen153
+\tocsubsectotal=\dimen154
+\tocsubsubsecnum=\dimen155
+\tocsubsubsectotal=\dimen156
+\tocparanum=\dimen157
+\tocparatotal=\dimen158
+\tocsubparanum=\dimen159
+\@tempcntc=\count273
+\fnindent=\dimen160
+\c@@inst=\count274
+\c@@auth=\count275
+\c@auco=\count276
+\instindent=\dimen161
+\authrun=\box97
+\authorrunning=\toks17
+\tocauthor=\toks18
+\titrun=\box98
+\titlerunning=\toks19
+\toctitle=\toks20
+\c@theorem=\count277
+\c@case=\count278
+\c@conjecture=\count279
+\c@corollary=\count280
+\c@definition=\count281
+\c@example=\count282
+\c@exercise=\count283
+\c@lemma=\count284
+\c@note=\count285
+\c@problem=\count286
+\c@property=\count287
+\c@proposition=\count288
+\c@question=\count289
+\c@solution=\count290
+\c@remark=\count291
+\headlineindent=\dimen162
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/base/fonten
+c.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics/gr
+aphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics/ke
+yval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks21
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics/gr
+aphics.sty
+Package: graphics 2022/03/10 v1.4e Standard LaTeX Graphics (DPC,SPQR)
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics/tr
+ig.sty
+Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics-cf
+g/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 107.
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/graphics-de
+f/pdftex.def
+File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen163
+\Gin@req@width=\dimen164
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/l3backend/l
+3backend-pdftex.def
+File: l3backend-pdftex.def 2024-02-20 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count292
+\l__pdf_internal_box=\box99
+) (./samplepaper.aux)
+\openout1 = `samplepaper.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/context/base/mkii
+/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count293
+\scratchdimen=\dimen165
+\scratchbox=\box100
+\nofMPsegments=\count294
+\nofMParguments=\count295
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count296
+\MPscratchDim=\dimen166
+\MPnumerator=\count297
+\makeMPintoPDFobject=\count298
+\everyMPtoPDFconversion=\toks23
+)
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/epstopdf-pk
+g/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/latexconfig
+/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 45.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 45.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 45.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 45.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
+5.
+
+(/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/tex/latex/base/t1cmtt
+.fd
+File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+Package epstopdf Info: Source file: <fig1.eps>
+(epstopdf)                    date: 2017-10-04 11:21:14
+(epstopdf)                    size: 357553 bytes
+(epstopdf)             Output file: <fig1-eps-converted-to.pdf>
+(epstopdf)                    date: 2025-01-23 09:41:55
+(epstopdf)                    size: 25599 bytes
+(epstopdf)             Command: <repstopdf --outfile=fig1-eps-converted-to.pdf 
+fig1.eps>
+(epstopdf)             \includegraphics on input line 99.
+Package epstopdf Info: Output file is already uptodate.
+<fig1-eps-converted-to.pdf, id=1, 345.29pt x 142.5325pt>
+File: fig1-eps-converted-to.pdf Graphic file (type pdf)
+<use fig1-eps-converted-to.pdf>
+Package pdftex.def Info: fig1-eps-converted-to.pdf  used on input line 99.
+(pdftex.def)             Requested size: 347.12354pt x 143.29115pt.
+ [1
+
+{/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/map/pdftex/updm
+ap/pdftex.map}{/opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/e
+nc/dvips/cm-super/cm-super-t1.enc}{/opt/homebrew/Cellar/texlive/20240312_1/shar
+e/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}] [2 <./fig1-eps-convert
+ed-to.pdf>] [3] (./samplepaper.aux)
+ ***********
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-02-20>
+ ***********
+ ) 
+Here is how much of TeX's memory you used:
+ 2048 strings out of 474116
+ 31686 string characters out of 5732613
+ 1934187 words of memory out of 5000000
+ 24418 multiletter control sequences out of 15000+600000
+ 568843 words of font info for 55 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 57i,9n,65p,311b,256s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi10.pfb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmmi7.pfb></opt/homebrew/Cellar/texlive/202403
+12_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></opt/homebrew/C
+ellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.p
+fb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmr7.pfb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmsy7.pfb></opt/homebrew/Cellar/texlive/2024031
+2_1/share/texmf-dist/fonts/type1/public/cm-super/sfbx0900.pfb></opt/homebrew/Ce
+llar/texlive/20240312_1/share/texmf-dist/fonts/type1/public/cm-super/sfbx1000.p
+fb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public
+/cm-super/sfbx1200.pfb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dis
+t/fonts/type1/public/cm-super/sfbx1440.pfb></opt/homebrew/Cellar/texlive/202403
+12_1/share/texmf-dist/fonts/type1/public/cm-super/sfrm0600.pfb></opt/homebrew/C
+ellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public/cm-super/sfrm0900.
+pfb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-dist/fonts/type1/publi
+c/cm-super/sfrm1000.pfb></opt/homebrew/Cellar/texlive/20240312_1/share/texmf-di
+st/fonts/type1/public/cm-super/sfti0900.pfb></opt/homebrew/Cellar/texlive/20240
+312_1/share/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb></opt/homebrew/
+Cellar/texlive/20240312_1/share/texmf-dist/fonts/type1/public/cm-super/sftt0900
+.pfb>
+Output written on samplepaper.pdf (3 pages, 276915 bytes).
+PDF statistics:
+ 111 PDF objects out of 1000 (max. 8388607)
+ 67 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -4,8 +4,8 @@ project(VisibilityLattices)
 # For OMP support use
 # cmake -DCMAKE_PREFIX_PATH=$(brew --prefix libomp) -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="/opt/homebrew/opt/llvm/bin/clang" -DCMAKE_CXX_COMPILER="/opt/homebrew/opt/llvm/bin/clang++" ..
 
-#include_directories("/opt/homebrew/opt/llvm/include" "/opt/homebrew/opt/libomp/include")
-#link_directories("/opt/homebrew/opt/llvm/lib" "/opt/homebrew/opt/libomp/lib")
+include_directories("/opt/homebrew/opt/llvm/include" "/opt/homebrew/opt/libomp/include")
+link_directories("/opt/homebrew/opt/llvm/lib" "/opt/homebrew/opt/libomp/lib")
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -28,7 +28,7 @@ find_package(OpenMP)
 
 # JOL: do not understand why I have to manually set thiis so that it finds Eigen
 # include_directories( /Users/lachaud/GITHUB/DigitalShapeTools/src )
-# include_directories( /opt/homebrew/include/eigen3/)
+include_directories( /opt/homebrew/include/eigen3/)
 
 if(OpenMP_CXX_FOUND)
     add_executable(visibilityLattices main.cpp)
