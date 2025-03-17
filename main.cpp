@@ -44,13 +44,13 @@ CountedPtr<SH3::ImplicitShape3D> implicit_shape(nullptr);
 CountedPtr<SH3::BinaryImage> binary_image(nullptr);
 CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
-bool ground_truth = false;
 
 // Parameters
 int VisibilityRadius = 10;
 double gridstep = 1.0;
 int OMP_max_nb_threads = 1;
 double Time = 0.0;
+bool interface = false;
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -135,7 +135,7 @@ Visibility visibility = Visibility();
 void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
   vp.clear();
   vp.reserve(vq.size());
-  for (const auto & i : vq)
+  for (const auto &i: vq)
     vp.emplace_back(gridstep * (i[0] - 0.5),
                     gridstep * (i[1] - 0.5),
                     gridstep * (i[2] - 0.5));
@@ -144,7 +144,7 @@ void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
 void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) {
   vq.clear();
   vq.reserve(vp.size());
-  for (const auto & i : vp)
+  for (const auto &i: vp)
     vq.emplace_back(Integer(i[0] / gridstep + 0.5),
                     Integer(i[1] / gridstep + 0.5),
                     Integer(i[2] / gridstep + 0.5));
@@ -152,7 +152,7 @@ void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) 
 
 void listPolynomials() {
   auto L = SH3::getPolynomialList();
-  for (const auto& p: L)
+  for (const auto &p: L)
     trace.info() << p.first << " = " << p.second << std::endl;
 }
 
@@ -253,7 +253,7 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
  * @return
  */
 IntegralIntervals<Integer>
-checkInterval(const std::pair<int, int> toCheck, const IntegralIntervals<Integer>& figIntervals) {
+checkInterval(const std::pair<int, int> toCheck, const IntegralIntervals<Integer> &figIntervals) {
   IntegralIntervals<Integer> result;
   result.clear();
   auto toCheckSize = toCheck.second - toCheck.first;
@@ -268,8 +268,8 @@ checkInterval(const std::pair<int, int> toCheck, const IntegralIntervals<Integer
 IntegralIntervals<Integer> intersect(const IntegralIntervals<Integer> &l1, const IntegralIntervals<Integer> &l2) {
   IntegralIntervals<Integer> result;
   int k1 = 0, k2 = 0;
-  const auto& l1D = l1.data();
-  const auto& l2D = l2.data();
+  const auto &l1D = l1.data();
+  const auto &l2D = l2.data();
   auto &rData = result.data();
   rData.reserve(std::max(l1D.size(), l2D.size()));
   while (k1 < l1D.size() && k2 < l2D.size()) {
@@ -292,8 +292,8 @@ IntegralIntervals<Integer> intersect(const IntegralIntervals<Integer> &l1, const
  * @return
  */
 IntegralIntervals<Integer> matchVector(IntegralIntervals<Integer> &toCheck,
-                                       const IntegralIntervals<Integer>& vectorIntervals,
-                                       const IntegralIntervals<Integer>& figIntervals) {
+                                       const IntegralIntervals<Integer> &vectorIntervals,
+                                       const IntegralIntervals<Integer> &figIntervals) {
   for (auto vInterval: vectorIntervals.data()) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
@@ -303,39 +303,39 @@ IntegralIntervals<Integer> matchVector(IntegralIntervals<Integer> &toCheck,
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+
 void computeVisibilityOmp(int radius) {
   std::cout << "Computing visibility OMP" << std::endl;
   Dimension axis = getLargeAxis();
   auto figLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints();
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
   auto segmentList = getAllVectors(radius);
+
+  // avoid thread imbalance
+  std::random_shuffle(segmentList.begin(), segmentList.end());
+
   visibility = Visibility(axis, segmentList, pointels);
   int numThreads = omp_get_max_threads();
-  std::vector<size_t> chunkIdxSplitters = std::vector<size_t>(numThreads + 1, 0);
-  auto meanChunkSize = segmentList.size() / numThreads;
-  auto factor = meanChunkSize / 6. / numThreads; // Todo determine optimal factor
+//  auto factor = meanChunkSize / 6. / numThreads; // Todo determine optimal factor
   // Split the segmentList into chunks for each thread, first thread will get more chunks then decreases to the last thread
-  for (int i = 0; i < omp_get_max_threads() - 1; i++) {
-    chunkIdxSplitters[i + 1] = chunkIdxSplitters[i] + (i - numThreads) * factor / 2. + meanChunkSize;
-    std::cout << "Chunk " << i << " " << chunkIdxSplitters[i] << " " << chunkIdxSplitters[i + 1] << std::endl;
-  }
-  chunkIdxSplitters[numThreads] = segmentList.size();
+//  for (int i = 0; i < omp_get_max_threads() - 1; i++) {
+//    chunkIdxSplitters[i + 1] = chunkIdxSplitters[i] + (i - numThreads) * factor / 2. + meanChunkSize;
+//    std::cout << "Chunk " << i << " " << chunkIdxSplitters[i] << " " << chunkIdxSplitters[i + 1] << std::endl;
+//  }
+//  chunkIdxSplitters[numThreads] = segmentList.size();
 //  std::vector<int> repartitionPositiveValues = std::vector<int>(3 * radius * radius, 0);
-#pragma omp parallel num_threads(numThreads)
-  {
-    int i = omp_get_thread_num();
-    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-    start = std::chrono::high_resolution_clock::now();
-#pragma omp critical
-    {
-      std::cout <<"Visibility computation thread " << i << std::endl;
-    }
+  size_t chunkSize = 64;
+  auto chunkAmount = segmentList.size() / chunkSize;
+  auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
+#pragma omp for schedule(dynamic)
+  for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
     std::map<Point, IntegralIntervals<Integer>> latticeVector;
     IntegralIntervals<Integer> eligibles;
     auto &eligiblesData = eligibles.data();
     int minTx, maxTx, minTy, maxTy;
-    for (auto segmentIdx = chunkIdxSplitters[i]; segmentIdx < chunkIdxSplitters[i + 1]; segmentIdx++) {
+    for (auto segmentIdx = chunkIdx * chunkSize;
+         segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
 //      for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
       /*IntegerVector */segment = segmentList[segmentIdx];
       /*std::map<Point, IntegralIntervals<Integer>> */latticeVector = getLatticeVector(segment, axis).data();
@@ -351,7 +351,7 @@ void computeVisibilityOmp(int radius) {
           eligiblesData.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
           const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                                 axis == 2 ? 0 : 2 * ty);
-          for (const auto& cInfo: latticeVector) {
+          for (const auto &cInfo: latticeVector) {
             eligibles = matchVector(eligibles, cInfo.second, figLattices.at(pInterest + cInfo.first));
             if (eligibles.empty()) break;
           }
@@ -370,11 +370,6 @@ void computeVisibilityOmp(int radius) {
         }
       }
     }
-    end = std::chrono::high_resolution_clock::now();
-#pragma omp critical
-    {
-      std::cout << "End thread " << i << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms)" << std::endl;
-    }
   }
   std::cout << "Visibility computed" << std::endl;
   // dump in a file the repartition of positive values
@@ -386,6 +381,7 @@ void computeVisibilityOmp(int radius) {
 //  }
 //  repartitionFile.close();
 }
+
 #pragma clang diagnostic pop
 
 /**
@@ -405,7 +401,7 @@ void computeVisibility(int radius) {
   auto segmentList = getAllVectors(radius);
   visibility = Visibility(axis, segmentList, pointels);
   int minTx, maxTx, minTy, maxTy;
-  std::vector<long> durations = std::vector<long>(segmentList.size()/100, 0);
+  std::vector<long> durations = std::vector<long>(segmentList.size() / 100, 0);
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
   // Enumerate all pairs of vectorIdx, vector
   for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
@@ -422,7 +418,7 @@ void computeVisibility(int radius) {
         eligiblesData.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
         const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                               axis == 2 ? 0 : 2 * ty);
-        for (const auto& cInfo: latticeVector) {
+        for (const auto &cInfo: latticeVector) {
           eligibles = matchVector(eligibles, cInfo.second, figLattices.at(pInterest + cInfo.first));
           if (eligibles.empty()) break;
         }
@@ -433,7 +429,7 @@ void computeVisibility(int radius) {
     }
     if (segmentIdx % 100 == 99) {
       end = std::chrono::high_resolution_clock::now();
-      durations[segmentIdx/100] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+      durations[segmentIdx / 100] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
   }
   std::ofstream durationsFile;
@@ -532,6 +528,8 @@ void myCallback() {
 
 
 int main(int argc, char *argv[]) {
+
+
   // command line inteface options
   CLI::App app{"A tool to check visibility using lattices."};
   std::string filename = "../volumes/bunny34.vol";
@@ -554,6 +552,7 @@ int main(int argc, char *argv[]) {
   app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
   app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
   app.add_flag("-l", listP, "lists the known named polynomials.");
+  app.add_flag("--noInterface", interface, "desactivate the interface and use the visibility OMP algorithm");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
@@ -586,7 +585,6 @@ int main(int argc, char *argv[]) {
                                         SH3::Domain(K.lowerBound(),
                                                     K.upperBound()),
                                         params);
-    ground_truth = true;
     trace.endBlock();
   } else {
     trace.beginBlock("Reading image vol file");
@@ -619,15 +617,18 @@ int main(int argc, char *argv[]) {
   trace.endBlock();
 
   // Initialize polyscope
-  polyscope::init();
-  psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
-                                                primal_positions,
-                                                primal_faces);
-  psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
-  psPrimalMesh->setEdgeWidth(1.5);
-  polyscope::state::userCallback = myCallback;
-  polyscope::show();
+  if (interface) {
+    polyscope::init();
+    psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
+                                                  primal_positions,
+                                                  primal_faces);
+    psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
+    psPrimalMesh->setEdgeWidth(1.5);
+    polyscope::state::userCallback = myCallback;
+    polyscope::show();
+  } else {
 
+  }
   return EXIT_SUCCESS;
 
 }
