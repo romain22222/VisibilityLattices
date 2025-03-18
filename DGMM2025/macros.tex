@@ -1,0 +1,86 @@
+% set of real numbers
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+% set of integer numbers
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+% cell complex build on the lattice \Z^d
+\let\C\relax \DeclareMathOperator{\C}{\ensuremath{\mathcal{C}^d}} % modified because of incompatiblity with hyperref package
+% cardinality of a set
+\newcommand{\Card}[1]{\ensuremath{\#\left( #1 \right)}}
+% Interior of a closed set.
+\newcommand{\Int}[1]{\ensuremath{\mathrm{Int}\left( #1 \right)}}
+% Some vectors and matrices
+\newcommand{\vx}[0]{\ensuremath{\mathbf{x}}}
+\newcommand{\vy}[0]{\ensuremath{\mathbf{y}}}
+\newcommand{\vz}[0]{\ensuremath{\mathbf{z}}}
+\newcommand{\vb}[0]{\ensuremath{\mathbf{b}}}
+\newcommand{\vA}[0]{\ensuremath{\mathbf{A}}}
+\newcommand{\va}[0]{\ensuremath{\mathbf{a}}}
+\newcommand{\vc}[0]{\ensuremath{\mathbf{c}}}
+\newcommand{\ve}[0]{\ensuremath{\mathbf{e}}}
+\newcommand{\vm}[0]{\ensuremath{\mathbf{m}}}
+\newcommand{\vn}[0]{\ensuremath{\mathbf{n}}}
+\newcommand{\vu}[0]{\ensuremath{\mathbf{u}}}
+\newcommand{\vv}[0]{\ensuremath{\mathbf{v}}}
+\newcommand{\vw}[0]{\ensuremath{\mathbf{w}}}
+\newcommand{\vp}[0]{\ensuremath{\mathbf{p}}}
+\newcommand{\vq}[0]{\ensuremath{\mathbf{q}}}
+\newcommand{\vr}[0]{\ensuremath{\mathbf{r}}}
+\newcommand{\vs}[0]{\ensuremath{\mathbf{s}}}
+\newcommand{\vt}[0]{\ensuremath{\mathbf{t}}}
+% Convex hull
+\newcommand{\Conv}[1]{\mathrm{CvxH}\left( #1 \right)}
+
+% References
+\newcommand{\Equ}[1]{(\ref{#1})}
+\newcommand{\RefFigure}[1]{Figure~\ref{#1}}
+\newcommand{\RefLemma}[1]{Lemma~\ref{#1}}
+\newcommand{\RefLemmas}[2]{Lemmas~\ref{#1} and~\ref{#2}}
+\newcommand{\RefTheorem}[1]{Theorem~\ref{#1}}
+\newcommand{\RefCorollary}[1]{Corollary~\ref{#1}}
+\newcommand{\RefAlgorithm}[1]{Algorithm~\ref{#1}}
+\newcommand{\RefSection}[1]{Section~\ref{#1}}
+\newcommand{\Refline}[1]{line~\ref{#1}}
+\newcommand{\RefLine}[1]{Line~\ref{#1}}
+
+% Star, closure, boundary of a complex
+\newcommand{\Bd}[1]{\ensuremath{\mathrm{Bd}\left(#1\right)}}
+\newcommand{\Star}[1]{\ensuremath{\mathrm{Star}\left(#1\right)}}
+\newcommand{\Starop}[0]{\ensuremath{\mathrm{Star}}}
+\newcommand{\Cl}[1]{\ensuremath{\mathrm{Cl}\left(#1\right)}}
+% Closed interior
+\newcommand{\CI}[1]{\ensuremath{\mathrm{ClInt}\left(#1\right)}}
+% Body of a complex
+\newcommand{\Body}[1]{\ensuremath{\left\|#1\right\|}}
+% topological closure
+\newcommand{\TCl}[1]{\ensuremath{\overline{#1}}}
+% topological interior
+\newcommand{\TInt}[1]{\ensuremath{\mathring{#1}}}
+% topological boundary
+\newcommand{\TBd}[1]{\ensuremath{\partial{#1}}}
+% <=
+\newcommand{\Le}{\ensuremath{\leqslant}}
+% >=
+\newcommand{\Ge}{\ensuremath{\geqslant}}
+
+
+% Euclidean distance
+\newcommand{\EDist}[0]{\ensuremath{\mathrm{d}_\mathbf{E}}}
+% Hausdorff distance
+\newcommand{\HDist}[0]{\ensuremath{\mathrm{d}_H}}
+% Normal cone to S at p
+\newcommand{\NC}[2]{\ensuremath{\mathrm{N}_{#1}(#2)}}
+
+% l2 norm
+\newcommand{\ltwo}[0]{\ensuremath{\ell_2}}
+\newcommand{\loo}[0]{\ensuremath{\ell_\infty}}
+
+% Reach
+\newcommand{\Reach}[1]{\ensuremath{\mathrm{reach}(#1)}}
+% Volume
+\newcommand{\Vol}[1]{\ensuremath{\mathrm{Vol}\left(#1\right)}}
+\newcommand{\Vold}[2]{\ensuremath{\mathrm{Vol}^{#1}\left(#2\right)}}
+% Digitization
+\newcommand{\Dig}[2]{\ensuremath{\mathrm{D}_{#1}\left(#2\right)}}
+% Counting lattice points
+\newcommand{\Lat}[1]{\ensuremath{\mathcal{L}_{#1}}}
+\newcommand{\LatC}[2]{\ensuremath{\Lat{#1}(#2)}}
