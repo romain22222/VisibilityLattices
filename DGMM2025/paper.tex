@@ -27,6 +27,7 @@
 \usepackage{environ}
 
 \usepackage{changes}
+%\usepackage{amstex}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -38,50 +39,131 @@
 %
 \title{Fast and exact visibility on digitized shapes and application to feature-aware normal estimation}
 %
-\titlerunning{Fast and exact visibility on digitized shapes}
+    \titlerunning{Fast and exact visibility on digitized shapes}
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{Romain Negro\inst{1}\orcidID{0000-XXXX-YYYY-ZZZZ} \and
-  Jacques-Olivier Lachaud\inst{1}\orcidID{0000-0003-4236-2133}}
+    \author{Romain Negro\inst{1}\orcidID{0000-XXXX-YYYY-ZZZZ} \and
+    Jacques-Olivier Lachaud\inst{1}\orcidID{0000-0003-4236-2133}}
 %
-\authorrunning{R. Negro and J.-O. Lachaud}
+    \authorrunning{R. Negro and J.-O. Lachaud}
 % First names are abbreviated in the running head.
 % If there are more than two authors, 'et al.' is used.
 %
-\institute{Universit\'e Savoie Mont Blanc, CNRS, LAMA, F-73000 Chambéry, France\\
-  \email{\{romain.negro|jacques-olivier.lachaud\}@univ-smb.fr}}
+    \institute{Universit\'e Savoie Mont Blanc, CNRS, LAMA, F-73000 Chambéry, France\\
+    \email{\{romain.negro|jacques-olivier.lachaud\}@univ-smb.fr}}
 %
-\maketitle              % typeset the header of the contribution
+    \maketitle              % typeset the header of the contribution
 %
-\begin{abstract}
-  Our abstract
-\keywords{Visibility \and Geometric inference \and Digital normal estimation \and Digital geometry} 
-\end{abstract}
+    \begin{abstract}
+        Our abstract
+        \keywords{Visibility \and Geometric inference \and Digital normal estimation \and Digital geometry}
+    \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction}
+
+
+    \section{Introduction}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Visibility through tangency of chords}
 
-Introduce full convexity and tangency. \cite{lachaud:2021-dgmm,Lachaud:2022-jmiv}.
+
+    \section{Visibility through tangency of chords}
+
+    Introduce full convexity and tangency. \cite{lachaud:2021-dgmm,lachaud:2022-jmiv}.
+
+    \begin{definition}
+        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e., \( [p, q] \subseteq \text{Star}(K)\).
+    \end{definition}
+
+    % Examples of visibility in 2D
+    \begin{figure}
+        \centering
+        \begin{tikzpicture}
+            \draw[dashed] (0,0) -- (4,2);
+            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p1};
+            \filldraw[black] (4,2) circle (0.05) node[anchor=north] {q1};
+            \draw (0,0) -- (1,0) -- (2,0) -- (2,1) -- (3,1) -- (3,2) -- (4,2);
+            \draw[dashed=gray] (-1,0) -- (-1,1) -- (0,1) -- (1,1) -- (1,2) -- (2,2) -- (2,3) -- (3,3) -- (4,3) -- (5,3) -- (5,2) -- (5,1) -- (4,1) -- (4,0) -- (3,0) -- (3,-1) -- (2,-1) -- (1,-1) -- (0,-1) -- (-1,-1) -- (-1,0);
+        \end{tikzpicture}
+        \hspace{\floatsep}
+        \begin{tikzpicture}
+            \draw[red,dashed] (0,0) -- (3,2);
+            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p2};
+            \filldraw[black] (3,2) circle (0.05) node[anchor=north] {q2};
+            \draw (0,0) -- (0,1) -- (0,2) -- (1,2) -- (1,3) -- (2,3) -- (2,2) -- (3,2);
+            \draw[dashed=gray] (-1,0) -- (-1,1) -- (-1,2) -- (-1,3) -- (0,3) -- (0,4) -- (1,4) -- (2,4) -- (3,4) -- (3,3) -- (4,3) -- (4,2) -- (4,1) -- (3,1) -- (2,1) -- (1,1) -- (1,0) -- (1,-1) -- (0,-1) -- (-1,-1) -- (-1,0);
+        \end{tikzpicture}
+        \newline
+        \newline
+        \begin{tikzpicture}
+            \draw[red,dashed] (0,0) -- (2,0);
+            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p3};
+            \filldraw[black] (2,0) circle (0.05) node[anchor=north] {q3};
+            \draw (0,0) -- (0,1) -- (0,2) -- (1,2) -- (2,2) -- (2,1) -- (2,0);
+            \draw[dashed=gray] (-1,-1) -- (-1,3) -- (3,3) -- (3,-1) -- (1,-1) -- (1,1) -- (1,-1) -- (-1,-1);
+        \end{tikzpicture}
+        \hspace{\floatsep}
+        \begin{tikzpicture}
+            \draw[red,dashed] (0,0) -- (2,2);
+            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p4};
+            \filldraw[black] (2,2) circle (0.05) node[anchor=north] {q4};
+            \draw (0,0) -- (0,1) -- (0,2) -- (1,2) -- (2,2);
+            \draw[dashed=gray] (-1,0) -- (-1,1) -- (-1,2) -- (-1,3) -- (0,3) -- (1,3) -- (2,3) -- (3,3) -- (3,2) -- (3,1) -- (2,1) -- (1,1) -- (1,0) -- (1,-1) -- (0,-1) -- (-1,-1) -- (-1,0);
+        \end{tikzpicture}
+        \caption{Examples of visibility in 2D, only q1 is visible from p1, q2 is not visible from p2 (gets out of the star), q3 is not visible from p3 (gets out of the star from a 1-d cell), q4 is not visible from p4 (gets out of the star from a 0-d cell).}
+        \label{fig:visibility-2d}
+    \end{figure}
+
+    % Example of visibility not necessarily connected
+    % Path from p to q : r u r u r r r r r u r
+    \begin{figure}
+        \centering
+        \begin{tikzpicture}
+            \draw (0,0) -- (1,0) -- (1,1) -- (2,1) -- (2,2) -- (3,2) -- (4,2) -- (5,2) -- (6,2) -- (7,2) -- (7,3);
+            \draw [black, dashed] (0,0) -- (7,3);
+            \draw [red, dashed] (0,0) -- (7,2);
+            \draw [red, dashed] (0,0) -- (6,2);
+            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p};
+            \filldraw[gray] (1,0) circle (0.05);
+            \filldraw[gray] (1,1) circle (0.05);
+            \filldraw[gray] (2,1) circle (0.05);
+            \filldraw[gray] (2,2) circle (0.05);
+            \filldraw[gray] (3,2) circle (0.05);
+            \filldraw[gray] (4,2) circle (0.05);
+            \filldraw[gray] (5,2) circle (0.05);
+            \filldraw[red] (6,2) circle (0.05);
+            \filldraw[red] (7,2) circle (0.05);
+            \filldraw[black] (7,3) circle (0.05) node[anchor=west] {q};
+            \draw[dashed=gray] (-1,-1) -- (-1,1) -- (0,1) -- (0,2) -- (1,2) -- (1,3) -- (6,3) -- (6,4) -- (8,4) -- (8,1) -- (3,1) -- (3,0) -- (2,0) -- (2,-1) -- (-1,-1);
+        \end{tikzpicture}
+        \caption{Example of non connex visibility in 2D, q is visible from p while the visibility points are not 26-connected.}
+        \label{fig:visibility-2d-not-connected}
+    \end{figure}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Fast computation using integer intervals intersections}
+
+
+    \section{Fast computation using integer intervals intersections}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Feature-aware normal estimation on digital surfaces}
+
+
+    \section{Feature-aware normal estimation on digital surfaces}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
+
+
+    \section{Conclusion}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{credits}
-  \subsubsection{\ackname}
-  This work is partially supported by the French National Research Agency
-  within the StableProxies project (ANR-22-CE46-0006).
+    \begin{credits}
+        \subsubsection{\ackname}
+        This work is partially supported by the French National Research Agency
+        within the StableProxies project (ANR-22-CE46-0006).
 %% \subsubsection{\discintname}
 %% It is now necessary to declare any competing interests or to specifically
 %% state that the authors have no competing interests. Please place the
@@ -92,14 +174,14 @@ Introduce full convexity and tangency. \cite{lachaud:2021-dgmm,Lachaud:2022-jmiv
 %% relevant to the content of this article. Or: Author A has received research
 %% grants from Company W. Author B has received a speaker honorarium from
 %% Company X and owns stock in Company Y. Author C is a member of committee Z.
-\end{credits}
+    \end{credits}
 %
 % ---- Bibliography ----
 %
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
-\bibliographystyle{splncs04}
-\bibliography{biblio}
+    \bibliographystyle{splncs04}
+    \bibliography{biblio}
 
 \end{document}

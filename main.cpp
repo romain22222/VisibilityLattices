@@ -1,8 +1,9 @@
 
 #include <iostream>
+#include <random>
 #include <string>
+#include <polyscope/polyscope.h>
 #include <polyscope/point_cloud.h>
-//#include <polyscope/polyscope.h>
 #include <polyscope/pick.h>
 #include <polyscope/surface_mesh.h>
 #include <DGtal/arithmetic/IntegerComputer.h>
@@ -30,6 +31,7 @@ typedef typename Convexity::LatticeSet LatticeSet;
 
 // Polyscope
 polyscope::PointCloud *psVisibility = nullptr;
+polyscope::PointCloud *psVisibilityStart = nullptr;
 polyscope::SurfaceMesh *psPrimalMesh = nullptr;
 
 // Global variables
@@ -114,7 +116,7 @@ public:
     return true;
   }
 
-  void set(const Point &offset, const IntegralIntervals<Integer> &value, const int vectorIdx) {
+  void set(const Point &offset, const IntegralIntervals<Integer> &value, const size_t vectorIdx) {
     auto p = offset;
     for (auto &interval: value.data()) {
       for (int i = interval.first / 2; i <= interval.second / 2; i++) {
@@ -145,9 +147,9 @@ void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) 
   vq.clear();
   vq.reserve(vp.size());
   for (const auto &i: vp)
-    vq.emplace_back(Integer(i[0] / gridstep + 0.5),
-                    Integer(i[1] / gridstep + 0.5),
-                    Integer(i[2] / gridstep + 0.5));
+    vq.emplace_back(round(i[0] / gridstep + 0.5),
+                    round(i[1] / gridstep + 0.5),
+                    round(i[2] / gridstep + 0.5));
 }
 
 void listPolynomials() {
@@ -301,9 +303,6 @@ IntegralIntervals<Integer> matchVector(IntegralIntervals<Integer> &toCheck,
   return toCheck;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
-
 void computeVisibilityOmp(int radius) {
   std::cout << "Computing visibility OMP" << std::endl;
   Dimension axis = getLargeAxis();
@@ -312,18 +311,9 @@ void computeVisibilityOmp(int radius) {
   auto segmentList = getAllVectors(radius);
 
   // avoid thread imbalance
-  std::random_shuffle(segmentList.begin(), segmentList.end());
+  std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
   visibility = Visibility(axis, segmentList, pointels);
-  int numThreads = omp_get_max_threads();
-//  auto factor = meanChunkSize / 6. / numThreads; // Todo determine optimal factor
-  // Split the segmentList into chunks for each thread, first thread will get more chunks then decreases to the last thread
-//  for (int i = 0; i < omp_get_max_threads() - 1; i++) {
-//    chunkIdxSplitters[i + 1] = chunkIdxSplitters[i] + (i - numThreads) * factor / 2. + meanChunkSize;
-//    std::cout << "Chunk " << i << " " << chunkIdxSplitters[i] << " " << chunkIdxSplitters[i + 1] << std::endl;
-//  }
-//  chunkIdxSplitters[numThreads] = segmentList.size();
-//  std::vector<int> repartitionPositiveValues = std::vector<int>(3 * radius * radius, 0);
   size_t chunkSize = 64;
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
@@ -336,15 +326,10 @@ void computeVisibilityOmp(int radius) {
     int minTx, maxTx, minTy, maxTy;
     for (auto segmentIdx = chunkIdx * chunkSize;
          segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
-//      for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
-      /*IntegerVector */segment = segmentList[segmentIdx];
-      /*std::map<Point, IntegralIntervals<Integer>> */latticeVector = getLatticeVector(segment, axis).data();
-//      IntegralIntervals<Integer> eligibles;
-//      auto &eligiblesData = eligibles.data();
-      /*auto */minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
-      /*auto */maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
-      /*auto */minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
-      /*auto */maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
+      minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
+      maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
+      minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
+      maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
       for (auto tx = minTx; tx < maxTx; tx++) {
         for (auto ty = minTy; ty < maxTy; ty++) {
           eligiblesData.clear();
@@ -356,15 +341,6 @@ void computeVisibilityOmp(int radius) {
             if (eligibles.empty()) break;
           }
           if (!eligibles.empty()) {
-//            int rpvIdx = segmentList[segmentIdx][0] * segmentList[segmentIdx][0]
-//                         + segmentList[segmentIdx][1] * segmentList[segmentIdx][1]
-//                         + segmentList[segmentIdx][2] * segmentList[segmentIdx][2];
-//#pragma omp critical
-//            {
-//              for (auto idx = 0; idx < eligiblesData.size(); idx++) {
-//                repartitionPositiveValues[rpvIdx] += eligiblesData[idx].second - eligiblesData[idx].first;
-//              }
-//            }
             visibility.set(pInterest / 2, eligibles, segmentIdx);
           }
         }
@@ -372,17 +348,7 @@ void computeVisibilityOmp(int radius) {
     }
   }
   std::cout << "Visibility computed" << std::endl;
-  // dump in a file the repartition of positive values
-//  std::ofstream repartitionFile;
-//  repartitionFile.open("repartitionPositiveValues.csv");
-//  repartitionFile << "idx,positiveValues" << std::endl;
-//  for (auto idx = 0; idx < repartitionPositiveValues.size(); idx++) {
-//    repartitionFile << idx << "," << repartitionPositiveValues[idx] << std::endl;
-//  }
-//  repartitionFile.close();
 }
-
-#pragma clang diagnostic pop
 
 /**
  * Compute the figure visibility using lattices
@@ -450,14 +416,19 @@ void computeVisibilityWithPointShow(std::size_t idx) {
   auto kdTree = LinearKDTree<Point, 3>(pointels);
   for (auto point_idx: kdTree.pointsInBall(pointels[idx], sphereRadius)) {
     auto tmp = kdTree.position(point_idx);
-    if (visibility.isVisible(pointels[idx], tmp)) {
+    if (visibility.isVisible(pointels[idx], tmp) && tmp != pointels[idx]) {
       points.push_back(tmp);
     }
   }
   std::vector<RealPoint> rpoints;
   embedPointels(points, rpoints);
+
+  std::vector<RealPoint> rpointStart;
+  embedPointels({pointels[idx]}, rpointStart);
   psVisibility = polyscope::registerPointCloud("Visibility", rpoints);
   psVisibility->setPointRadius(0.25 * gridstep, false);
+  psVisibilityStart = polyscope::registerPointCloud("Start", rpointStart);
+  psVisibilityStart->setPointRadius(0.3 * gridstep, false);
 }
 
 void checkParallelism() {
@@ -486,17 +457,15 @@ void checkParallelism() {
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
-    bool goodSelection = false;
     auto selection = polyscope::pick::getSelection();
     auto selectedSurface = dynamic_cast<polyscope::SurfaceMesh *>(selection.first);
     auto idx = selection.second;
 
     // Only authorize selection on the input surface and the reconstruction
     auto surf = polyscope::getSurfaceMesh("Primal surface");
-    goodSelection = goodSelection || (selectedSurface == surf);
     const auto nv = selectedSurface->nVertices();
     // Validate that it its a face index
-    if (goodSelection && idx < nv) {
+    if (selectedSurface == surf && idx < nv) {
       pointel_idx = idx;
       selected_point = pointels[pointel_idx];
       std::ostringstream otext;
@@ -538,7 +507,6 @@ int main(int argc, char *argv[]) {
   std::string polynomial;
   int minAABB = -10;
   int maxAABB = 10;
-  bool embed = false;
   bool listP = false;
   app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
   // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
@@ -553,6 +521,7 @@ int main(int argc, char *argv[]) {
   app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
   app.add_flag("-l", listP, "lists the known named polynomials.");
   app.add_flag("--noInterface", interface, "desactivate the interface and use the visibility OMP algorithm");
+  interface = !interface;
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
