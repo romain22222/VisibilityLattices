@@ -52,7 +52,7 @@ int VisibilityRadius = 10;
 double gridstep = 1.0;
 int OMP_max_nb_threads = 1;
 double Time = 0.0;
-bool interface = false;
+bool noInterface = false;
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -326,6 +326,7 @@ void computeVisibilityOmp(int radius) {
     int minTx, maxTx, minTy, maxTy;
     for (auto segmentIdx = chunkIdx * chunkSize;
          segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
+      latticeVector = getLatticeVector(segment, axis).data();
       minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
       maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
       minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
@@ -454,6 +455,29 @@ void checkParallelism() {
 }
 
 
+void computeMeanDistanceVisibility() {
+  // Print the gridstep
+  std::cout << "Gridstep = " << gridstep << std::endl;
+
+  // Print measure radius
+  std::cout << "Visibility radius = " << VisibilityRadius << std::endl;
+
+  // Print the mean distance between any two visible points
+  double meanDistance = 0;
+  int nbVisiblePairs = 0;
+  for (int i = 0; i < pointels.size(); i++) {
+    auto kdTree = LinearKDTree<Point, 3>(pointels);
+    for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
+      auto tmp = kdTree.position(point_idx);
+      if (isPointLowerThan(pointels[i], tmp) && visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
+        meanDistance += (tmp - pointels[i]).norm();
+        nbVisiblePairs++;
+      }
+    }
+  }
+  std::cout << "Mean distance between visible points = " << meanDistance / nbVisiblePairs << std::endl;
+}
+
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
@@ -489,6 +513,9 @@ void myCallback() {
     computeVisibilityOmp(VisibilityRadius);
     Time = trace.endBlock();
   }
+  if (ImGui::Button("Measure Mean Distance Visibility")) {
+    computeMeanDistanceVisibility();
+  }
   if (ImGui::Button("Check OMP"))
     checkParallelism();
   ImGui::SameLine();
@@ -519,9 +546,9 @@ int main(int argc, char *argv[]) {
                  "the maximal threshold M (included) for a voxel to belong to the digital shape.");
   app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
   app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
+  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
   app.add_flag("-l", listP, "lists the known named polynomials.");
-  app.add_flag("--noInterface", interface, "desactivate the interface and use the visibility OMP algorithm");
-  interface = !interface;
+  app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
@@ -586,7 +613,14 @@ int main(int argc, char *argv[]) {
   trace.endBlock();
 
   // Initialize polyscope
-  if (interface) {
+  if (noInterface) {
+    trace.beginBlock("Compute visibilities");
+    computeVisibilityOmp(VisibilityRadius);
+    Time = trace.endBlock();
+    trace.beginBlock("Compute mean distance visibility");
+    computeMeanDistanceVisibility();
+    Time = trace.endBlock();
+  } else {
     polyscope::init();
     psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
                                                   primal_positions,
@@ -595,8 +629,6 @@ int main(int argc, char *argv[]) {
     psPrimalMesh->setEdgeWidth(1.5);
     polyscope::state::userCallback = myCallback;
     polyscope::show();
-  } else {
-
   }
   return EXIT_SUCCESS;
 
