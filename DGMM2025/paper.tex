@@ -27,7 +27,10 @@
 \usepackage{environ}
 
 \usepackage{changes}
-%\usepackage{amstex}
+\usepackage{amstex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{varwidth}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -64,6 +67,11 @@
 
 
     \section{Introduction}
+
+
+    Definition Zd
+    Definition Cell complex
+    Definition Star
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -142,11 +150,63 @@
     \end{figure}
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
     \section{Fast computation using integer intervals intersections}
+
+    \begin{algorithm}
+        \caption{Given a cell complex C and a radius \(r\), compute the visibility at every point of C up to distance \(r\).}
+        \label{alg:visibility}
+        \begin{algorithmic}
+
+            \Function{CheckI}{$I$: Interval, ComplexI: list of Interval}
+                \State $[a, b] \gets I$
+                \State $Result \gets \emptyset$
+                \For{each interval $J$ in ComplexI}
+                    \State $[c, d] \gets J$
+                    \If{$\text{Size}(I) \leq \text{Size}(J)$}
+                        \State $Result \gets Result \cup [c-a,d-b+1]$
+                    \EndIf
+                \EndFor
+                \State \Return Result
+            \EndFunction
+
+            \Function{MatchVector}{\text{CurrentIResult}: list of Interval, VectorI: list of Interval, ComplexI: list of Interval}
+                \For{each interval $I$ in VectorI}
+                    \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{CheckI}{I, \text{ComplexI}}$
+                \EndFor
+                \State \Return \text{CurrentIResult}
+            \EndFunction
+
+            \Function{Visibility}{\text{C}: Cell complex, \text{Radius}: integer}
+                \State $FigLattices \gets \Call{GetStarFigLattices}{C}$
+                \State $Vectors \gets \Call{GetAllPrimalVectors}{Radius}$
+                \State $Visibility: \text{list of boolean} \gets \emptyset$
+                \State $minFInterval, maxFInterval \gets \Call{GetMinMaxInterval}{FigLattices}$
+                \For{each $V$ in $Vectors$}
+                    \State $VLattice \gets \Call{GetLattice}{\text{V}}$
+                    \For{every shift $tx, ty$ in $FigLattices$}
+                        \State $CurrentIResult \gets [minFInterval, maxFInterval]$
+                        \State $StartingPoint \gets \Call{GetStartingPoint}{tx, ty}$
+                        \For{each $Lattice$ in $VStarLattice$}
+                            \State \begin{varwidth}[t]{\linewidth}
+                                       $CurrentIResult~\gets~MatchVector(CurrentIResult,$\par
+                                       \hskip\algorithmicindent $Lattice.intervals,$\par
+                                       \hskip\algorithmicindent $\text{FigLattices}[StartingPoint + Lattice.position])$
+                            \end{varwidth}
+                        \EndFor
+                        \State \Call{UpdateVisibility}{$Visibility$, $CurrentIResult$}
+                    \EndFor
+                \EndFor
+                \State \Return $Visibility$
+            \EndFunction
+
+
+
+        \end{algorithmic}
+    \end{algorithm}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
