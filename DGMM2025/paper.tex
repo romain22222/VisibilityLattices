@@ -40,7 +40,7 @@
 %
 \begin{document}
 %
-\title{Fast and exact visibility on digitized shapes and application to feature-aware normal estimation}
+    \title{Fast and exact visibility on digitized shapes and application to feature-aware normal estimation}
 %
     \titlerunning{Fast and exact visibility on digitized shapes}
 % If the paper title is too long for the running head, you can set
@@ -69,19 +69,45 @@
     \section{Introduction}
 
 
-    Definition Zd
-    Definition Cell complex
-    Definition Star
+    Visibility is a fundamental concept in computational geometry and digital topology, with applications ranging from computer vision to geometric modeling.
+    In this work, we explore visibility through the lens of chord tangency, introducing a novel approach that builds on discrete geometric structures.
+    Our framework leverages the discrete setting of and cell complexes, providing a rigorous foundation for analyzing visibility properties in digital spaces.
+
+    We recall essential definitions from previous works, particularly the notions of , cell complexes, and the star operator as formalized in~\cite{lachaud:2021-dgmm} and~\cite{lachaud:2022-jmiv}.
+    The integer grid serves as our primary space of study, where geometric structures are discretized using cell complexes.
+    A cell complex is a decomposition of space into elementary units—vertices, edges, faces, and higher-dimensional counterparts—forming a combinatorial representation of geometric objects.
+    The star of a cell, as defined in these works, consists of all higher-dimensional cells that contain it, a crucial concept for analyzing local neighborhoods and connectivity.
+
+    Building on these foundations, our study focuses on visibility as determined by the tangency of chords in discrete geometry.
+    We define and analyze how visibility relationships emerge in this context and investigate their combinatorial and topological implications.
+    This approach provides a new perspective on discrete visibility, offering potential applications in digital imaging, surface reconstruction, and computational topology.
+
+    The remainder of this paper is structured as follows.
+    In Section 2, we formalize the concept of chord tangency and its role in visibility analysis.
+    Section 3 enters into the usage of integer intervals intersections to quickly scan the figure in order to recover this visibiltiy.
+    Section 4 presents our main results, using this visibility to compute normals using the CNC estimator~\cite*{lachaud:2022-dcg}.
+    Finally, Section 5 concludes with some other applications of integer intervals intersections in the field.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
     \section{Visibility through tangency of chords}
 
+
+    Let $\Z^d$ be the d-dimensional digital space, $d$ > 0.
+    Let $\mathcal{C}^d$ be the (cubical) cell complex induced by the lattice $\Z^d$ : its 0-cells are the points of $\Z^d$, its 1-cells are the open unit segments joining two 0-cells at distance 1, its 2-cells are the open unit squares, etc., and its d-cells are the d-dimensional open unit hypercubes with vertices in $\Z^d$.
+    We denote $\mathcal{C}^d_k$ the set of its k-cells.
+    In the following, a cell will always designate an element of $\mathcal{C}^d$, and the term subcomplex always designates a subset of $\mathcal{C}^d$.
+
+    A cell $\sigma$ is a face of another cell $\tau$ whenever $\sigma$ is a subset of the topological closure $\bar{\tau}$ of $\tau$, written $\sigma \preccurlyeq \tau$.
+    Given any subcomplex K of $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq \tau\}$
+
+
     Introduce full convexity and tangency. \cite{lachaud:2021-dgmm,lachaud:2022-jmiv}.
 
     \begin{definition}
-        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e., \( [p, q] \subseteq \text{Star}(K)\).
+        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e.,\ \( [p, q] \subseteq \text{Star}(K)\)
     \end{definition}
 
     % Examples of visibility in 2D
@@ -201,7 +227,6 @@
                 \EndFor
                 \State \Return $Visibility$
             \EndFunction
-
 
 
         \end{algorithmic}
