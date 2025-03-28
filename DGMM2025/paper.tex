@@ -73,7 +73,7 @@
     In this work, we explore visibility through the lens of chord tangency, introducing a novel approach that builds on discrete geometric structures.
     Our framework leverages the discrete setting of and cell complexes, providing a rigorous foundation for analyzing visibility properties in digital spaces.
 
-    We recall essential definitions from previous works, particularly the notions of , cell complexes, and the star operator as formalized in~\cite{lachaud:2021-dgmm} and~\cite{lachaud:2022-jmiv}.
+    We recall essential definitions from previous works, particularly the notions of cell complexes and the star operator as formalized in~\cite{lachaud:2021-dgmm} and~\cite{lachaud:2022-jmiv}.
     The integer grid serves as our primary space of study, where geometric structures are discretized using cell complexes.
     A cell complex is a decomposition of space into elementary units—vertices, edges, faces, and higher-dimensional counterparts—forming a combinatorial representation of geometric objects.
     The star of a cell, as defined in these works, consists of all higher-dimensional cells that contain it, a crucial concept for analyzing local neighborhoods and connectivity.
@@ -102,9 +102,6 @@
 
     A cell $\sigma$ is a face of another cell $\tau$ whenever $\sigma$ is a subset of the topological closure $\bar{\tau}$ of $\tau$, written $\sigma \preccurlyeq \tau$.
     Given any subcomplex K of $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq \tau\}$
-
-
-    Introduce full convexity and tangency. \cite{lachaud:2021-dgmm,lachaud:2022-jmiv}.
 
     \begin{definition}
         Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e.,\ \( [p, q] \subseteq \text{Star}(K)\)
@@ -148,6 +145,11 @@
         \caption{Examples of visibility in 2D, only q1 is visible from p1, q2 is not visible from p2 (gets out of the star), q3 is not visible from p3 (gets out of the star from a 1-d cell), q4 is not visible from p4 (gets out of the star from a 0-d cell).}
         \label{fig:visibility-2d}
     \end{figure}
+
+
+    We note that one particular aspect of this visibility definition is that all visible points from a given point taken as a separate complex are not necessarily 26-connected~\ref{fig:visibility-2d-not-connected}.
+    Furthermore, we conjecture that they even may not be $n$-connected for $n$ arbitrarily large.
+    This characteristic has implications for the applicability of Algorithm 3 from~\cite{lachaud:2022-jmiv}, as the algorithm assumes that visited points are 26-connected, potentially leading to incomplete collection of visible points.
 
     % Example of visibility not necessarily connected
     % Path from p to q : r u r u r r r r r u r
