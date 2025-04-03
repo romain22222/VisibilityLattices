@@ -187,21 +187,21 @@
         \label{alg:visibility}
         \begin{algorithmic}
 
-            \Function{CheckI}{$I$: Interval, ComplexI: list of Interval}
+            \Function{Translation}{$I$: Interval, L: list of Interval}
                 \State $[a, b] \gets I$
                 \State $Result \gets \emptyset$
-                \For{each interval $J$ in ComplexI}
+                \For{each interval $J$ in L}
                     \State $[c, d] \gets J$
                     \If{$\text{Size}(I) \leq \text{Size}(J)$}
-                        \State $Result \gets Result \cup [c-a,d-b+1]$
+                        \State $Result \gets Result \cup [c-a,d-b]$
                     \EndIf
                 \EndFor
                 \State \Return Result
             \EndFunction
 
-            \Function{MatchVector}{\text{CurrentIResult}: list of Interval, VectorI: list of Interval, ComplexI: list of Interval}
+            \Function{MatchVector}{\text{CurrentIResult}: list of Interval, VectorI: list of Interval, L: list of Interval}
                 \For{each interval $I$ in VectorI}
-                    \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{CheckI}{I, \text{ComplexI}}$
+                    \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{Translation}{I, \text{L}}$
                 \EndFor
                 \State \Return \text{CurrentIResult}
             \EndFunction
@@ -230,6 +230,22 @@
             \EndFunction
 
 
+        \end{algorithmic}
+    \end{algorithm}
+
+    \begin{algorithm}
+        \caption{Given 2 lists of intervals I and J, find $I \cup J$, the intersection of those 2 lists}
+        \label{alg:intersection}
+        \begin{algorithmic}
+            \Function{Intersection (\cup)}{\text{I, J}: list of Intervals}
+                \State R \gets \emptyset
+                \State k1, k2 = 0
+                \While{k1 < I.nbIntervals \And k2 < J.nbIntervals}
+                    \State i \gets I[k1]
+                    \State j \gets J[k2]
+
+                \EndWhile
+            \EndFunction
         \end{algorithmic}
     \end{algorithm}
 
