@@ -24,10 +24,12 @@ typedef PointVector<3, Integer> IntegerVector;
 typedef std::vector<IntegerVector> IntegerVectors;
 typedef Shortcuts<KSpace> SH3;
 typedef ShortcutsGeometry<KSpace> SHG3;
-typedef PointVector<3, Integer> IntegerVector;
-typedef std::vector<IntegerVector> IntegerVectors;
 typedef DigitalConvexity<KSpace> Convexity;
 typedef typename Convexity::LatticeSet LatticeSet;
+typedef IntegerVector Point;
+
+typedef std::pair<Integer, Integer> Interval;
+typedef std::vector<Interval> Intervals;
 
 // Polyscope
 polyscope::PointCloud *psVisibility = nullptr;
@@ -116,9 +118,9 @@ public:
     return true;
   }
 
-  void set(const Point &offset, const IntegralIntervals<Integer> &value, const size_t vectorIdx) {
+  void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
     auto p = offset;
-    for (auto &interval: value.data()) {
+    for (auto &interval: value) {
       for (int i = interval.first / 2; i <= interval.second / 2; i++) {
         p[mainAxis] = i;
         visibles[this->getPointIdx(p) * vectorsSize + vectorIdx] = true;
@@ -254,32 +256,29 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
  * @param figIntervals
  * @return
  */
-IntegralIntervals<Integer>
-checkInterval(const std::pair<int, int> toCheck, const IntegralIntervals<Integer> &figIntervals) {
-  IntegralIntervals<Integer> result;
-  result.data().reserve(figIntervals.size());
+Intervals
+checkInterval(const std::pair<int, int> toCheck, const Intervals &figIntervals) {
+  Intervals result;
+  result.reserve(figIntervals.size());
   auto toCheckSize = toCheck.second - toCheck.first;
-  for (auto interval: figIntervals.data()) {
+  for (auto interval: figIntervals) {
     if (interval.second - interval.first >= toCheckSize) {
-      result.data().emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
+      result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
     }
   }
   return result;
 }
 
-IntegralIntervals<Integer> intersect(const IntegralIntervals<Integer> &l1, const IntegralIntervals<Integer> &l2) {
-  IntegralIntervals<Integer> result;
+Intervals intersect(const Intervals &l1, const Intervals &l2) {
+  Intervals result;
+  result.reserve(l1.size() + l2.size() - 1);
   int k1 = 0, k2 = 0;
-  const auto &l1D = l1.data();
-  const auto &l2D = l2.data();
-  auto &rData = result.data();
-  rData.reserve(std::max(l1D.size(), l2D.size()));
-  while (k1 < l1D.size() && k2 < l2D.size()) {
-    auto interval1 = l1D[k1];
-    auto interval2 = l2D[k2];
+  while (k1 < l1.size() && k2 < l2.size()) {
+    auto interval1 = l1[k1];
+    auto interval2 = l2[k2];
     auto i = std::max(interval1.first, interval2.first);
     auto j = std::min(interval1.second, interval2.second);
-    if (i < j) rData.emplace_back(i, j);
+    if (i < j) result.emplace_back(i, j);
     if (interval1.second <= interval2.second) k1++;
     if (interval1.second >= interval2.second) k2++;
   }
@@ -293,10 +292,10 @@ IntegralIntervals<Integer> intersect(const IntegralIntervals<Integer> &l1, const
  * @param figLattices
  * @return
  */
-IntegralIntervals<Integer> matchVector(IntegralIntervals<Integer> &toCheck,
-                                       const IntegralIntervals<Integer> &vectorIntervals,
-                                       const IntegralIntervals<Integer> &figIntervals) {
-  for (auto vInterval: vectorIntervals.data()) {
+Intervals matchVector(Intervals &toCheck,
+                                       const Intervals &vectorIntervals,
+                                       const Intervals &figIntervals) {
+  for (auto vInterval: vectorIntervals) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
   }
@@ -306,7 +305,11 @@ IntegralIntervals<Integer> matchVector(IntegralIntervals<Integer> &toCheck,
 void computeVisibilityOmp(int radius) {
   std::cout << "Computing visibility OMP" << std::endl;
   Dimension axis = getLargeAxis();
-  auto figLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints();
+  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints().data();
+  std::map<Point, Intervals> figLattices;
+  for (auto p:tmpFigLattices) {
+    figLattices[p.first] = p.second.data();
+  }
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
   auto segmentList = getAllVectors(radius);
 
@@ -320,25 +323,28 @@ void computeVisibilityOmp(int radius) {
 #pragma omp for schedule(dynamic)
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
-    std::map<Point, IntegralIntervals<Integer>> latticeVector;
-    IntegralIntervals<Integer> eligibles;
-    auto &eligiblesData = eligibles.data();
+    std::map<Point, Intervals> latticeVector;
+    Intervals eligibles;
     int minTx, maxTx, minTy, maxTy;
     for (auto segmentIdx = chunkIdx * chunkSize;
          segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
-      latticeVector = getLatticeVector(segment, axis).data();
+      segment = segmentList[segmentIdx];
+      auto tmp = getLatticeVector(segment, axis).data();
+      for (auto p:tmp) {
+        latticeVector[p.first] = p.second.data();
+      }
       minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
       maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
       minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
       maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
       for (auto tx = minTx; tx < maxTx; tx++) {
         for (auto ty = minTy; ty < maxTy; ty++) {
-          eligiblesData.clear();
-          eligiblesData.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+          eligibles.clear();
+          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
           const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                                 axis == 2 ? 0 : 2 * ty);
           for (const auto &cInfo: latticeVector) {
-            eligibles = matchVector(eligibles, cInfo.second, figLattices.at(pInterest + cInfo.first));
+            eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
             if (eligibles.empty()) break;
           }
           if (!eligibles.empty()) {
@@ -359,12 +365,15 @@ void computeVisibilityOmp(int radius) {
 void computeVisibility(int radius) {
   std::cout << "Computing visibility" << std::endl;
   Dimension axis = getLargeAxis();
-  auto figLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints();
+  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints().data();
+  std::map<Point, Intervals> figLattices;
+  for (auto p:tmpFigLattices) {
+    figLattices[p.first] = p.second.data();
+  }
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
   IntegerVector segment;
-  IntegralIntervals<Integer> eligibles;
-  auto &eligiblesData = eligibles.data();
-  std::map<Point, IntegralIntervals<Integer>> latticeVector;
+  Intervals eligibles;
+  std::map<Point, Intervals> latticeVector;
   auto segmentList = getAllVectors(radius);
   visibility = Visibility(axis, segmentList, pointels);
   int minTx, maxTx, minTy, maxTy;
@@ -374,15 +383,18 @@ void computeVisibility(int radius) {
   for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
     if (segmentIdx % 100 == 0) start = std::chrono::high_resolution_clock::now();
     segment = segmentList[segmentIdx];
-    latticeVector = getLatticeVector(segment, axis).data();
+    auto tmp = getLatticeVector(segment, axis).data();
+    for (auto p:tmp) {
+      latticeVector[p.first] = p.second.data();
+    }
     minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
     maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
     minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
     maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
     for (auto tx = minTx; tx < maxTx; tx++) {
       for (auto ty = minTy; ty < maxTy; ty++) {
-        eligiblesData.clear();
-        eligiblesData.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+        eligibles.clear();
+        eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
         const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                               axis == 2 ? 0 : 2 * ty);
         for (const auto &cInfo: latticeVector) {
@@ -454,12 +466,12 @@ void checkParallelism() {
   OMP_max_nb_threads = cnt_max[0];
 }
 
-std::unordered_set<int> pickSet(int N, int k, std::mt19937 &gen) {
-  std::uniform_int_distribution<> dis(1, N);
-  std::unordered_set<int> elems;
+std::vector<size_t> pickSet(size_t N, size_t k, std::mt19937 &gen) {
+  std::uniform_int_distribution<size_t> dis(1, N);
+  std::vector<size_t> elems;
 
   while (elems.size() < k) {
-    elems.insert(dis(gen));
+    elems.push_back(dis(gen));
   }
 
   return elems;
@@ -480,10 +492,10 @@ void computeMeanDistanceVisibility() {
 
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::mt19937 gen(seed);
-  auto pointelsSample = pickSet(pointels.size(), 100, gen);
+  auto pointelsSample = pickSet(pointels.size(), pointels.size()/10, gen);
+  auto kdTree = LinearKDTree<Point, 3>(pointels);
 
-  for (int i = 0; i < pointelsSample.size(); i++) {
-    auto kdTree = LinearKDTree<Point, 3>(pointels);
+  for (auto i: pointelsSample) {
     for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
       auto tmp = kdTree.position(point_idx);
       if (isPointLowerThan(pointels[i], tmp) && visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
