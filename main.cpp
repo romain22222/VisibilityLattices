@@ -257,11 +257,11 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
 IntegralIntervals<Integer>
 checkInterval(const std::pair<int, int> toCheck, const IntegralIntervals<Integer> &figIntervals) {
   IntegralIntervals<Integer> result;
-  result.reserve(figIntervals.size());
+  result.data().reserve(figIntervals.size());
   auto toCheckSize = toCheck.second - toCheck.first;
   for (auto interval: figIntervals.data()) {
     if (interval.second - interval.first >= toCheckSize) {
-      result.push_back(interval.first - toCheck.first, interval.second - toCheck.second);
+      result.data().emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
     }
   }
   return result;
