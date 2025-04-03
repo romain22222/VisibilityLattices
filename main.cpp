@@ -26,7 +26,6 @@ typedef Shortcuts<KSpace> SH3;
 typedef ShortcutsGeometry<KSpace> SHG3;
 typedef DigitalConvexity<KSpace> Convexity;
 typedef typename Convexity::LatticeSet LatticeSet;
-typedef IntegerVector Point;
 
 typedef std::pair<Integer, Integer> Interval;
 typedef std::vector<Interval> Intervals;
@@ -257,7 +256,7 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
  * @return
  */
 Intervals
-checkInterval(const std::pair<int, int> toCheck, const Intervals &figIntervals) {
+checkInterval(const Interval toCheck, const Intervals &figIntervals) {
   Intervals result;
   result.reserve(figIntervals.size());
   auto toCheckSize = toCheck.second - toCheck.first;
