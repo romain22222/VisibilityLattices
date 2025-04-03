@@ -454,6 +454,16 @@ void checkParallelism() {
   OMP_max_nb_threads = cnt_max[0];
 }
 
+std::unordered_set<int> pickSet(int N, int k, std::mt19937 &gen) {
+  std::uniform_int_distribution<> dis(1, N);
+  std::unordered_set<int> elems;
+
+  while (elems.size() < k) {
+    elems.insert(dis(gen));
+  }
+
+  return elems;
+}
 
 void computeMeanDistanceVisibility() {
   // Print the gridstep
@@ -465,7 +475,14 @@ void computeMeanDistanceVisibility() {
   // Print the mean distance between any two visible points
   double meanDistance = 0;
   int nbVisiblePairs = 0;
-  for (int i = 0; i < pointels.size(); i++) {
+
+  // pick 100 random pointels
+
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::mt19937 gen(seed);
+  auto pointelsSample = pickSet(pointels.size(), 100, gen);
+
+  for (int i = 0; i < pointelsSample.size(); i++) {
     auto kdTree = LinearKDTree<Point, 3>(pointels);
     for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
       auto tmp = kdTree.position(point_idx);
