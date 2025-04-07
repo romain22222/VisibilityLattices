@@ -30,6 +30,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{varwidth}
+\usepackage{mathtools}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -186,6 +187,22 @@
         An interval $I$ is defined as the pair $[a,b], a \leq b, st. \forall a \leq n \leq b, n \in I$
     \end{definition}
 
+    \begin{definition}
+        $\forall A = [a,b], B = [c,d] \in interval, A < B \Leftrightarrow b < c$
+    \end{definition}
+
+    \begin{definition}
+        An intervals $L$ is an ordered list of intervals ${L_1,\ldots,L_n}$ st. $\forall i \in \mathbb{N}, L_i < L_{i+1}$
+    \end{definition}
+
+    \begin{definition}
+        A translation of an interval $A$ is defined as $A+t \coloneqq [a+t, b+t]$
+    \end{definition}
+
+    \begin{definition}
+        All translations $T$ of an interval $A$ on an intervals $L$ is defined as $\{t, st. A+t \subset L\}$
+    \end{definition}
+
     \begin{algorithm}
         \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$.}
         \label{alg:visibility}
@@ -202,13 +219,6 @@
                 \State \Return Result
             \EndFunction
 
-            \Function{MatchVector}{\text{CurrentIResult}: Intervals, VectorI: Intervals, L: Intervals}
-                \For{each interval $I$ in VectorI}
-                    \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{Translation}{I, \text{L}}$
-                \EndFor
-                \State \Return \text{CurrentIResult}
-            \EndFunction
-
             \Function{Visibility}{\text{C}: Cell complex, \text{Radius}: integer}
                 \State $FigLattices \gets \Call{GetStarFigLattices}{C}$
                 \State $Vectors \gets \Call{GetAllPrimalVectors}{Radius}$
@@ -220,11 +230,9 @@
                         \State $CurrentIResult \gets [minFInterval, maxFInterval]$
                         \State $StartingPoint \gets \Call{GetStartingPoint}{tx, ty}$
                         \For{each $Lattice$ in $VStarLattice$}
-                            \State \begin{varwidth}[t]{\linewidth}
-                                       $CurrentIResult~\gets~MatchVector(CurrentIResult,$\par
-                                       \hskip\algorithmicindent $Lattice.intervals,$\par
-                                       \hskip\algorithmicindent $\text{FigLattices}[StartingPoint + Lattice.position])$
-                            \end{varwidth}
+                            \For{each interval $I$ in $Lattice.intervals$}
+                                \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{Translation}{I, \text{FigLattices}[StartingPoint + Lattice.position])}$
+                            \EndFor
                         \EndFor
                         \State \Call{UpdateVisibility}{$Visibility$, $CurrentIResult$}
                     \EndFor
