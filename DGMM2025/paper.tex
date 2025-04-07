@@ -28,7 +28,7 @@
 
 \usepackage{changes}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage{varwidth}
 \usepackage{mathtools}
 \setauthormarkup{}
@@ -110,39 +110,44 @@
     % Examples of visibility in 2D
     \begin{figure}
         \centering
-        \begin{tikzpicture}
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.75,2.75);
-            \draw[dashed] (0,0) -- (2,1);
-            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p1};
-            \filldraw[black] (2,1) circle (0.05) node[anchor=north] {q1};
-            \draw [thick] (0,0) -- (0.5,0) -- (1,0) -- (1,0.5) -- (1.5,0.5) -- (1.5,1) -- (2,1);
-            \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0.5,0.5) -- (0.5,1) -- (1,1) -- (1,1.5) -- (2.5,1.5) -- (2.5,0.5) -- (2,0.5) -- (2,0) -- (1.5,0) -- (1.5,-0.5) -- (-0.5,-0.5);
-        \end{tikzpicture}
-        \begin{tikzpicture}
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.25,3.25);
-            \draw[red,dashed,thick] (0,0) -- (1.5,1);
-            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p2};
-            \filldraw[black] (1.5,1) circle (0.05) node[anchor=north] {q2};
-            \draw [thick] (0,0) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (1,1.5) -- (1,1) -- (1.5,1);
-            \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (0,1.5) -- (0,2) -- (1.5,2) -- (1.5,1.5) -- (2,1.5)  -- (2,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
-        \end{tikzpicture}
-        \begin{tikzpicture}
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
-            \draw[red,dashed,thick] (0,0) -- (1,0);
-            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p3};
-            \filldraw[black] (1,0) circle (0.05) node[anchor=north] {q3};
-            \draw [thick] (0,0) -- (0,1) -- (1,1) -- (1,0);
-            \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,-0.5) -- (-0.5,-0.5) -- (0.5,-0.5) -- (0.5,0.5);
-        \end{tikzpicture}
-        \begin{tikzpicture}
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
-            \draw[red,dashed,thick] (0,0) -- (1,1);
-            \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p4};
-            \filldraw[black] (1,1) circle (0.05) node[anchor=north] {q4};
-            \draw [thick] (0,0) -- (0,1) -- (1,1);
-            \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
-        \end{tikzpicture}
-        \caption{Examples of visibility in 2D, only q1 is visible from p1, q2 is not visible from p2 (gets out of the star), q3 is not visible from p3 (gets out of the star from a 1-d cell), q4 is not visible from p4 (gets out of the star from a 0-d cell).}
+        \begin{tabular}{cc|cc}
+            \begin{tikzpicture}
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.75,2.75);
+                \draw[dashed] (0,0) -- (2,1);
+                \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p1};
+                \filldraw[black] (2,1) circle (0.05) node[anchor=north] {q1};
+                \draw [thick] (0,0) -- (0.5,0) -- (1,0) -- (1,0.5) -- (1.5,0.5) -- (1.5,1) -- (2,1);
+                \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0.5,0.5) -- (0.5,1) -- (1,1) -- (1,1.5) -- (2.5,1.5) -- (2.5,0.5) -- (2,0.5) -- (2,0) -- (1.5,0) -- (1.5,-0.5) -- (-0.5,-0.5);
+            \end{tikzpicture}&&&
+            \begin{tikzpicture}
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.25,3.25);
+                \draw[red,dashed,thick] (0,0) -- (1.5,1);
+                \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p2};
+                \filldraw[black] (1.5,1) circle (0.05) node[anchor=north] {q2};
+                \draw [thick] (0,0) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (1,1.5) -- (1,1) -- (1.5,1);
+                \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (0,1.5) -- (0,2) -- (1.5,2) -- (1.5,1.5) -- (2,1.5)  -- (2,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
+            \end{tikzpicture}\\
+            Visible&&&Non Visible\\\\
+            \hline\\
+            \begin{tikzpicture}
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
+                \draw[red,dashed,thick] (0,0) -- (1,0);
+                \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p3};
+                \filldraw[black] (1,0) circle (0.05) node[anchor=north] {q3};
+                \draw [thick] (0,0) -- (0,1) -- (1,1) -- (1,0);
+                \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,-0.5) -- (-0.5,-0.5) -- (0.5,-0.5) -- (0.5,0.5);
+            \end{tikzpicture}&&&
+            \begin{tikzpicture}
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
+                \draw[red,dashed,thick] (0,0) -- (1,1);
+                \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p4};
+                \filldraw[black] (1,1) circle (0.05) node[anchor=north] {q4};
+                \draw [thick] (0,0) -- (0,1) -- (1,1);
+                \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
+            \end{tikzpicture}\\
+            Non Visible (from a 1-d cell)&&&Non Visible (from a 0-d cell)
+        \end{tabular}
+        \caption{Examples of visibility in 2D.}
         \label{fig:visibility-2d}
     \end{figure}
 
@@ -156,43 +161,37 @@
     \begin{figure}
         \centering
         \begin{tikzpicture}
-            \draw (0,0) -- (1,0) -- (1,1) -- (2,1) -- (2,2) -- (3,2) -- (4,2) -- (5,2) -- (6,2) -- (7,2) -- (7,3);
-            \draw [black, dashed] (0,0) -- (7,3);
-            \draw [red, dashed] (0,0) -- (7,2);
-            \draw [red, dashed] (0,0) -- (6,2);
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (5.25,3.25);
+            \draw[thick] (0,0) -- (0.5,0) -- (0.5,0.5) -- (1,0.5) -- (1,1) -- (3.5,1) -- (3.5,1.5);
+            \draw [black, dashed] (0,0) -- (3.5,1.5);
+            \draw [red, dashed] (0,0) -- (3.5,1);
+            \draw [red, dashed] (0,0) -- (3,1);
             \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p};
-            \filldraw[gray] (1,0) circle (0.05);
+            \filldraw[gray] (0.5,0) circle (0.05);
+            \filldraw[gray] (0.5,0.5) circle (0.05);
+            \filldraw[gray] (1,0.5) circle (0.05);
             \filldraw[gray] (1,1) circle (0.05);
+            \filldraw[gray] (1.5,1) circle (0.05);
             \filldraw[gray] (2,1) circle (0.05);
-            \filldraw[gray] (2,2) circle (0.05);
-            \filldraw[gray] (3,2) circle (0.05);
-            \filldraw[gray] (4,2) circle (0.05);
-            \filldraw[gray] (5,2) circle (0.05);
-            \filldraw[red] (6,2) circle (0.05);
-            \filldraw[red] (7,2) circle (0.05);
-            \filldraw[black] (7,3) circle (0.05) node[anchor=west] {q};
-            \draw[dashed=gray] (-1,-1) -- (-1,1) -- (0,1) -- (0,2) -- (1,2) -- (1,3) -- (6,3) -- (6,4) -- (8,4) -- (8,1) -- (3,1) -- (3,0) -- (2,0) -- (2,-1) -- (-1,-1);
+            \filldraw[gray] (2.5,1) circle (0.05);
+            \filldraw[red] (3,1) circle (0.05);
+            \filldraw[red] (3.5,1) circle (0.05);
+            \filldraw[black] (3.5,1.5) circle (0.05) node[anchor=west] {q};
+            \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0,0.5) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (3,1.5) -- (3,2) -- (4,2) -- (4,0.5) -- (1.5,0.5) -- (1.5,0) -- (1,0) -- (1,-0.5) -- (-0.5,-0.5);
         \end{tikzpicture}
         \caption{Example of non connex visibility in 2D, q is visible from p while the visibility points are not 26-connected.}
         \label{fig:visibility-2d-not-connected}
     \end{figure}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
     \section{Fast computation using integer intervals intersections}
 
-    \begin{definition}
-        An interval $I$ is defined as the pair $[a,b], a \leq b, st. \forall a \leq n \leq b, n \in I$
-    \end{definition}
+    To improve computation time, we will use lattice sets of integer intervals.
 
     \begin{definition}
-        $\forall A = [a,b], B = [c,d] \in interval, A < B \Leftrightarrow b < c$
-    \end{definition}
-
-    \begin{definition}
-        An intervals $L$ is an ordered list of intervals ${L_1,\ldots,L_n}$ st. $\forall i \in \mathbb{N}, L_i < L_{i+1}$
+        A sequence of intervals is an ordered list of intervals $L = ([a_i,b_i])_{i=1,\ldots,n}$ such that $b_i + 1 < a_{i+1}$, i.e., disjoint intervals with at least a missing integer.
     \end{definition}
 
     \begin{definition}
@@ -200,47 +199,119 @@
     \end{definition}
 
     \begin{definition}
-        All translations $T$ of an interval $A$ on an intervals $L$ is defined as $\{t, st. A+t \subset L\}$
+        A translation of a sequence of intervals $L$ is the sequence defined as $L+t \coloneqq \{L_1+t,\ldots,L_n+t\}$
     \end{definition}
 
+    \begin{definition}
+        All translations $T$ of an interval or a sequence of intervals $A$ in a sequence of intervals $L$ are defined as $ T \coloneqq t, st. A+t \subset L\}$
+    \end{definition}
+
+    We will consider the lattices as a map from points $p \in \R^{d-1}$ to a sequence of intervals, where all coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod2\right)$.
+
+    \begin{figure}
+        \centering
+        \caption{Representation of a 2d cell complex (here the star of a given curve) as lattices}
+        \label{fig:lattice-representation}
+        \usetikzlibrary {arrows.meta,decorations.shapes}
+        \begin{tabular}{c c}
+            \begin{tikzpicture}
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,-0.25) grid (7.25,7.25);
+                \filldraw[black] (1,4) circle (0.05);
+                \filldraw[black] (1,5) circle (0.05);
+                \filldraw[black] (2,5) circle (0.05);
+                \filldraw[black] (3,5) circle (0.05);
+                \filldraw[black] (3,4) circle (0.05);
+                \filldraw[black] (3,3) circle (0.05);
+                \filldraw[black] (3,2) circle (0.05);
+                \filldraw[black] (2,2) circle (0.05);
+                \filldraw[black] (2,1) circle (0.05);
+                \filldraw[black] (1,1) circle (0.05);
+                \filldraw[black] (1,0) circle (0.05);
+                \filldraw[black] (2,0) circle (0.05);
+                \filldraw[black] (3,0) circle (0.05);
+                \filldraw[black] (3,1) circle (0.05);
+                \filldraw[black] (4,1) circle (0.05);
+                \filldraw[black] (5,1) circle (0.05);
+                \draw[-{Stealth[length=3mm]}=black] (-1,-1) -- (-1,6.5);
+                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10mm}] {(-1,-1) -- (-1,7)};
+                \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (2,2) -- (2,1) -- (1,1) -- (1,0) -- (3,0) -- (3,1) -- (5,1);
+                \draw[thick,dashed] (1,3) -- (1,2) -- (0,2) -- (0,-1) -- (4,-1) -- (4,0) -- (6,0) -- (6,2) -- (4,2) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+            \end{tikzpicture} &
+            %      \begin{tikzpicture}
+            %     \foreach \y in {1,1.5,...,6} {
+            %       \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (0.75,\y) -- (6.25,\y);
+            %     }
+            %     \draw[-{Stealth[length=3mm]}=black] (0,0) -- (0,5.5);
+            %     \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10mm}] {(0,0) -- (0,5)};
+            %     \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (2,2) -- (2,1) -- (1,1) -- (1,0) -- (3,0) -- (3,1) -- (5,1);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,5)--(3.1,5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,4.5)--(1.1,4.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,4.5)--(3.1,4.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,4)--(1.1,4);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,4)--(3.1,4);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,3.5)--(3.1,3.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,3)--(3.1,3);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,2.5)--(3.1,2.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.9,2)--(3.1,2);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.9,1.5)--(2.1,1.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,1)--(2.1,1);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,1)--(5.1,1);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,0.5)--(1.1,0.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,0.5)--(3.1,0.5);
+            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,0)--(3.1,0);
+            %     \filldraw[white,yshift=-1cm] (0,0) circle (0.01); % readjust the height to match the original path
+            % \end{tikzpicture} &
+            \begin{tikzpicture}
+                \foreach \y in {0,0.5,...,7} {
+                    \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
+                }
+                \draw[-{Stealth[length=3mm]}=black] (-1,-1) -- (-1,6.5);
+                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10mm}] {(-1,-1) -- (-1,6.5)};
+                \draw[thick,dashed] (1,3) -- (1,2) -- (0,2) -- (0,-1) -- (4,-1) -- (4,0) -- (6,0) -- (6,2) -- (4,2) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4.5)--(3.6,4.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4)--(1.6,4);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,4)--(3.6,4);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,3.5)--(1.6,3.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3.5)--(3.6,3.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3)--(3.6,3);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,2.5)--(3.6,2.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,2)--(3.6,2);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(5.6,1.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1)--(5.6,1);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0.5)--(5.6,0.5);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0)--(3.6,0);
+                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,-0.5)--(3.6,-0.5);
+                \filldraw[white,yshift=-1.25cm] (0,0) circle (0.01); % readjust the height to match the original path
+            \end{tikzpicture}
+        \end{tabular}
+
+
+    \end{figure}
+
     \begin{algorithm}
-        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$.}
+        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$. We assume z being the lattice main axis, x and y being the auxiliary axises}
         \label{alg:visibility}
         \begin{algorithmic}
-            \Function{Translation}{I: Interval, L: Intervals}
-                \State $[a, b] \gets I$
-                \State $Result \gets \emptyset$
-                \For{each interval $J$ in L}
-                    \State $[c, d] \gets J$
-                    \If{$\text{Size}(I) \leq \text{Size}(J)$}
-                        \State $Result \gets Result \cap [c-a,d-b]$
-                    \EndIf
-                \EndFor
-                \State \Return Result
-            \EndFunction
-
-            \Function{Visibility}{\text{C}: Cell complex, \text{Radius}: integer}
-                \State $FigLattices \gets \Call{GetStarFigLattices}{C}$
-                \State $Vectors \gets \Call{GetAllPrimalVectors}{Radius}$
-                \State $Visibility: \text{vector of boolean} \gets \emptyset$
-                \State $minFInterval, maxFInterval \gets \Call{GetMinMaxInterval}{FigLattices}$
-                \For{each $V$ in $Vectors$}
-                    \State $VLattice \gets \Call{GetLattice}{\text{V}}$
-                    \For{every shift $tx, ty$ in $FigLattices$}
-                        \State $CurrentIResult \gets [minFInterval, maxFInterval]$
-                        \State $StartingPoint \gets \Call{GetStartingPoint}{tx, ty}$
-                        \For{each $Lattice$ in $VStarLattice$}
-                            \For{each interval $I$ in $Lattice.intervals$}
-                                \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{Translation}{I, \text{FigLattices}[StartingPoint + Lattice.position])}$
-                            \EndFor
+            \Function{Visibility}{\text{C}: Cell complex, \text{r}: Integer}
+                \State $\Omega \gets \Call{Star}{C}$ \Comment{Lattices of the star of the studied cell complex}
+                \State $Vectors \gets \Call{GetAllPrimalVectors}{r}$
+                \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Vectors) * PointelsAmount$}
+                \State $low, high \gets \Call{BoundingBoxZ}{\Omega}$
+                \ForAll{$v$ in $Vectors$}
+                    \State $VStar \gets \Call{Star}{\text{v}}$
+                    \ForAll{shift $tx, ty$ in $\Omega$}
+                        \State $R \gets [low, high]$
+                        \State $S: \R^3 \gets [2tx, 2ty,0]$
+                        \ForAll{lattice $L$ in $VStar$}
+                            \State $\text{R} \gets \text{R} \cap \Call{Translations}{L.intervals,\Omega[S + L.position]}$
                         \EndFor
-                        \State \Call{UpdateVisibility}{$Visibility$, $CurrentIResult$}
+                        \State \Call{UpdateVisibility}{$V$, $R$}
                     \EndFor
                 \EndFor
-                \State \Return $Visibility$
+                \State \Return $V$
             \EndFunction
-
-
         \end{algorithmic}
     \end{algorithm}
 
