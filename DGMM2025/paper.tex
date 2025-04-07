@@ -30,6 +30,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{varwidth}
+\usepackage{algc}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -103,7 +104,7 @@
     Given any subcomplex K of $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq \tau\}$
 
     \begin{definition}
-        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e.,\ \( [p, q] \subseteq \text{Star}(K)\)
+        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e., \( [p, q] \subseteq \text{Star}(K)\)
     \end{definition}
 
     % Examples of visibility in 2D
@@ -182,12 +183,16 @@
 
     \section{Fast computation using integer intervals intersections}
 
+    \begin{definition}
+        An interval $I$ is defined as the pair $[a,b], a \leq b, st. \forall a \leq n \leq b, n \in I$
+    \end{definition}
+
     \begin{algorithm}
         \caption{Given a cell complex C and a radius \(r\), compute the visibility at every point of C up to distance \(r\).}
         \label{alg:visibility}
         \begin{algorithmic}
 
-            \Function{Translation}{$I$: Interval, L: list of Interval}
+            \Function{Translation}{$I$: Interval, L: Intervals}
                 \State $[a, b] \gets I$
                 \State $Result \gets \emptyset$
                 \For{each interval $J$ in L}
@@ -199,7 +204,7 @@
                 \State \Return Result
             \EndFunction
 
-            \Function{MatchVector}{\text{CurrentIResult}: list of Interval, VectorI: list of Interval, L: list of Interval}
+            \Function{MatchVector}{\text{CurrentIResult}: Intervals, VectorI: Intervals, L: Intervals}
                 \For{each interval $I$ in VectorI}
                     \State $\text{CurrentIResult} \gets \text{CurrentIResult} \cap \Call{Translation}{I, \text{L}}$
                 \EndFor
@@ -209,7 +214,7 @@
             \Function{Visibility}{\text{C}: Cell complex, \text{Radius}: integer}
                 \State $FigLattices \gets \Call{GetStarFigLattices}{C}$
                 \State $Vectors \gets \Call{GetAllPrimalVectors}{Radius}$
-                \State $Visibility: \text{list of boolean} \gets \emptyset$
+                \State $Visibility: \text{vector of boolean} \gets \emptyset$
                 \State $minFInterval, maxFInterval \gets \Call{GetMinMaxInterval}{FigLattices}$
                 \For{each $V$ in $Vectors$}
                     \State $VLattice \gets \Call{GetLattice}{\text{V}}$
@@ -234,21 +239,31 @@
     \end{algorithm}
 
     \begin{algorithm}
-        \caption{Given 2 lists of intervals I and J, find $I \cup J$, the intersection of those 2 lists}
+        \caption{Given 2 lists of intervals K and L, find $K \cup L$, the intersection of those 2 lists}
         \label{alg:intersection}
         \begin{algorithmic}
-            \Function{Intersection (\cup)}{\text{I, J}: list of Intervals}
-                \State R \gets \emptyset
-                \State k1, k2 = 0
-                \While{k1 < I.nbIntervals \And k2 < J.nbIntervals}
-                    \State i \gets I[k1]
-                    \State j \gets J[k2]
-
+            \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
+                \State $R \gets \emptyset$
+                \State $k, l \gets 0$
+                \While{$k < K.nbIntervals \And l < L.nbIntervals$}
+                    \State $[a,b] \gets K[k]$
+                    \State $[c,d] \gets L[l]$
+                    \State $cMin \gets max(a, c)$
+                    \State $cMax \gets max(b, d)$
+                    \If{$cMax < cMin$}
+                        \State $R.append([cMin, cMax])$
+                    \EndIf
+                    \If{$a \leq d$}
+                        \State $k \gets k+1$
+                    \EndIf
+                    \If{$c \leq b$}
+                        \State $l \gets l+1$
+                    \EndIf
                 \EndWhile
+                \State \Return $R$
             \EndFunction
         \end{algorithmic}
     \end{algorithm}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
