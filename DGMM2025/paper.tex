@@ -30,7 +30,6 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{varwidth}
-\usepackage{algc}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -188,17 +187,16 @@
     \end{definition}
 
     \begin{algorithm}
-        \caption{Given a cell complex C and a radius \(r\), compute the visibility at every point of C up to distance \(r\).}
+        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$.}
         \label{alg:visibility}
         \begin{algorithmic}
-
-            \Function{Translation}{$I$: Interval, L: Intervals}
+            \Function{Translation}{I: Interval, L: Intervals}
                 \State $[a, b] \gets I$
                 \State $Result \gets \emptyset$
                 \For{each interval $J$ in L}
                     \State $[c, d] \gets J$
                     \If{$\text{Size}(I) \leq \text{Size}(J)$}
-                        \State $Result \gets Result \cup [c-a,d-b]$
+                        \State $Result \gets Result \cap [c-a,d-b]$
                     \EndIf
                 \EndFor
                 \State \Return Result
@@ -239,7 +237,7 @@
     \end{algorithm}
 
     \begin{algorithm}
-        \caption{Given 2 lists of intervals K and L, find $K \cup L$, the intersection of those 2 lists}
+        \caption{Given 2 lists of intervals K and L, find $K \cap L$, the intersection of those 2 lists}
         \label{alg:intersection}
         \begin{algorithmic}
             \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
