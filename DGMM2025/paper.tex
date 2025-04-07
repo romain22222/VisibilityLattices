@@ -246,8 +246,8 @@
                 \While{$k < K.nbIntervals \And l < L.nbIntervals$}
                     \State $[a,b] \gets K[k]$
                     \State $[c,d] \gets L[l]$
-                    \State $cMin \gets max(a, c)$
-                    \State $cMax \gets max(b, d)$
+                    \State $cMin \gets \max(a, c)$
+                    \State $cMax \gets \max(b, d)$
                     \If{$cMax < cMin$}
                         \State $R.append([cMin, cMax])$
                     \EndIf
