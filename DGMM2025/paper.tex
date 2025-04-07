@@ -245,7 +245,7 @@
     \end{algorithm}
 
     \begin{algorithm}
-        \caption{Given 2 lists of intervals K and L, find $K \cap L$, the intersection of those 2 lists}
+        \caption{Given 2 lists of intervals $K$ and $L$, find $K \cap L$, the intersection of those 2 lists}
         \label{alg:intersection}
         \begin{algorithmic}
             \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
@@ -254,15 +254,15 @@
                 \While{$k < K.nbIntervals \And l < L.nbIntervals$}
                     \State $[a,b] \gets K[k]$
                     \State $[c,d] \gets L[l]$
-                    \State $cMin \gets \max(a, c)$
-                    \State $cMax \gets \max(b, d)$
-                    \If{$cMax < cMin$}
-                        \State $R.append([cMin, cMax])$
+                    \State $e \gets \max(a, c)$
+                    \State $f \gets \min(b, d)$
+                    \If{$e < f$}
+                        \State $R.append([e, f])$
                     \EndIf
-                    \If{$a \leq d$}
+                    \If{$b \leq d$}
                         \State $k \gets k+1$
                     \EndIf
-                    \If{$c \leq b$}
+                    \If{$d \leq b$}
                         \State $l \gets l+1$
                     \EndIf
                 \EndWhile
