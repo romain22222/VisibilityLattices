@@ -70,10 +70,10 @@ bool isPointLowerThan(const Point &p1, const Point &p2) {
 
 class Visibility {
 public:
-  Dimension mainAxis = 0;
+  Dimension mainAxis;
   std::vector<bool> visibles;
-  size_t vectorsSize = 0;
-  size_t pointsSize = 0;
+  size_t vectorsSize;
+  size_t pointsSize;
   std::map<Point, size_t> pointIdxs;
   std::map<IntegerVector, size_t> vectorIdxs;
 
@@ -277,7 +277,7 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
     auto interval2 = l2[k2];
     auto i = std::max(interval1.first, interval2.first);
     auto j = std::min(interval1.second, interval2.second);
-    if (i < j) result.emplace_back(i, j);
+    if (i <= j) result.emplace_back(i, j);
     if (interval1.second <= interval2.second) k1++;
     if (interval1.second >= interval2.second) k2++;
   }
@@ -397,7 +397,7 @@ void computeVisibility(int radius) {
         const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                               axis == 2 ? 0 : 2 * ty);
         for (const auto &cInfo: latticeVector) {
-          eligibles = matchVector(eligibles, cInfo.second, figLattices.at(pInterest + cInfo.first));
+          eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
           if (eligibles.empty()) break;
         }
         if (!eligibles.empty()) {
@@ -550,11 +550,29 @@ void myCallback() {
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
 
+void testIntersection() {
+  // 1|2 4|5 7|9
+  for (auto v:intersect(Intervals({Interval(0,9)}),Intervals({Interval(1,2),Interval(4,5),Interval(7,10)}))) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+
+  // 2|3 5|6 8|10
+  for (auto v:intersect(Intervals({Interval(0,3),Interval(5,10)}),Intervals({Interval(2,6),Interval(8,12)}))) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+
+  // 1|3 6|7 9|10 12|12 14|15
+  for (auto v:intersect(Intervals({Interval(0,3),Interval(5,10),Interval(12,15)}),Intervals({Interval(1,3),Interval(6,7),Interval(9,12),Interval(14,15)}))) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+}
+
 
 int main(int argc, char *argv[]) {
-
-
-  // command line inteface options
+    // command line inteface options
   CLI::App app{"A tool to check visibility using lattices."};
   std::string filename = "../volumes/bunny34.vol";
   int thresholdMin = 0;
