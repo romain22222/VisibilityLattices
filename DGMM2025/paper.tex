@@ -327,7 +327,7 @@
                     \State $[c,d] \gets L[l]$
                     \State $e \gets \max(a, c)$
                     \State $f \gets \min(b, d)$
-                    \If{$e < f$}
+                    \If{$e \leq f$}
                         \State $R.append([e, f])$
                     \EndIf
                     \If{$b \leq d$}
