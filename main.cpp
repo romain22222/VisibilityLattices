@@ -322,13 +322,13 @@ void computeVisibilityOmp(int radius) {
 #pragma omp for schedule(dynamic)
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
-    std::map<Point, Intervals> latticeVector;
     Intervals eligibles;
     int minTx, maxTx, minTy, maxTy;
     for (auto segmentIdx = chunkIdx * chunkSize;
          segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
       segment = segmentList[segmentIdx];
       auto tmp = getLatticeVector(segment, axis).data();
+      std::map<Point, Intervals> latticeVector;
       for (auto p:tmp) {
         latticeVector[p.first] = p.second.data();
       }
@@ -372,7 +372,6 @@ void computeVisibility(int radius) {
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
   IntegerVector segment;
   Intervals eligibles;
-  std::map<Point, Intervals> latticeVector;
   auto segmentList = getAllVectors(radius);
   visibility = Visibility(axis, segmentList, pointels);
   int minTx, maxTx, minTy, maxTy;
@@ -383,6 +382,7 @@ void computeVisibility(int radius) {
     if (segmentIdx % 100 == 0) start = std::chrono::high_resolution_clock::now();
     segment = segmentList[segmentIdx];
     auto tmp = getLatticeVector(segment, axis).data();
+    std::map<Point, Intervals> latticeVector;
     for (auto p:tmp) {
       latticeVector[p.first] = p.second.data();
     }
