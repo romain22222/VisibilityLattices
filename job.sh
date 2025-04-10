@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=visibilityTest
-#SBATCH --partition=dayCPU
+#SBATCH --partition=weekend
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
