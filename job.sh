@@ -8,5 +8,5 @@
 #SBATCH --mem=60GB
 #SBATCH --time=00:10:00
 
-
+echo $CUDA_VISIBLE_DEVICES
 /home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-64.vol --noInterface -r 20
