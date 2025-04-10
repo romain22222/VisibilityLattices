@@ -11,5 +11,7 @@
 # export CUDA_VISIBLE_DEVICES=0
 # echo $CUDA_VISIBLE_DEVICES
 
+export OMP_NUM_THREADS=64
+echo $OMP_NUM_THREADS
 
 /home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-64.vol --noInterface -r 20
