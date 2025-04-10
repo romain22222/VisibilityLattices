@@ -14,4 +14,4 @@
 export OMP_NUM_THREADS=64
 echo $OMP_NUM_THREADS
 
-/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-64.vol --noInterface -r 20
+/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-256.vol --noInterface -r 40
