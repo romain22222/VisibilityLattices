@@ -9,4 +9,4 @@
 #SBATCH --time=00:10:00
 
 
-/home/negror/VisibilityLattices/build/visibilityLattices -i ../../VolGallery/Stanford-bunny/bunny-64.vol --noInterface -r 20
+/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-64.vol --noInterface -r 20
