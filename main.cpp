@@ -660,6 +660,7 @@ int main(int argc, char *argv[]) {
 
   // Initialize polyscope
   if (noInterface) {
+    checkParallelism();
     trace.beginBlock("Compute visibilities");
     computeVisibilityOmp(VisibilityRadius);
     Time = trace.endBlock();
