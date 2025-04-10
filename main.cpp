@@ -48,6 +48,9 @@ CountedPtr<SH3::BinaryImage> binary_image(nullptr);
 CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 
+std::vector<RealPoint> visibility_normals;
+std::vector<double> visibility_H;
+
 // Parameters
 int VisibilityRadius = 10;
 double gridstep = 1.0;
@@ -506,6 +509,30 @@ void computeMeanDistanceVisibility() {
   std::cout << "Mean distance between visible points = " << meanDistance / nbVisiblePairs << std::endl;
 }
 
+void computeVisibilityNormals() {
+  visibility_normals.resize(pointels.size());
+  visibility_H.resize(pointels.size());
+  auto kdTree = LinearKDTree<Point, 3>(pointels);
+#pragma omp for schedule(dynamic)
+  for (int i = 0; i < pointels.size(); ++i) {
+    RealVector tmpSum(0,0,0);
+    size_t count = 0;
+    for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
+      auto tmp = kdTree.position(point_idx);
+      if (visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
+        tmpSum += tmp - pointels[i];
+        count++;
+      }
+    }
+    visibility_normals[i] = -tmpSum/count;
+    visibility_H[i] = visibility_normals[i].norm();
+  }
+  if (!noInterface) {
+    psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
+    psPrimalMesh->addVertexScalarQuantity("Pointel visibility H", visibility_H);
+  }
+}
+
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
@@ -546,6 +573,11 @@ void myCallback() {
   }
   if (ImGui::Button("Check OMP"))
     checkParallelism();
+  if (ImGui::Button("Compute Normals")) {
+    trace.beginBlock("Compute visibilities Normals");
+    computeVisibilityNormals();
+    Time = trace.endBlock();
+  }
   ImGui::SameLine();
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
