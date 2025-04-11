@@ -49,7 +49,7 @@ CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 
 std::vector<RealPoint> visibility_normals;
-std::vector<double> visibility_H;
+std::vector<RealPoint> visibility_sharps;
 
 // Parameters
 int VisibilityRadius = 10;
@@ -509,9 +509,8 @@ void computeMeanDistanceVisibility() {
   std::cout << "Mean distance between visible points = " << meanDistance / nbVisiblePairs << std::endl;
 }
 
-void computeVisibilityNormals() {
-  visibility_normals.resize(pointels.size());
-  visibility_H.resize(pointels.size());
+void computeVisibilityDirectionToSharpFeatures() {
+  visibility_sharps.resize(pointels.size());
   auto kdTree = LinearKDTree<Point, 3>(pointels);
 #pragma omp for schedule(dynamic)
   for (int i = 0; i < pointels.size(); ++i) {
@@ -524,12 +523,60 @@ void computeVisibilityNormals() {
         count++;
       }
     }
-    visibility_normals[i] = -tmpSum/count;
-    visibility_H[i] = visibility_normals[i].norm();
+    visibility_sharps[i] = -tmpSum/count;
+  }
+  if (!noInterface) {
+    psPrimalMesh->addVertexVectorQuantity("Pointel visibility sharp direction", visibility_sharps);
+  }
+}
+
+void computeVisibilityNormals() {
+  visibility_normals.clear();
+  visibility_normals.reserve(pointels.size());
+  auto kdTree = LinearKDTree<Point, 3>(pointels);
+#pragma omp for schedule(dynamic)
+  for (const auto & pointel : pointels) {
+    std::vector<Point> visibles;
+    RealPoint centroid(0,0,0);
+    for (auto point_idx: kdTree.pointsInBall(pointel, VisibilityRadius)) {
+      auto tmp = kdTree.position(point_idx);
+      if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
+        visibles.push_back(tmp);
+        centroid += tmp;
+      }
+    }
+    centroid /= (double)visibles.size();
+    Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
+    for (const auto& pt: visibles) {
+      auto diff = pt - centroid;
+      for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+          cov(i,j) += diff[i] * diff[j];
+        }
+      }
+    }
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov/(double)visibles.size());
+    auto normalE = solver.eigenvectors().col(0);
+    visibility_normals.emplace_back(normalE.x(),normalE.y(),normalE.z());
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
-    psPrimalMesh->addVertexScalarQuantity("Pointel visibility H", visibility_H);
+  }
+}
+
+void reorientVisibilityNormals() {
+  if (visibility_normals.empty()) {
+    computeVisibilityNormals();
+  }
+  if (visibility_sharps.empty()) {
+    computeVisibilityDirectionToSharpFeatures();
+  }
+  for (int i = 0; i < visibility_normals.size(); ++i) {
+    if (visibility_normals[i].dot(visibility_sharps[i]) < 0)
+      visibility_normals[i] = -visibility_normals[i];
+  }
+  if (!noInterface) {
+    psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
   }
 }
 
@@ -573,9 +620,19 @@ void myCallback() {
   }
   if (ImGui::Button("Check OMP"))
     checkParallelism();
+  if (ImGui::Button("Compute direction to sharp features")) {
+    trace.beginBlock("Compute visibilities Direction To Sharp Features");
+    computeVisibilityDirectionToSharpFeatures();
+    Time = trace.endBlock();
+  }
   if (ImGui::Button("Compute Normals")) {
     trace.beginBlock("Compute visibilities Normals");
     computeVisibilityNormals();
+    Time = trace.endBlock();
+  }
+  if (ImGui::Button("Reorient Normals")) {
+    trace.beginBlock("Reorient visibility normals");
+    reorientVisibilityNormals();
     Time = trace.endBlock();
   }
   ImGui::SameLine();
