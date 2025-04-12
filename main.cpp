@@ -262,7 +262,7 @@ Intervals
 checkInterval(const Interval toCheck, const Intervals &figIntervals) {
   Intervals result;
   result.reserve(figIntervals.size());
-  auto toCheckSize = toCheck.second - toCheck.first;
+  const auto toCheckSize = toCheck.second - toCheck.first;
   for (auto interval: figIntervals) {
     if (interval.second - interval.first >= toCheckSize) {
       result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
@@ -273,13 +273,14 @@ checkInterval(const Interval toCheck, const Intervals &figIntervals) {
 
 Intervals intersect(const Intervals &l1, const Intervals &l2) {
   Intervals result;
-  result.reserve(l1.size() + l2.size() - 1);
+  // result.reserve( l1.size() + l2.size() - 1);
+  result.reserve( std::max( l1.size(), l2.size() ) );
   int k1 = 0, k2 = 0;
   while (k1 < l1.size() && k2 < l2.size()) {
-    auto interval1 = l1[k1];
-    auto interval2 = l2[k2];
-    auto i = std::max(interval1.first, interval2.first);
-    auto j = std::min(interval1.second, interval2.second);
+    const auto interval1 = l1[k1];
+    const auto interval2 = l2[k2];
+    const auto i = std::max(interval1.first, interval2.first);
+    const auto j = std::min(interval1.second, interval2.second);
     if (i <= j) result.emplace_back(i, j);
     if (interval1.second <= interval2.second) k1++;
     if (interval1.second >= interval2.second) k2++;
@@ -294,10 +295,10 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
  * @param figLattices
  * @return
  */
-Intervals matchVector(Intervals &toCheck,
-                                       const Intervals &vectorIntervals,
-                                       const Intervals &figIntervals) {
-  for (auto vInterval: vectorIntervals) {
+Intervals matchVector( Intervals &toCheck,
+		       const Intervals &vectorIntervals,
+		       const Intervals &figIntervals ) {
+  for (const auto& vInterval: vectorIntervals) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
   }
@@ -307,7 +308,7 @@ Intervals matchVector(Intervals &toCheck,
 void computeVisibilityOmp(int radius) {
   std::cout << "Computing visibility OMP" << std::endl;
   Dimension axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints().data();
+  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
   std::map<Point, Intervals> figLattices;
   for (auto p:tmpFigLattices) {
     figLattices[p.first] = p.second.data();
@@ -322,7 +323,8 @@ void computeVisibilityOmp(int radius) {
   size_t chunkSize = 64;
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
-#pragma omp for schedule(dynamic)
+  std::cout << "Starting // OMP" << std::endl;
+#pragma omp parallel for schedule(dynamic)
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
     Intervals eligibles;
@@ -367,7 +369,7 @@ void computeVisibilityOmp(int radius) {
 void computeVisibility(int radius) {
   std::cout << "Computing visibility" << std::endl;
   Dimension axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.begin(), pointels.end(), axis).starOfPoints().data();
+  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
   std::map<Point, Intervals> figLattices;
   for (auto p:tmpFigLattices) {
     figLattices[p.first] = p.second.data();
