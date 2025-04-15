@@ -273,8 +273,9 @@ checkInterval(const Interval toCheck, const Intervals &figIntervals) {
 
 Intervals intersect(const Intervals &l1, const Intervals &l2) {
   Intervals result;
-  // result.reserve( l1.size() + l2.size() - 1);
-  result.reserve( std::max( l1.size(), l2.size() ) );
+    // check 3rd example of testIntersection to see that you need at most this amount
+   result.reserve( l1.size() + l2.size() - 1);
+//  result.reserve( std::max( l1.size(), l2.size() ) );
   int k1 = 0, k2 = 0;
   while (k1 < l1.size() && k2 < l2.size()) {
     const auto interval1 = l1[k1];
@@ -496,7 +497,7 @@ void computeMeanDistanceVisibility() {
 
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::mt19937 gen(seed);
-  auto pointelsSample = pickSet(pointels.size(), pointels.size()/10, gen);
+  auto pointelsSample = pickSet(pointels.size(), pointels.size(), gen);
   auto kdTree = LinearKDTree<Point, 3>(pointels);
 
   for (auto i: pointelsSample) {
@@ -514,7 +515,6 @@ void computeMeanDistanceVisibility() {
 void computeVisibilityDirectionToSharpFeatures() {
   visibility_sharps.resize(pointels.size());
   auto kdTree = LinearKDTree<Point, 3>(pointels);
-#pragma omp for schedule(dynamic)
   for (int i = 0; i < pointels.size(); ++i) {
     RealVector tmpSum(0,0,0);
     size_t count = 0;
@@ -536,7 +536,6 @@ void computeVisibilityNormals() {
   visibility_normals.clear();
   visibility_normals.reserve(pointels.size());
   auto kdTree = LinearKDTree<Point, 3>(pointels);
-#pragma omp for schedule(dynamic)
   for (const auto & pointel : pointels) {
     std::vector<Point> visibles;
     RealPoint centroid(0,0,0);
