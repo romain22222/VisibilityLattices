@@ -32,6 +32,7 @@
 \usepackage{varwidth}
 \usepackage{mathtools}
 \usepackage{pgfplots}
+\usetikzlibrary {arrows.meta,decorations.shapes}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -224,7 +225,7 @@
     \begin{figure}
         \centering
         \label{fig:lattice-representation}
-        \usetikzlibrary {arrows.meta,decorations.shapes}
+        % \usetikzlibrary {arrows.meta,decorations.shapes}
         \begin{tabular}{c c}
             \begin{tikzpicture}[scale=0.75]
                 \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,-0.25) grid (7.25,7.25);
@@ -301,6 +302,109 @@
         \caption{Representation of a 2d cell complex (here the star of a given curve) as lattices. From X cells from the star on the left, we get Y intervals on the right}
     \end{figure}
 
+    \begin{figure}
+        \centering
+        \begin{tabular}{c c}
+            \begin{tikzpicture}[scale=0.75]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.25) grid (12.25,3.25);
+                \draw[-{Stealth[length=3mm]}=black] (-1.5,-1) -- (-1.5,2.5);
+                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1.5,-1) -- (-1.5,2)};
+                \filldraw[black] (0,0) circle (0.05);
+                \filldraw[black] (1,0) circle (0.05);
+                \filldraw[black] (2,0) circle (0.05);
+                \filldraw[black] (2,1) circle (0.05);
+                \filldraw[black] (3,1) circle (0.05);
+                \filldraw[black] (4,1) circle (0.05);
+                \filldraw[black] (5,1) circle (0.05);
+                \filldraw[black] (5,0) circle (0.05);
+                \filldraw[black] (6,0) circle (0.05);
+                \filldraw[black] (7,0) circle (0.05);
+                \filldraw[black] (7,1) circle (0.05);
+                \filldraw[black] (8,1) circle (0.05);
+                \filldraw[black] (8,0) circle (0.05);
+                \filldraw[black] (9,0) circle (0.05);
+                \filldraw[black] (10,0) circle (0.05);
+                \filldraw[black] (10,1) circle (0.05);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,-0.5)--(2.6,-0.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,-0.5)--(10.6,-0.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,0)--(2.6,0);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,0)--(10.6,0);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,0.5)--(10.6,0.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1)--(5.6,1);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (6.4,1)--(8.6,1);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (9.4,1)--(10.6,1);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1.5)--(5.6,1.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (6.4,1.5)--(8.6,1.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (9.4,1.5)--(10.6,1.5);
+                \draw[thick, black] (0,0) -- (2,0) -- (2,1) -- (5,1) -- (5,0) -- (7,0) -- (7,1) -- (8,1) -- (8,0) -- (10,0) -- (10,1);
+                \draw[thick,dashed] (6,1) -- (6,2);
+                \draw[thick,dashed] (9,1) -- (9,2);
+                \draw[thick,dashed] (-1,-1) -- (-1,1) -- (1,1) -- (1,2) -- (11,2) -- (11,-1) -- (4,-1) -- (4,0) -- (3,0) -- (3,-1) -- (-1,-1);
+
+            \end{tikzpicture} &
+            \begin{tikzpicture}[scale=0.75]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.25) grid (4.25,3.25);
+                \draw[-{Stealth[length=3mm]}=black] (-1.5,-1) -- (-1.5,2.5);
+                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1.5,-1) -- (-1.5,2)};
+                \filldraw[black] (0,0) circle (0.05);
+                \filldraw[black] (2,1) circle (0.05);
+                \draw[thick, black] (0,0) -- (2,1);
+                \draw[thick,dashed] (-1,-1) -- (-1,1) -- (1,1) -- (1,2) -- (3,2) -- (3,0) -- (1,0) --  (1,-1) -- (-1,-1);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,-0.5)--(0.6,-0.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,0)--(0.6,0);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,0.5)--(2.6,0.5);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1)--(2.6,1);
+                \draw[thick,gray, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1.5)--(2.6,1.5);
+            \end{tikzpicture}\\
+            \hline
+            \multicolumn{2}{c}{
+                \begin{tikzpicture}[scale=0.75]
+                    \foreach \y in {0,0.5,...,10.5} {
+                        \draw[thin, lightgray] (-1.25,\y) -- (11.25,\y);
+                    }
+                    \foreach \y in {0,2,...,10} {
+                        \draw[blue] (-1.25,\y) -- (11.25,\y);
+                    }
+
+                    \draw[thick,green, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,9.5)--(0.6,9.5);
+                    \draw[thick,arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,9)--(2.6,9);
+                    \draw[thick,arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,9)--(10.6,9);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,8.5)--(1.6,8.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,8.5)--(9.6,8.5);
+
+                    \draw[thick,green, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,7.5)--(0.6,7.5);
+                    \draw[thick,arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,7)--(2.6,7);
+                    \draw[thick,arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,7)--(10.6,7);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,6.5)--(1.6,6.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,6.5)--(9.6,6.5);
+
+                    \draw[thick,green, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,5.5)--(2.6,5.5);
+                    \draw[thick,arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,5)--(10.6,5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,4.5)--(1.6,4.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,4.5)--(7.6,4.5);
+
+                    \draw[thick,green, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,3.5)--(2.6,3.5);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,3)--(5.6,3);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (6.4,3)--(8.6,3);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (9.4,3)--(10.6,3);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,2.5)--(1.6,2.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,2.5)--(5.6,2.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (7.4,2.5)--(7.6,2.5);
+
+                    \draw[thick,green, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1.5)--(2.6,1.5);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,1)--(5.6,1);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (6.4,1)--(8.6,1);
+                    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (9.4,1)--(10.6,1);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (-0.6,0.5)--(1.6,0.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (4.4,0.5)--(5.6,0.5);
+                    \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (7.4,0.5)--(7.6,0.5);
+
+                \end{tikzpicture}}
+        \end{tabular}
+        \caption{Evolution of the visibility check algorithm for a 2,1 vector. Green are the vector lattices, black are the figure lattices, red are the current intervals of positions where the visibility is still possible. The last red intervals are the visible positions. We travel the lattices from bottom-up. }
+        \label{fig:enter-label}
+    \end{figure}
+
     \begin{algorithm}
         \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$. We assume z being the lattice main axis, x and y being the auxiliary axises}
         \label{alg:visibility}
@@ -338,11 +442,14 @@
                     \State $[c,d] \gets L[l]$
                     \State $e \gets \max(a, c)$
                     \State $f \gets \min(b, d)$
-                    \If{$e \leq f$}\State $R.append([e, f])$
+                    \If{$e \leq f$}
+                        \State $R.append([e, f])$
                     \EndIf
-                    \If{$b \leq d$}\State $k \gets k+1$
+                    \If{$b \leq d$}
+                        \State $k \gets k+1$
                     \EndIf
-                    \If{$d \leq b$}\State $l \gets l+1$
+                    \If{$d \leq b$}
+                        \State $l \gets l+1$
                     \EndIf
                 \EndWhile
                 \State \Return $R$
@@ -356,75 +463,151 @@
     \section{Feature-aware normal estimation on digital surfaces}
 
     \pgfplotsset{width=13cm}
-    \begin{tikzpicture}
-        \centering
-        \begin{axis}[
-            xlabel={Gridstep},
-            x dir=reverse,
-            ylabel={Mean distance},
-            legend pos=north west,
-            ymajorgrids=true,
-            grid style=dashed,
-            ymode=log,
-            log ticks with fixed point,
-        ]
+    \begin{figure}
+        \begin{tikzpicture}
+            \centering
+            \begin{axis}[
+                xlabel={Gridstep},
+                x dir=reverse,
+                ylabel={Mean distance},
+                legend pos=north west,
+                ymajorgrids=true,
+                grid style=dashed,
+                ymode=log,
+                log ticks with fixed point,
+            ]
 
-            \addplot[
-                color=cyan,
-                mark=square,
+                \addplot[
+                    color=cyan,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,5.76973)(0.875,6.03836)(0.75,6.22426)(0.625,6.39012)(0.5,6.51014)(0.375,6.63571)(0.25,6.68132)
+                };
+                \addlegendentry{sphere9 radius 10}
+                \addplot[
+                    color=red,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,5.91022)(0.875,6.10641)(0.75,6.14175)(0.625,6.20202)(0.5,6.28637)(0.375,6.44418)(0.25,6.56938)
+                };
+                \addlegendentry{goursat radius 10}
+                \addplot[
+                    color=red,
+                    mark=triangle,
+                ]
+                coordinates {
+                    (1,9.04228)(0.875,10.1319)(0.75,10.2837)(0.625,10.6125)(0.5,10.8969)(0.375,11.3186)(0.25,11.8382)
+                };
+                \addlegendentry{radius 20}
+                \addplot[
+                    color=red,
+                    mark=halfcircle,
+                ]
+                coordinates {
+                    (1,9.22083)(0.875,10.6476)(0.75,11.5976)(0.625,12.7428)(0.5,13.9534)(0.375,14.73)(0.25,15.8425)
+                };
+                \addlegendentry{radius 30}
+                \addplot[
+                    color=violet,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,5.36873)(0.875,5.43148)(0.75,5.47206)(0.625,5.67227)(0.5,5.81554)(0.375,6.03961)(0.25,6.31671)
+                };
+                \addlegendentry{torus}
+                \addplot[
+                    color=violet,
+                    mark=triangle,
+                ]
+                coordinates {
+                    (1,6.42158)(0.875,6.36929)(0.75,6.94675)(0.625,7.65529)(0.5,8.65652)(0.375,9.05402)(0.25,10.0784)
+                };
+                \addplot[
+                    color=violet,
+                    mark=halfcircle,
+                ]
+                coordinates {
+                    (1,6.44119)(0.875,6.43563)(0.75,7.00852)(0.625,7.71613)(0.5,9.1544)(0.375,9.84299)(0.25,12.241)
+                };
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Mean Visibility Distance as a Function of Grid Resolution}
+    \end{figure}
+    \begin{figure}
+        \begin{tikzpicture}
+            \centering
+            \begin{axis}[
+                xlabel={Gridstep},
+                x dir=reverse,
+                ylabel={Duration (s)},
+                legend pos=north west,
+                ymajorgrids=true,
+                grid style=dashed,
+                ymode=log,
+                log ticks with fixed point,
             ]
-            coordinates {
-                (1,5.76973)(0.875,6.03836)(0.75,6.22426)(0.625,6.39012)(0.5,6.51014)(0.375,6.63571)(0.25, 6.68132)
-            };
-            \addlegendentry{sphere9 radius 10}
-            \addplot[
-                color=red,
-                mark=square,
-            ]
-            coordinates {
-                (1,5.91022)(0.875,6.10641)(0.75,6.14175)(0.625,6.20202)(0.5,6.28637)(0.375,6.44418)(0.25, 6.56938)
-            };
-            \addlegendentry{goursat radius 10}
-            \addplot[
-                color=red,
-                mark=triangle,
-            ]
-            coordinates {
-                (1,9.04228)(0.875,10.1319)(0.75,10.2837)(0.625,10.6125)(0.5,10.8969)(0.375,11.3186)(0.25, 11.8382)
-            };
-            \addlegendentry{radius 20}
-            \addplot[
-                color=red,
-                mark=halfcircle,
-            ]
-            coordinates {
-                (1,9.22083)(0.875,10.6476)(0.75,11.5976)(0.625,12.7428)(0.5,13.9534)(0.375,14.73)(0.25,15.8425)
-            };
-            \addlegendentry{radius 30}
-            \addplot[
-                color=violet,
-                mark=square,
-            ]
-            coordinates {
-                (1,5.36873)(0.875,5.43148)(0.75,5.47206)(0.625,5.67227)(0.5,5.81554)(0.375,6.03961)(0.25,6.31671)
-            };
-            \addlegendentry{torus}
-            \addplot[
-                color=violet,
-                mark=triangle,
-            ]
-            coordinates {
-                (1,6.42158)(0.875,6.36929)(0.75,6.94675)(0.625,7.65529)(0.5,8.65652)(0.375,9.05402)(0.25,10.0784)
-            };
-            \addplot[
-                color=violet,
-                mark=halfcircle,
-            ]
-            coordinates {
-                (1,6.44119)(0.875,6.43563)(0.75,7.00852)(0.625,7.71613)(0.5,9.1544)(0.375,9.84299)(0.25,12.241)
-            };
-        \end{axis}
-    \end{tikzpicture}
+
+                \addplot[
+                    color=cyan,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,0.513)(0.875,0.585)(0.75,0.897)(0.625,1.401)(0.5,2.441)(0.375,4.664)(0.25,11.420)
+                };
+                \addlegendentry{sphere9 radius 10}
+                \addplot[
+                    color=red,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,0.440)(0.875,0.665)(0.75,0.823)(0.625,1.428)(0.5,2.463)(0.375,4.697)(0.25,11.766)
+                };
+                \addlegendentry{goursat radius 10}
+                \addplot[
+                    color=red,
+                    mark=triangle,
+                ]
+                coordinates {
+                    (1,1.389)(0.875,2.567)(0.75,3.661)(0.625,7.123)(0.5,13.881)(0.375,28.913)(0.25,77.360)
+                };
+                \addlegendentry{radius 20}
+                \addplot[
+                    color=red,
+                    mark=halfcircle,
+                ]
+                coordinates {
+                    (1,2.172)(0.875,3.747)(0.75,5.565)(0.625,13.180)(0.5,33.088)(0.375,80.584)(0.25,240.546)
+                };
+                \addlegendentry{radius 30}
+                \addplot[
+                    color=violet,
+                    mark=square,
+                ]
+                coordinates {
+                    (1,0.057)(0.875,0.081)(0.75,0.097)(0.625,0.197)(0.5,0.330)(0.375,0.800)(0.25,2.253)
+                };
+                \addlegendentry{torus}
+                \addplot[
+                    color=violet,
+                    mark=triangle,
+                ]
+                coordinates {
+                    (1,0.248)(0.875,0.294)(0.75,0.339)(0.625,0.620)(0.5,1.110)(0.375,2.643)(0.25,9.369)
+                };
+                \addplot[
+                    color=violet,
+                    mark=halfcircle,
+                ]
+                coordinates {
+                    (1,0.837)(0.875,0.880)(0.75,0.942)(0.625,1.316)(0.5,2.142)(0.375,5.046)(0.25,20.418)
+                };
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Computation Time of Visibility as a Function of Grid Resolution}
+    \end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
