@@ -9,6 +9,7 @@
 #include <DGtal/arithmetic/IntegerComputer.h>
 #include <DGtal/base/Common.h>
 #include <DGtal/geometry/volumes/DigitalConvexity.h>
+#include <DGtal/geometry/volumes/TangencyComputer.h>
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/helpers/Shortcuts.h>
 #include <DGtal/helpers/ShortcutsGeometry.h>
@@ -565,19 +566,26 @@ void computeVisibilityNormals() {
   }
 }
 
+RealVector getTrivNormal(size_t idx) {
+  return primal_surface->vertexNormal(idx);
+}
+
 void reorientVisibilityNormals() {
   if (visibility_normals.empty()) {
     computeVisibilityNormals();
   }
-  if (visibility_sharps.empty()) {
-    computeVisibilityDirectionToSharpFeatures();
-  }
+//  if (visibility_sharps.empty()) {
+//    computeVisibilityDirectionToSharpFeatures();
+//  }
   for (int i = 0; i < visibility_normals.size(); ++i) {
-    if (visibility_normals[i].dot(visibility_sharps[i]) < 0)
+    const auto triv_normal = getTrivNormal(i);
+    if (visibility_normals[i].dot(triv_normal) < 0)
       visibility_normals[i] = -visibility_normals[i];
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
+    psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
+    psPrimalMesh->addFaceVectorQuantity("Face trivial normal", primal_surface->faceNormals());
   }
 }
 
@@ -747,6 +755,35 @@ int main(int argc, char *argv[]) {
   digital_dimensions = getFigSizes();
   trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
   trace.endBlock();
+
+  // Compute trivial normals
+
+  auto pTC = new TangencyComputer<KSpace>(K);
+  pTC->init(pointels.cbegin(), pointels.cend(), true);
+  int t_ring = int(round(params["t-ring"].as<double>()));
+  auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
+  primal_surface->faceNormals() = surfel_trivial_normals;
+  for (auto i = 1; i < t_ring+3; i++) {
+    primal_surface->computeVertexNormalsFromFaceNormals();
+    primal_surface->computeFaceNormalsFromVertexNormals();
+    surfel_trivial_normals = primal_surface->faceNormals();
+  }
+  auto trivial_normals = primal_surface->vertexNormals();
+  trivial_normals.resize(pointels.size());
+  for (auto &n: trivial_normals) n = RealVector::zero;
+  for (auto k = 0; k < surfels.size(); k++) {
+    const auto& surf = surfels[k];
+    const auto cells0 = SH3::getPrimalVertices(K, surf);
+    for (const auto& c0: cells0) {
+      const auto p = K.uCoords(c0);
+      const auto idx = pTC->index(p);
+      trivial_normals[idx] += surfel_trivial_normals[k];
+    }
+  }
+  for (auto &n: trivial_normals) n /= n.norm();
+
+  primal_surface->vertexNormals() = trivial_normals;
+
 
   // Initialize polyscope
   if (noInterface) {
