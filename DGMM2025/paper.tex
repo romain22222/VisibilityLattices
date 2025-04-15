@@ -31,6 +31,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{varwidth}
 \usepackage{mathtools}
+\usepackage{pgfplots}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -59,20 +60,20 @@
     \maketitle              % typeset the header of the contribution
 %
     \begin{abstract}
-      Computing visibility on a geometric object requires heavy
-      computations since it requires to identify pair of points that
-      are visible to each other, i.e. there is a straight segment
-      joining them that stays in the close vicinity of the object
-      boundary. We propose to exploit a specific representation of
-      digital sets based on lists of integral intervals in order to
-      compute efficiently the complete visibility graph between
-      lattice points of the digital shape. As a quite direct
-      application, we show then how we can use visibility to estimate
-      the normal vector field of a digital shape in an accurate and
-      convergent manner while staying aware of the salient and sharp features of
-      the shape.
-      
-      \keywords{Visibility \and Geometric inference \and Digital normal estimation \and Digital geometry}
+        Computing visibility on a geometric object requires heavy
+        computations since it requires to identify pair of points that
+        are visible to each other, i.e. there is a straight segment
+        joining them that stays in the close vicinity of the object
+        boundary. We propose to exploit a specific representation of
+        digital sets based on lists of integral intervals in order to
+        compute efficiently the complete visibility graph between
+        lattice points of the digital shape. As a quite direct
+        application, we show then how we can use visibility to estimate
+        the normal vector field of a digital shape in an accurate and
+        convergent manner while staying aware of the salient and sharp features of
+        the shape.
+
+        \keywords{Visibility \and Geometric inference \and Digital normal estimation \and Digital geometry}
     \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -222,7 +223,6 @@
 
     \begin{figure}
         \centering
-        \caption{Representation of a 2d cell complex (here the star of a given curve) as lattices}
         \label{fig:lattice-representation}
         \usetikzlibrary {arrows.meta,decorations.shapes}
         \begin{tabular}{c c}
@@ -298,8 +298,7 @@
                 \filldraw[white,yshift=-1.25cm] (0,0) circle (0.01); % readjust the height to match the original path
             \end{tikzpicture}
         \end{tabular}
-
-
+        \caption{Representation of a 2d cell complex (here the star of a given curve) as lattices. From X cells from the star on the left, we get Y intervals on the right}
     \end{figure}
 
     \begin{algorithm}
@@ -355,6 +354,77 @@
 
 
     \section{Feature-aware normal estimation on digital surfaces}
+
+    \pgfplotsset{width=13cm}
+    \begin{tikzpicture}
+        \centering
+        \begin{axis}[
+            xlabel={Gridstep},
+            x dir=reverse,
+            ylabel={Mean distance},
+            legend pos=north west,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymode=log,
+            log ticks with fixed point,
+        ]
+
+            \addplot[
+                color=cyan,
+                mark=square,
+            ]
+            coordinates {
+                (1,5.76973)(0.875,6.03836)(0.75,6.22426)(0.625,6.39012)(0.5,6.51014)(0.375,6.63571)(0.25, 6.68132)
+            };
+            \addlegendentry{sphere9 radius 10}
+            \addplot[
+                color=red,
+                mark=square,
+            ]
+            coordinates {
+                (1,5.91022)(0.875,6.10641)(0.75,6.14175)(0.625,6.20202)(0.5,6.28637)(0.375,6.44418)(0.25, 6.56938)
+            };
+            \addlegendentry{goursat radius 10}
+            \addplot[
+                color=red,
+                mark=triangle,
+            ]
+            coordinates {
+                (1,9.04228)(0.875,10.1319)(0.75,10.2837)(0.625,10.6125)(0.5,10.8969)(0.375,11.3186)(0.25, 11.8382)
+            };
+            \addlegendentry{radius 20}
+            \addplot[
+                color=red,
+                mark=halfcircle,
+            ]
+            coordinates {
+                (1,9.22083)(0.875,10.6476)(0.75,11.5976)(0.625,12.7428)(0.5,13.9534)(0.375,14.73)(0.25,15.8425)
+            };
+            \addlegendentry{radius 30}
+            \addplot[
+                color=violet,
+                mark=square,
+            ]
+            coordinates {
+                (1,5.36873)(0.875,5.43148)(0.75,5.47206)(0.625,5.67227)(0.5,5.81554)(0.375,6.03961)(0.25,6.31671)
+            };
+            \addlegendentry{torus}
+            \addplot[
+                color=violet,
+                mark=triangle,
+            ]
+            coordinates {
+                (1,6.42158)(0.875,6.36929)(0.75,6.94675)(0.625,7.65529)(0.5,8.65652)(0.375,9.05402)(0.25,10.0784)
+            };
+            \addplot[
+                color=violet,
+                mark=halfcircle,
+            ]
+            coordinates {
+                (1,6.44119)(0.875,6.43563)(0.75,7.00852)(0.625,7.71613)(0.5,9.1544)(0.375,9.84299)(0.25,12.241)
+            };
+        \end{axis}
+    \end{tikzpicture}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
