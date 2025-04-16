@@ -33,6 +33,7 @@
 \usepackage{mathtools}
 \usepackage{pgfplots}
 \usepackage[dvipsnames]{xcolor}
+\pgfplotsset{compat=1.18}
 \usetikzlibrary {arrows.meta,decorations.shapes}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=magenta]{JO}
@@ -194,7 +195,7 @@
             \filldraw[black] (3.5,1.5) circle (0.05) node[anchor=west] {q};
             \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0,0.5) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (3,1.5) -- (3,2) -- (4,2) -- (4,0.5) -- (1.5,0.5) -- (1.5,0) -- (1,0) -- (1,-0.5) -- (-0.5,-0.5);
         \end{tikzpicture}
-        \caption{Example of non connex visibility in 2D, q is visible from p while the visibility points are not 26-connected.}
+        \caption{Example of non-connex visibility in 2D, q is visible from p while the visibility points are not 26-connected.}
         \label{fig:visibility-2d-not-connected}
     \end{figure}
 
@@ -203,7 +204,7 @@
 
     \section{Fast computation using integer intervals intersections}
 
-    To improve computation time, we will use lattice sets of integer intervals.
+    To improve computation time, we will use lattice maps of integer intervals.
 
     \begin{definition}
         A sequence of intervals is an ordered list of intervals $L = ([a_i,b_i])_{i=1,\ldots,n}$ such that $b_i + 1 < a_{i+1}$, i.e., disjoint intervals with at least a missing integer.
@@ -218,10 +219,10 @@
     \end{definition}
 
     \begin{definition}
-        All translations $T$ of an interval or a sequence of intervals $A$ in a sequence of intervals $L$ are defined as $ T \coloneqq t, st. A+t \subset L\}$
+        All translations $T$ of an interval or a sequence of intervals $A$ in a sequence of intervals $L$ are defined as $ T \coloneqq \{ t, st. A+t \subset L\}$
     \end{definition}
 
-    We will consider the lattices as a map from points $p \in \R^{d-1}$ to a sequence of intervals, where all coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod2\right)$.
+    We will consider lattice maps as pairs of (shift, intervals), where shifts are points $p \in \R^{d-1}$. All coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod d\right)$. Note that all examples are in 2-d while the shown algorithm is in n-d.
 
     \begin{figure}
         \centering
@@ -300,7 +301,7 @@
                 \filldraw[white,yshift=-1.25cm] (0,0) circle (0.01); % readjust the height to match the original path
             \end{tikzpicture}
         \end{tabular}
-        \caption{Representation of a 2d cell complex (here the star of a given curve) as lattices. From X cells from the star on the left, we get Y intervals on the right}
+        \caption{Representation of a 2d cell complex (here the star of a given curve) as a lattice map. From 31 cells from the star on the left, we get 15 intervals on the right}
     \end{figure}
 
     \colorlet{MyGreen}{green!80!gray}
@@ -382,8 +383,9 @@
                     \foreach[count=\i] \y in {11.5,9,...,1.5} {
                         \draw (0,0) node at (-4,\y) {$F_{\i}$};
                     }
-                    \foreach[count=\i] \y in {11,8.5,...,1} {
-                        \draw (0,0) node at (-4,\y) {$T_{\i} = \text{Translations}(V_{\i},F_{\i})$};
+                    \draw (0,0) node at (-4,11) {$T_{1} = \text{Translations}(V_{1},F_{1})$};
+                    \foreach[count=\i] \y in {8.5,6,...,1} {
+                        \draw (0,0) node at (-4,\y) {$T_{\the\numexpr\i+1\relax}$};
                     }
                     \draw (0,0) node at (-4,10.5) {$R_1 = T_1$};
 
@@ -440,26 +442,24 @@
 
                 \end{tikzpicture}}
         \end{tabular}
-        \caption{Evolution of the visibility check algorithm for a 2,1 vector. Green are the vector lattices, black are the figure lattices, red are the current intervals of positions where the visibility is still possible. The last red intervals are the visible positions. We travel the lattices from bottom-up. }
+        \caption{Evolution of the visibility check algorithm for a 2,1 vector. Green is the vector lattice map, black is the figure lattice map, red are the current intervals of positions where the visibility is still possible. The last red intervals are the visible positions. We travel the lattice maps from bottom-up. }
         \label{fig:enter-label}
     \end{figure}
 
     \begin{algorithm}
-        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$. We assume z being the lattice main axis, x and y being the auxiliary axises}
+        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$. We assume z being the main axis of the lattice maps, x and y being the auxiliary axises}
         \label{alg:visibility}
         \begin{algorithmic}
-            \Function{Visibility}{\text{C}: Cell complex, \text{r}: Integer}
-                \State $\Omega \gets \Call{Star}{C}$ \Comment{Lattices of the star of the studied cell complex}
-                \State $Vectors \gets \Call{GetAllPrimalVectors}{r}$
-                \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Vectors) * PointelsAmount$}
+            \Function{Visibility}{C: Cell complex, r: Integer}
+                \State $\Omega \gets \Call{Star}{C}$ \Comment{Lattice map of the star of the studied cell complex}
+                \State $Directions \gets \Call{GetAllPrimalDirections}{r}$
+                \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Directions) \times \#C.pointels$}
                 \State $low, high \gets \Call{BoundingBoxZ}{\Omega}$
-                \ForAll{$v$ in $Vectors$}
-                    \State $VStar \gets \Call{Star}{\text{v}}$
-                    \ForAll{shift $tx, ty$ in $\Omega$}
+                \ForAll{$d$ in $Directions$}
+                    \ForAll{shift $S$ in $\Omega$}
                         \State $R \gets [low, high]$
-                        \State $S: \R^3 \gets [2tx, 2ty,0]$
-                        \ForAll{lattice $L$ in $VStar$}
-                            \State $\text{R} \gets \text{R} \cap \Call{Translations}{L.intervals,\Omega[S + L.position]}$
+                        \ForAll{pair $P$ in $\Call{Star}{\text{d}}$}
+                            \State $R \gets R \cap \Call{Translations}{P.intervals,\Omega[S + P.shift]}$
                         \EndFor
                         \State \Call{UpdateVisibility}{$V$, $R$}
                     \EndFor
@@ -474,13 +474,10 @@
         \label{alg:intersection}
         \begin{algorithmic}
             \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
-                \State $R \gets \emptyset$
-                \State $k, l \gets 0$
+                \State $R \gets \emptyset$; $k, l \gets 0$
                 \While{$k < K.nbIntervals \And l < L.nbIntervals$}
-                    \State $[a,b] \gets K[k]$
-                    \State $[c,d] \gets L[l]$
-                    \State $e \gets \max(a, c)$
-                    \State $f \gets \min(b, d)$
+                    \State $[a,b] \gets K[k]$; $[c,d] \gets L[l]$
+                    \State $e \gets \max(a, c)$; $f \gets \min(b, d)$
                     \If{$e \leq f$}
                         \State $R.append([e, f])$
                     \EndIf
@@ -513,6 +510,7 @@
                 ymajorgrids=true,
                 grid style=dashed,
                 ymode=log,
+                xmode=log,
                 log ticks with fixed point,
             ]
 
