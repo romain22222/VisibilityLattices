@@ -707,7 +707,7 @@ int main(int argc, char *argv[]) {
                 | SHG3::defaultParameters()
                 | SHG3::parametersGeometryEstimation();
   params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
-  params("surfaceTraversal", "DepthFirst");
+  params("surfaceTraversal", "default");
   bool is_polynomial = !polynomial.empty();
   if (is_polynomial) {
     trace.beginBlock("Build polynomial surface");
