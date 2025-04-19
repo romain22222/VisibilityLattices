@@ -126,11 +126,24 @@
     lattice directions. The originality of our method is to encode
     subsets of lattice points as sets of integer intervals and to
     reduce all the inclusion problems as intersections and
-    translations of integer intervals.
+    translations of integer intervals. For a given lattice vector
+    $\mathbf{t}$, we solve the visibility of every pair of points
+    $(p,p+\mathbf{t})$ of $X$. Global visibility is achieved by
+    testing all sought directions within a given range, and is
+    parallelized straightforwardly.
 
     We focus on solving efficiently this problem because it is crucial
     in computing geometric normals along digital surfaces that are
-    aware of salient features.
+    aware of salient features. Indeed, 2d discrete tangent estimators
+    based on tangency or discrete line segments have proven to be both
+    sensitive to sharp corners while multigrid convergent along the
+    boundary of digitized smooth shapes
+    \cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}.
+
+    or
+    normal estimators along digital surfaces have been shown to be
+    multigrid convergent on digitization of shapes with smooth
+    boundary \cite{Cuel:2014-dgci,Lachaud:2017-lnm}
     
     (Work in progress)
 
