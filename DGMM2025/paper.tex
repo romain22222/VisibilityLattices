@@ -84,10 +84,45 @@
 
     \section{Introduction}
 
+    Visibility is a fundamental concept in computational geometry and
+    digital topology, with applications ranging from computer vision
+    (identifying occlusions) to geometric modeling (feature detection, geodesics)
+    and computer graphics (path tracing, shadowmap). Visibility within
+    polygons in the plane has been extensively studied in the
+    litterature \cite{ghosh:2007-book} and is still studied in higher
+    dimensional spaces \cite{orourke:2017-book}. The general problem
+    has a high complexity. For instance, the 3d visibility complex
+    between $n$ spheres and occluding spheres has a complexity
+    $O(n^4)$ \cite{durand:2002-tog}. Exact 3d visibility between
+    polygons and occluding polygons is often casted into 5d Euclidean
+    space derived from Plücker space \cite{nirenstein:2002-ewr}, which
+    nicely represents 3d lines and their respective positions. The
+    computational cost remains high even with decomposition into
+    coarse cells for speed up (several days of computation for a
+    million triangles at the time).
 
-    \cite{coeurjolly:2004-prl}
+    To increase efficiency, several authors have proposed to cast the
+    visibility problem into a digital space, generally $\Z^3$ or its
+    decomposition into cubical cells. Visibility is simplified as the
+    problem if there is a connected digital straight line joining a
+    pair of cells without occluding cell(s) (e.g. Soille
+    \cite{soille:1994-prl} uses Bresenham line segments). Coeurjolly
+    \emph{et al.} \cite{coeurjolly:2004-prl} uses a non-symmetric
+    visibility definition and preimage computations to speed up that
+    kind of algorithms. Chica \cite{chica:2008-spm} uses a half-cell
+    erosion of the complementary space and Bresenham straight lines to
+    decide visibility.
     
-    Visibility is a fundamental concept in computational geometry and digital topology, with applications ranging from computer vision to geometric modeling.
+    We propose an algorithm that solves the following visibility
+    problem: given a digital set $X \subset \Z^d$, two points $p,q$ of
+    $X$ are \emph{visible} whenever the Euclidean straight line
+    segment $\lbrack p,q \rbrack$ is never at $\infty$-distance
+    greater or equal to $1$ from $X$.
+
+    (Work in progress)
+
+    
+    Visibility is a fundamental concept in computational geometry and digital topology, with applications ranging from computer vision to geometric modeling and computer graphics.
     In this work, we explore visibility through the lens of chord tangency, introducing a novel approach that builds on discrete geometric structures.
     Our framework leverages the discrete setting of and cell complexes, providing a rigorous foundation for analyzing visibility properties in digital spaces.
 
