@@ -36,7 +36,7 @@
 \pgfplotsset{compat=1.18}
 \usetikzlibrary {arrows.meta,decorations.shapes}
 \setauthormarkup{}
-\definechangesauthor[name=jo, color=magenta]{JO}
+\definechangesauthor[name=jo, color=blue]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
 
 \input{./macros}
@@ -112,7 +112,7 @@
     kind of algorithms. Chica \cite{chica:2008-spm} uses a half-cell
     erosion of the complementary space and Bresenham straight lines to
     decide visibility.
-    
+
     We propose an algorithm that solves the following visibility
     problem: given a digital set $X \subset \Z^d$, two points $p,q$ of
     $X$ are \emph{visible} whenever the Euclidean straight line
@@ -132,43 +132,77 @@
     testing all sought directions within a given range, and is
     parallelized straightforwardly.
 
+    
     We focus on solving efficiently this problem because it is crucial
     in computing geometric normals along digital surfaces that are
     aware of salient features. Indeed, 2d discrete tangent estimators
     based on tangency or discrete line segments have proven to be both
     sensitive to sharp corners while multigrid convergent along the
     boundary of digitized smooth shapes
-    \cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}.
+    \cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}. Many ad
+    hoc methods have been proposed for tangent plane or normal
+    estimation on 3d digital surfaces
+    (e.g. \cite{fourey:2009-cg,charrier:2011-iwcia,Cuel:2014-dgci,Lachaud:2017-lnm,mareche:2024-ispr}).
+    If two of these methods \cite{Cuel:2014-dgci,Lachaud:2017-lnm}
+    have been shown to be multigrid convergent on digitization of
+    shapes with smooth boundary, their formulation intrinsically
+    smoothes features, e.g. in contrast with the method of
+    Mar{\^e}ch{\'e} \emph{et al.}  \cite{mareche:2024-ispr}, whose
+    convergence is not established. We propose here a normal estimator
+    defined as the most orthogonal vector to the cone of visibility at
+    the point of interest. Visibility is high in smooth regions and
+    the induced visibility vectors are good approximations of tangent
+    vectors. On the contrary the visibility is blocked at sharp
+    features, so the normal vector is then not influenced by the
+    geometry on the other side of the features. We demonstrate the
+    superiority of this normal estimator for estimating curvatures
+    along digital surfaces with sharp features.
 
-    or
-    normal estimators along digital surfaces have been shown to be
-    multigrid convergent on digitization of shapes with smooth
-    boundary \cite{Cuel:2014-dgci,Lachaud:2017-lnm}
-    
-    (Work in progress)
+    Note that our algorithm for computing visibility is in fact much
+    more general. The same algorithm could be used to recognize if any
+    pattern of lattice points is present on a shape. It is similar to
+    an erosion algorithm where the structuring element is the chosen
+    pattern, and could also be used for morphological operations
+    \cite{soille1999morphological}.  The paper outline is as
+    follows. In Section~2, we recall some definitions and present
+    tangency of chords and its equivalence to visibility.  Section~3
+    describes the specific data structure for encoding set of grid
+    cells, and the main algorithm that exploits this encoding to
+    compute visibility exactly.  Section~4 presents experimental
+    results on visibility, its usage as a discrete normal estimator,
+    and how it improves curvature estimates on digital surfaces.
+    Finally, Section 5 concludes and gives some perspectives to this
+    work, notably other usages of this algorithm in the field.
 
-    
+
+
+    \deleted[id=JO]{
     Visibility is a fundamental concept in computational geometry and digital topology, with applications ranging from computer vision to geometric modeling and computer graphics.
     In this work, we explore visibility through the lens of chord tangency, introducing a novel approach that builds on discrete geometric structures.
     Our framework leverages the discrete setting of and cell complexes, providing a rigorous foundation for analyzing visibility properties in digital spaces.
-
+    }
 
     
+    \deleted[id=JO]{
     We recall essential definitions from previous works, particularly the notions of cell complexes and the star operator as formalized in~\cite{lachaud:2021-dgmm} and~\cite{lachaud:2022-jmiv}.
     The integer grid serves as our primary space of study, where geometric structures are discretized using cell complexes.
     A cell complex is a decomposition of space into elementary units (vertices, edges, faces, and higher-dimensional counterparts) forming a combinatorial representation of geometric objects.
     The star of a cell, as defined in these works, consists of all higher-dimensional cells that contain it, a crucial concept for analyzing local neighborhoods and connectivity.
-
-    Building on these foundations, our study focuses on visibility as determined by the tangency of chords in discrete geometry.
+    }
+    
+    \deleted[id=JO]{
+      Building on these foundations, our study focuses on visibility as determined by the tangency of chords in discrete geometry.
     We define and analyze how visibility relationships emerge in this context and investigate their combinatorial and topological implications.
     This approach provides a new perspective on discrete visibility, offering potential applications in digital imaging, surface reconstruction, and computational topology.
-
-    The remainder of this paper is structured as follows.
+    }
+    
+    \deleted[id=JO]{
+      The remainder of this paper is structured as follows.
     In Section 2, we formalize the concept of chord tangency and its role in visibility analysis.
     Section 3 enters into the usage of integer intervals intersections to quickly scan the figure in order to recover this visibiltiy.
     Section 4 presents our main results, using this visibility to compute normals using the CNC estimator~\cite{lachaud:2022-dcg}.
     Finally, Section 5 concludes with some other applications of integer intervals intersections in the field.
-
+    }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
