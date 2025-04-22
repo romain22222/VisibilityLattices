@@ -767,6 +767,42 @@
     \end{figure}
 
 
+    \begin{figure}
+      \begin{center}
+        \begin{tabular}{|c||c|c|c|} \hline
+          Curvature & II normals & CTriv normals & Our normals \\ \hline \hline
+          $\kappa_1$&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-II.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-CTriv.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-NV.png}\\ \hline
+          $\kappa_2$&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-II.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-CTriv.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-NV.png}\\ \hline
+          $H$&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-II.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-CTriv.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-NV.png}\\ \hline
+          $G$&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-II.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-CTriv.png}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-NV.png}\\ \hline
+        \end{tabular}
+      \end{center}
+      \caption{Estimation of curvatures using Corrected Normal Current
+        estimators \cite{} for the shape ``Dice-20'' of Thingi10K
+        database at resolution $256^3$. This estimator is
+        parameterized by an input normal estimator: first column by
+        ``Integral Invariant normals'' (radius $r=4.77$, second column
+        by ``Convolved Trivial normals'' (radius $k=3$), third column
+        by our presented normal estimator (radius $r=8.5$). Per row are displayed the
+        estimated curvatures in order: first and second principal
+        curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
+        Gaussian curvature $G$. The range of curvature between deep
+        blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
+        color equal to $0$.}
+    \end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
