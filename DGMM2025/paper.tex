@@ -599,7 +599,6 @@
             \centering
             \begin{axis}[
                 xlabel={Gridstep},
-                x dir=reverse,
                 ylabel={Mean distance},
                 legend pos=north west,
                 ymajorgrids=true,
@@ -656,70 +655,111 @@
         \begin{tikzpicture}
             \centering
             \begin{axis}[
-                xlabel={Gridstep},
-                x dir=reverse,
-                ylabel={Duration (s)},
+                xlabel={\#Pointels},
+                ylabel={Computation Time},
                 legend pos=north west,
                 ymajorgrids=true,
                 grid style=dashed,
                 ymode=log,
+                xmode=log,
                 log ticks with fixed point,
             ]
 
                 \addplot[
-                    color=cyan,
-                    mark=square,
-                ]
-                coordinates {
-                    (1,0.513)(0.875,0.585)(0.75,0.897)(0.625,1.401)(0.5,2.441)(0.375,4.664)(0.25,11.420)
-                };
-                \addlegendentry{sphere9 radius 10}
-                \addplot[
-                    color=red,
-                    mark=square,
-                ]
-                coordinates {
-                    (1,0.440)(0.875,0.665)(0.75,0.823)(0.625,1.428)(0.5,2.463)(0.375,4.697)(0.25,11.766)
-                };
-                \addlegendentry{goursat radius 10}
-                \addplot[
-                    color=red,
-                    mark=triangle,
-                ]
-                coordinates {
-                    (1,1.389)(0.875,2.567)(0.75,3.661)(0.625,7.123)(0.5,13.881)(0.375,28.913)(0.25,77.360)
-                };
-                \addlegendentry{radius 20}
-                \addplot[
-                    color=red,
+                    red,
+                    only marks,
                     mark=halfcircle,
-                ]
-                coordinates {
-                    (1,2.172)(0.875,3.747)(0.75,5.565)(0.625,13.180)(0.5,33.088)(0.375,80.584)(0.25,240.546)
+                    mark options={solid}
+                ] table[row sep=crcr] {
+                    10624 2246.69\\
+                    4968 793.426\\
+                    2584 328.535\\
+                    1840 190.401\\
+                    1176 93.2502\\
+                    912 78.7981\\
+                    624 56.3769\\
+                    28568 10193.5\\
+                    12632 4004.92\\
+                    7088 2010.63\\
+                    4664 1188.73\\
+                    3080 755.754\\
+                    2408 545.347\\
+                    1736 366.541\\
+                    24320 11169.1\\
+                    10760 4720.44\\
+                    6056 2397.79\\
+                    3944 1380.38\\
+                    2648 874.979\\
+                    2000 580.0\\
+                    1520 415.373\\
+                    8336 3196.55\\
+                    3720 1268.46\\
+                    2104 639.305\\
+                    1336 342.873\\
+                    928 177.54\\
+                    680 112.142\\
+                    520 87.0747\\
+                    37592 12335.6\\
+                    16712 5582.38\\
+                    9512 2976.21\\
+                    6056 1731.32\\
+                    4088 990.78\\
+                    3032 788.507\\
+                    2456 548.66\\
                 };
-                \addlegendentry{radius 30}
+                \addlegendentry{radius 10};
                 \addplot[
-                    color=violet,
-                    mark=square,
-                ]
-                coordinates {
-                    (1,0.057)(0.875,0.081)(0.75,0.097)(0.625,0.197)(0.5,0.330)(0.375,0.800)(0.25,2.253)
-                };
-                \addlegendentry{torus}
-                \addplot[
-                    color=violet,
-                    mark=triangle,
-                ]
-                coordinates {
-                    (1,0.248)(0.875,0.294)(0.75,0.339)(0.625,0.620)(0.5,1.110)(0.375,2.643)(0.25,9.369)
-                };
-                \addplot[
-                    color=violet,
+                    MyGreen,
+                    only marks,
                     mark=halfcircle,
-                ]
-                coordinates {
-                    (1,0.837)(0.875,0.880)(0.75,0.942)(0.625,1.316)(0.5,2.142)(0.375,5.046)(0.25,20.418)
+                    mark options={solid}
+                ] table[row sep=crcr] {
+                    1000 1000\\
                 };
+                \addlegendentry{radius 20};
+                \addplot[
+                    blue,
+                    only marks,
+                    mark=halfcircle,
+                    mark options={solid}
+                ] table[row sep=crcr] {
+                    10624 18283.5\\
+                    4968 4957.93\\
+                    2584 2133.36\\
+                    1840 1292.53\\
+                    1176 922.51\\
+                    912 863.731\\
+                    624 813.638\\
+                    28568 188784.0\\
+                    12632 62237.1\\
+                    7088 24874.9\\
+                    4664 9043.39\\
+                    3080 4407.09\\
+                    2408 2641.04\\
+                    1736 1820.31\\
+                    24320 227432.0\\
+                    10760 69706.8\\
+                    6056 25408.9\\
+                    3944 10094.7\\
+                    2648 5269.56\\
+                    2000 2948.16\\
+                    1520 2082.02\\
+                    8336 45045.4\\
+                    3720 8638.42\\
+                    2104 3238.48\\
+                    1336 1731.9\\
+                    928 1122.69\\
+                    680 928.084\\
+                    520 890.592\\
+                    37592 257981.0\\
+                    16712 84729.7\\
+                    9512 36298.8\\
+                    6056 15640.2\\
+                    4088 6662.17\\
+                    3032 4431.71\\
+                    2456 2621.98\\
+                };
+                \addlegendentry{radius 30};
             \end{axis}
         \end{tikzpicture}
         \caption{Computation Time of Visibility as a Function of Grid Resolution}
