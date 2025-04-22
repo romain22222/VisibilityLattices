@@ -665,7 +665,6 @@
                 xmode=log,
                 log ticks with fixed point,
             ]
-
                 \addplot[
                     red,
                     only marks,
@@ -707,6 +706,8 @@
                     4088 990.78\\
                     3032 788.507\\
                     2456 548.66\\
+                    97844 49226.3\\
+                    390235 181322\\
                 };
                 \addlegendentry{radius 10};
                 \addplot[
@@ -715,7 +716,43 @@
                     mark=halfcircle,
                     mark options={solid}
                 ] table[row sep=crcr] {
-                    1000 1000\\
+                    10624 9522.43\\
+                    4968 2876.81\\
+                    2584 1152.25\\
+                    1840 635.332\\
+                    1176 347.973\\
+                    912 304.801\\
+                    624 250.126\\
+                    28568 70137.9\\
+                    12632 26063.0\\
+                    7088 11985.8\\
+                    4664 6239.51\\
+                    3080 3468.31\\
+                    2408 2059.84\\
+                    1736 1254.2\\
+                    24320 86616.9\\
+                    10760 26605.7\\
+                    6056 11813.5\\
+                    3944 6516.92\\
+                    2648 3564.03\\
+                    2000 1949.32\\
+                    1520 1244.89\\
+                    8336 18125.5\\
+                    3720 5157.11\\
+                    2104 2029.09\\
+                    1336 896.186\\
+                    928 446.136\\
+                    680 306.651\\
+                    520 259.078\\
+                    37592 76316.3\\
+                    16712 27747.3\\
+                    9512 13608.6\\
+                    6056 7140.03\\
+                    4088 3704.52\\
+                    3032 2624.2\\
+                    2456 1422.6\\
+                    97844 378906\\
+                    390235 1747780\\
                 };
                 \addlegendentry{radius 20};
                 \addplot[
@@ -759,8 +796,17 @@
                     4088 6662.17\\
                     3032 4431.71\\
                     2456 2621.98\\
+                    97844 1157400\\
+                    390235 10000000\\ % TODO récup le temps demain (en ~10e4s)
                 };
                 \addlegendentry{radius 30};
+                \addplot [
+                    color=black,
+                    thick,
+                    domain=500:60000,
+                    samples=100,
+                ] {0.01*x^(1.5)};
+                \addlegendentry{$0.01\times x\sqrt{x}$}
             \end{axis}
         \end{tikzpicture}
         \caption{Computation Time of Visibility as a Function of Grid Resolution}
@@ -773,25 +819,25 @@
         \begin{tabular}{|c||c|c|c|} \hline
           Curvature & II normals & CTriv normals & Our normals \\ \hline \hline
           $\kappa_1$&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-II.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-CTriv.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-NV.png}\\ \hline
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-II}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-CTriv}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k1-NV}\\ \hline
           $\kappa_2$&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-II.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-CTriv.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-NV.png}\\ \hline
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-II}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-CTriv}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-k2-NV}\\ \hline
           $H$&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-H-II.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-H-CTriv.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-H-NV.png}\\ \hline
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-II}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-CTriv}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-H-NV}\\ \hline
           $G$&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-G-II.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-G-CTriv.png}&
-          \includegraphics[width=0.3\textwidth]{pictures/d20-G-NV.png}\\ \hline
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-II}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-CTriv}&
+          \includegraphics[width=0.3\textwidth]{pictures/d20-G-NV}\\ \hline
         \end{tabular}
       \end{center}
       \caption{Estimation of curvatures using Corrected Normal Current
-        estimators \cite{} for the shape ``Dice-20'' of Thingi10K
+        estimators \cite{lachaud:2022-dcg} for the shape ``Dice-20'' of Thingi10K
         database at resolution $256^3$. This estimator is
         parameterized by an input normal estimator: first column by
         ``Integral Invariant normals'' (radius $r=4.77$, second column
