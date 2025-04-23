@@ -52,6 +52,7 @@ CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 
 std::vector<RealPoint> visibility_normals;
+std::vector<RealPoint> normal_colors;
 std::vector<RealPoint> visibility_sharps;
 
 // Curvature variables
@@ -90,10 +91,10 @@ bool isPointLowerThan(const Point &p1, const Point &p2) {
 
 class Visibility {
 public:
-  Dimension mainAxis;
+  Dimension mainAxis{};
   std::vector<bool> visibles;
-  size_t vectorsSize;
-  size_t pointsSize;
+  size_t vectorsSize{};
+  size_t pointsSize{};
   std::map<Point, size_t> pointIdxs;
   std::map<IntegerVector, size_t> vectorIdxs;
 
@@ -652,6 +653,15 @@ void doRedisplayCurvatures() {
   psPrimalMesh->addFaceVectorQuantity("D2 (2nd princ. direction)", D2);
 }
 
+void doRedisplayNormalAsColors() {
+  normal_colors.clear();
+  normal_colors.reserve(visibility_normals.size());
+  for (const auto& n : visibility_normals) {
+    normal_colors.push_back(0.5f * (n + 1.0f));
+  }
+  psPrimalMesh->addVertexColorQuantity("Normals as colors", normal_colors);
+}
+
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
@@ -700,12 +710,9 @@ void myCallback() {
   if (ImGui::Button("Compute Normals")) {
     trace.beginBlock("Compute visibilities Normals");
     computeVisibilityNormals();
-    Time = trace.endBlock();
-  }
-  if (ImGui::Button("Reorient Normals")) {
-    trace.beginBlock("Reorient visibility normals");
     reorientVisibilityNormals();
     Time = trace.endBlock();
+    doRedisplayNormalAsColors();
   }
   if (ImGui::Button("Compute Curvatures")) {
     trace.beginBlock("Compute visibilities Curvatures");

@@ -25,6 +25,7 @@
 \usepackage{tikz}
 \usepackage{wrapfig}
 \usepackage{environ}
+\usepackage{bbm}
 
 \usepackage{changes}
 \usepackage{algorithm}
@@ -613,7 +614,7 @@
     In order to compute the visibility, we first compute $\Omega = \text{Star}(C)$. Then for each primal direction of
     coordinates at most $r$, we look at all the possible positions this specific direction does link 2 visible points
     of the cell complex. In order to do so, for each shift in $\Omega$, we compute the positions where points are
-    visible using the same method as presented in \ref{fig:enter-label}.
+    visible using the same method as presented in~\ref{fig:enter-label}.
 
     \begin{algorithm}
         \caption{Given 2 lists of intervals $K$ and $L$, find $K \cap L$, the intersection of those 2 lists}
@@ -894,12 +895,22 @@
 
     Let $V$ the visibility around the point $p$, let $c$ be the centroid of the
     visible points around p. The normal $\vec{n}$ is defined as the first
-    eigenvector of the covariance matrix \Nu of the visible points:
+    eigenvector of the covariance matrix $\mathcal{V}$ of the visible points:
     \begin{equation}
-        \Nu = \frac{1}{\#V} \sum_{i=1}^{\#V} (p_i - c)(p_i - c)^T
+        \mathcal{V} = \frac{1}{\#V} \sum_{i=1}^{\#V} (p_i - c)(p_i - c)^T
     \end{equation}
     In order to reorient the normal, we use the trivial normal of the
     surface as a reference.
+
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.8\textwidth]{pictures/torus-knot-normal-estimation}
+            \caption{Normal estimation on a torus knot using the visibility
+            algorithm. The normals are colored according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$
+                .}
+            \label{fig:normal-estimation}
+        \end{center}
+    \end{figure}
 
     Then, to compute the curvatures, we use the Corrected Normal Current
     estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
