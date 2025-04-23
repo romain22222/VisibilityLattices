@@ -8,6 +8,7 @@
 #include <polyscope/surface_mesh.h>
 #include <DGtal/arithmetic/IntegerComputer.h>
 #include <DGtal/base/Common.h>
+#include <DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h>
 #include <DGtal/geometry/volumes/DigitalConvexity.h>
 #include <DGtal/geometry/volumes/TangencyComputer.h>
 #include <DGtal/helpers/StdDefs.h>
@@ -27,6 +28,7 @@ typedef Shortcuts<KSpace> SH3;
 typedef ShortcutsGeometry<KSpace> SHG3;
 typedef DigitalConvexity<KSpace> Convexity;
 typedef typename Convexity::LatticeSet LatticeSet;
+typedef CorrectedNormalCurrentComputer<RealPoint, RealVector> CNC;
 
 typedef std::pair<Integer, Integer> Interval;
 typedef std::vector<Interval> Intervals;
@@ -51,6 +53,20 @@ CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 
 std::vector<RealPoint> visibility_normals;
 std::vector<RealPoint> visibility_sharps;
+
+// Curvature variables
+CountedPtr<CNC> pCNC;
+CNC::ScalarMeasure mu0;
+CNC::ScalarMeasure mu1;
+CNC::ScalarMeasure mu2;
+CNC::TensorMeasure muXY;
+std::vector<double> H;
+std::vector<double> G;
+std::vector<double> K1;
+std::vector<double> K2;
+std::vector<RealVector> D1;
+std::vector<RealVector> D2;
+float MaxCurv = 0.2;
 
 // Parameters
 int VisibilityRadius = 10;
@@ -274,8 +290,8 @@ checkInterval(const Interval toCheck, const Intervals &figIntervals) {
 
 Intervals intersect(const Intervals &l1, const Intervals &l2) {
   Intervals result;
-    // check 3rd example of testIntersection to see that you need at most this amount
-   result.reserve( l1.size() + l2.size() - 1);
+  // check 3rd example of testIntersection to see that you need at most this amount
+  result.reserve(l1.size() + l2.size() - 1);
 //  result.reserve( std::max( l1.size(), l2.size() ) );
   int k1 = 0, k2 = 0;
   while (k1 < l1.size() && k2 < l2.size()) {
@@ -297,10 +313,10 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
  * @param figLattices
  * @return
  */
-Intervals matchVector( Intervals &toCheck,
-		       const Intervals &vectorIntervals,
-		       const Intervals &figIntervals ) {
-  for (const auto& vInterval: vectorIntervals) {
+Intervals matchVector(Intervals &toCheck,
+                      const Intervals &vectorIntervals,
+                      const Intervals &figIntervals) {
+  for (const auto &vInterval: vectorIntervals) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
   }
@@ -312,7 +328,7 @@ void computeVisibilityOmp(int radius) {
   Dimension axis = getLargeAxis();
   auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
   std::map<Point, Intervals> figLattices;
-  for (auto p:tmpFigLattices) {
+  for (auto p: tmpFigLattices) {
     figLattices[p.first] = p.second.data();
   }
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
@@ -336,7 +352,7 @@ void computeVisibilityOmp(int radius) {
       segment = segmentList[segmentIdx];
       auto tmp = getLatticeVector(segment, axis).data();
       std::map<Point, Intervals> latticeVector;
-      for (auto p:tmp) {
+      for (auto p: tmp) {
         latticeVector[p.first] = p.second.data();
       }
       minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
@@ -373,7 +389,7 @@ void computeVisibility(int radius) {
   Dimension axis = getLargeAxis();
   auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
   std::map<Point, Intervals> figLattices;
-  for (auto p:tmpFigLattices) {
+  for (auto p: tmpFigLattices) {
     figLattices[p.first] = p.second.data();
   }
   const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
@@ -390,7 +406,7 @@ void computeVisibility(int radius) {
     segment = segmentList[segmentIdx];
     auto tmp = getLatticeVector(segment, axis).data();
     std::map<Point, Intervals> latticeVector;
-    for (auto p:tmp) {
+    for (auto p: tmp) {
       latticeVector[p.first] = p.second.data();
     }
     minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
@@ -517,7 +533,7 @@ void computeVisibilityDirectionToSharpFeatures() {
   visibility_sharps.resize(pointels.size());
   auto kdTree = LinearKDTree<Point, 3>(pointels);
   for (int i = 0; i < pointels.size(); ++i) {
-    RealVector tmpSum(0,0,0);
+    RealVector tmpSum(0, 0, 0);
     size_t count = 0;
     for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
       auto tmp = kdTree.position(point_idx);
@@ -526,7 +542,7 @@ void computeVisibilityDirectionToSharpFeatures() {
         count++;
       }
     }
-    visibility_sharps[i] = -tmpSum/count;
+    visibility_sharps[i] = -tmpSum / count;
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility sharp direction", visibility_sharps);
@@ -537,9 +553,9 @@ void computeVisibilityNormals() {
   visibility_normals.clear();
   visibility_normals.reserve(pointels.size());
   auto kdTree = LinearKDTree<Point, 3>(pointels);
-  for (const auto & pointel : pointels) {
+  for (const auto &pointel: pointels) {
     std::vector<Point> visibles;
-    RealPoint centroid(0,0,0);
+    RealPoint centroid(0, 0, 0);
     for (auto point_idx: kdTree.pointsInBall(pointel, VisibilityRadius)) {
       auto tmp = kdTree.position(point_idx);
       if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
@@ -547,19 +563,19 @@ void computeVisibilityNormals() {
         centroid += tmp;
       }
     }
-    centroid /= (double)visibles.size();
+    centroid /= (double) visibles.size();
     Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
-    for (const auto& pt: visibles) {
+    for (const auto &pt: visibles) {
       auto diff = pt - centroid;
       for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
-          cov(i,j) += diff[i] * diff[j];
+          cov(i, j) += diff[i] * diff[j];
         }
       }
     }
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov/(double)visibles.size());
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov / (double) visibles.size());
     auto normalE = solver.eigenvectors().col(0);
-    visibility_normals.emplace_back(normalE.x(),normalE.y(),normalE.z());
+    visibility_normals.emplace_back(normalE.x(), normalE.y(), normalE.z());
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
@@ -587,6 +603,48 @@ void reorientVisibilityNormals() {
     psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
     psPrimalMesh->addFaceVectorQuantity("Face trivial normal", primal_surface->faceNormals());
   }
+}
+
+void computeCurvatures() {
+  primal_surface->setVertexNormals(visibility_normals.cbegin(), visibility_normals.cend());
+  primal_surface->computeFaceNormalsFromVertexNormals();
+
+  mu0 = pCNC->computeMu0();
+  mu1 = pCNC->computeMu1();
+  mu2 = pCNC->computeMu2();
+  muXY = pCNC->computeMuXY();
+
+  H.resize(primal_surface->nbFaces());
+  G.resize(primal_surface->nbFaces());
+  K1.resize(primal_surface->nbFaces());
+  K2.resize(primal_surface->nbFaces());
+  D1.resize(primal_surface->nbFaces());
+  D2.resize(primal_surface->nbFaces());
+  // estimates mean (H) and Gaussian (G) curvatures by measure normalization.
+  for (auto f = 0; f < primal_surface->nbFaces(); ++f) {
+    const auto b = primal_surface->faceCentroid(f);
+    const auto wfaces = primal_surface->computeFacesInclusionsInBall(VisibilityRadius, f, b);
+    const auto area = mu0.faceMeasure(wfaces);
+    H[f] = pCNC->meanCurvature(area, mu1.faceMeasure(wfaces));
+    G[f] = pCNC->GaussianCurvature(area, mu2.faceMeasure(wfaces));
+    const auto N = primal_surface->faceNormals()[f];
+    const auto M = muXY.faceMeasure(wfaces);
+    std::tie(K1[f], K2[f], D1[f], D2[f])
+        = pCNC->principalCurvatures(area, M, N);
+  }
+}
+
+void doRedisplayCurvatures() {
+  psPrimalMesh->addFaceScalarQuantity("H (mean curvature)", H)
+      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+  psPrimalMesh->addFaceScalarQuantity("G (Gaussian curvature)", G)
+      ->setMapRange({-0.5 * MaxCurv * MaxCurv, 0.5 * MaxCurv * MaxCurv})->setColorMap("coolwarm");
+  psPrimalMesh->addFaceScalarQuantity("K1 (1st princ. curvature)", K1)
+      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+  psPrimalMesh->addFaceScalarQuantity("K2 (2nd princ. curvature)", K2)
+      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+  psPrimalMesh->addFaceVectorQuantity("D1 (1st princ. direction)", D1);
+  psPrimalMesh->addFaceVectorQuantity("D2 (2nd princ. direction)", D2);
 }
 
 void myCallback() {
@@ -644,25 +702,32 @@ void myCallback() {
     reorientVisibilityNormals();
     Time = trace.endBlock();
   }
+  if (ImGui::Button("Compute Curvatures")) {
+    trace.beginBlock("Compute visibilities Curvatures");
+    computeCurvatures();
+    Time = trace.endBlock();
+    doRedisplayCurvatures();
+  }
   ImGui::SameLine();
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
 
 void testIntersection() {
   // 1|2 4|5 7|9
-  for (auto v:intersect(Intervals({Interval(0,9)}),Intervals({Interval(1,2),Interval(4,5),Interval(7,10)}))) {
+  for (auto v: intersect(Intervals({Interval(0, 9)}), Intervals({Interval(1, 2), Interval(4, 5), Interval(7, 10)}))) {
     std::cout << v << " ";
   }
   std::cout << std::endl;
 
   // 2|3 5|6 8|10
-  for (auto v:intersect(Intervals({Interval(0,3),Interval(5,10)}),Intervals({Interval(2,6),Interval(8,12)}))) {
+  for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10)}), Intervals({Interval(2, 6), Interval(8, 12)}))) {
     std::cout << v << " ";
   }
   std::cout << std::endl;
 
   // 1|3 6|7 9|10 12|12 14|15
-  for (auto v:intersect(Intervals({Interval(0,3),Interval(5,10),Interval(12,15)}),Intervals({Interval(1,3),Interval(6,7),Interval(9,12),Interval(14,15)}))) {
+  for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10), Interval(12, 15)}),
+                         Intervals({Interval(1, 3), Interval(6, 7), Interval(9, 12), Interval(14, 15)}))) {
     std::cout << v << " ";
   }
   std::cout << std::endl;
@@ -670,7 +735,7 @@ void testIntersection() {
 
 
 int main(int argc, char *argv[]) {
-    // command line inteface options
+  // command line inteface options
   CLI::App app{"A tool to check visibility using lattices."};
   std::string filename = "../volumes/bunny34.vol";
   int thresholdMin = 0;
@@ -763,7 +828,7 @@ int main(int argc, char *argv[]) {
   int t_ring = int(round(params["t-ring"].as<double>()));
   auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
   primal_surface->faceNormals() = surfel_trivial_normals;
-  for (auto i = 1; i < t_ring+3; i++) {
+  for (auto i = 1; i < t_ring + 3; i++) {
     primal_surface->computeVertexNormalsFromFaceNormals();
     primal_surface->computeFaceNormalsFromVertexNormals();
     surfel_trivial_normals = primal_surface->faceNormals();
@@ -772,9 +837,9 @@ int main(int argc, char *argv[]) {
   trivial_normals.resize(pointels.size());
   for (auto &n: trivial_normals) n = RealVector::zero;
   for (auto k = 0; k < surfels.size(); k++) {
-    const auto& surf = surfels[k];
+    const auto &surf = surfels[k];
     const auto cells0 = SH3::getPrimalVertices(K, surf);
-    for (const auto& c0: cells0) {
+    for (const auto &c0: cells0) {
       const auto p = K.uCoords(c0);
       const auto idx = pTC->index(p);
       trivial_normals[idx] += surfel_trivial_normals[k];
@@ -785,6 +850,7 @@ int main(int argc, char *argv[]) {
   primal_surface->vertexNormals() = trivial_normals;
 
 
+  pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
   // Initialize polyscope
   if (noInterface) {
     checkParallelism();
