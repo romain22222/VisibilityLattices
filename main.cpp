@@ -366,7 +366,12 @@ void computeVisibilityOmp(int radius) {
           const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                                 axis == 2 ? 0 : 2 * ty);
           for (const auto &cInfo: latticeVector) {
-            eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
+            const auto it = figLattices.find(pInterest + cInfo.first);
+            if (it == figLattices.end()) {
+              eligibles.clear();
+              break;
+            }
+            eligibles = matchVector(eligibles, cInfo.second, it->second);
             if (eligibles.empty()) break;
           }
           if (!eligibles.empty()) {
