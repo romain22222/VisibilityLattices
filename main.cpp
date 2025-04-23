@@ -656,7 +656,7 @@ void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
     auto selection = polyscope::pick::getSelection();
-    auto selectedSurface = dynamic_cast<polyscope::SurfaceMesh *>(selection.first);
+    auto selectedSurface = static_cast<polyscope::SurfaceMesh *>(selection.first);
     auto idx = selection.second;
 
     // Only authorize selection on the input surface and the reconstruction
