@@ -834,11 +834,18 @@
 
     \section{Feature-aware normal estimation and curvature estimation on digital surfaces}
 
-    % Explain how i use the resulting visibility to compute the normals
+    Let $V$ the visibility around the point $p$, let $c$ be the centroid of the
+    visible points around p. The normal $\vec{n}$ is defined as the first
+    eigenvector of the covariance matrix \Nu of the visible points:
+    \begin{equation}
+        \Nu = \frac{1}{\#V} \sum_{i=1}^{\#V} (p_i - c)(p_i - c)^T
+    \end{equation}
+    In order to reorient the normal, we use the trivial normal of the
+    surface as a reference.
 
-    % Then same with curvatures
-
-    % Graphical result comparison of curvatures
+    Then, to compute the curvatures, we use the Corrected Normal Current
+    estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
+    above.
 
     \begin{figure}
       \begin{center}
