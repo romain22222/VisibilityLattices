@@ -908,7 +908,7 @@
     \section{Saliency-aware normal and curvature estimation}
 
     \newcommand{\Kernel}[1]{\ensuremath{w_{\sigma}(#1)}}
-    \paragraph*{Saliency-aware normal estimator.}
+    \paragraph{Saliency-aware normal estimator.}
     We propose a new normal estimator on digital surfaces, which uses
     the visibility of the point of interest while taking into account
     a user-given scale $\sigma$. If $\sigma$ is proportionnal to the
@@ -928,7 +928,7 @@
     \begin{equation}
         \mathcal{V}_p = \sum_{q \in V_p} \Kernel{\|q-p\|}(q - c_p)(q - c_p)^T.
     \end{equation}
-    The \emph{visibility normal} $\vec{n}_p$ of point $p$ is defined
+    The \emph{visibility normal} $\vec{n}(p)$ of point $p$ at scale $\sigma$ is defined
     as the first eigenvector of the covariance matrix $\mathcal{V}_p$
     of the visible points, corresponding to its smallest
     eigenvalue. Its orientation is chosen so as to point in the same
@@ -949,20 +949,23 @@
             \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-smooth-NV} \\
             \hline
         \end{tabular}
-        \caption{Examples of normals computed on a chinese dragon as a color map. First set displays II normals, second set uses the visibility
-        algorithm to compute them. The normals are colored according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$
-            . The right images are the smooth version of the left images}
+        \caption{Examples of normals computed on a chinese dragon as a
+          color map. First set displays II normals, second set uses
+          the visibility algorithm to compute them. The normals are
+          colored according to their orientation as $0.5 \cdot (n_i +
+          \mathbbm{1})$. The right images are the smooth version of
+          the left images}
         \label{fig:normals-estimation}
     \end{figure}
 
-    Then, to compute the curvatures, we use the Corrected Normal Current
-    estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
-    above.
+    %% Then, to compute the curvatures, we use the Corrected Normal Current
+    %% estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
+    %% above.
 
 
 
 
-    \paragraph*{Application to curvature estimation.}
+    \paragraph{Application to curvature estimation.}
     In order to illustrate better that the visibility normals better
     take into account the sharp features of a digital surface while
     staying meaningfull in digitization of smooth parts, we compare
