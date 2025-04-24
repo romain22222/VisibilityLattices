@@ -37,7 +37,7 @@
 \usepackage{pgfplots}
 \usepackage[dvipsnames]{xcolor}
 \pgfplotsset{compat=1.18}
-\usetikzlibrary {arrows.meta,decorations.shapes}
+\usetikzlibrary {spy,arrows.meta,decorations.shapes}
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=blue]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
@@ -918,27 +918,34 @@
     estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
     above.
 
+    \newcommand{\MyZoom}[1]{%
+      \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
+        \node[inner sep=0pt] {\pgfimage[width=0.3\textwidth]{#1}};
+        \spy[overlay,blue] on (0.4,0.2) in node at (-0.8,0.8);
+      \end{tikzpicture}}
+    % \newcommand{\MyZoom}[1]{\includegraphics[width=0.3\textwidth]{#1}}
+    
     \begin{figure}
         \begin{center}
             \begin{tabular}{|c||c|c|c|}
                 \hline
-                Curvature & II normals & CTriv normals & Our normals \\ \hline \hline
+                Curv. & II normals & CTriv normals & Our normals \\ \hline \hline
                 \raisebox{18mm}{$\kappa_1$} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k1-II.jpg} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k1-CTriv.jpg}&
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k1-VN.jpg}\\ \hline
+                \MyZoom{pictures/d20-k1-II.jpg} &
+                \MyZoom{pictures/d20-k1-CTriv.jpg}&
+                \MyZoom{pictures/d20-k1-VN.jpg}\\ \hline
                 \raisebox{18mm}{$\kappa_2$} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k2-II.jpg} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k2-CTriv.jpg}&
-                \includegraphics[width=0.3\textwidth]{pictures/d20-k2-VN.jpg}\\ \hline
+                \MyZoom{pictures/d20-k2-II.jpg} &
+                \MyZoom{pictures/d20-k2-CTriv.jpg}&
+                \MyZoom{pictures/d20-k2-VN.jpg}\\ \hline
                 \raisebox{18mm}{$H$} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-H-II.jpg} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-H-CTriv.jpg}&
-                \includegraphics[width=0.3\textwidth]{pictures/d20-H-VN.jpg}\\ \hline
+                \MyZoom{pictures/d20-H-II.jpg} &
+                \MyZoom{pictures/d20-H-CTriv.jpg}&
+                \MyZoom{pictures/d20-H-VN.jpg}\\ \hline
                 \raisebox{18mm}{$G$} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-G-II.jpg} &
-                \includegraphics[width=0.3\textwidth]{pictures/d20-G-CTriv.jpg}&
-                \includegraphics[width=0.3\textwidth]{pictures/d20-G-VN.jpg}\\ \hline
+                \MyZoom{pictures/d20-G-II.jpg} &
+                \MyZoom{pictures/d20-G-CTriv.jpg}&
+                \MyZoom{pictures/d20-G-VN.jpg}\\ \hline
             \end{tabular}
         \end{center}
         \caption{Estimation of curvatures using Corrected Normal
