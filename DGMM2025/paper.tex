@@ -978,11 +978,42 @@
     available in
     \href{https://dgtal-team.github.io/doc-nightly/moduleCurvatureMeasures.html}{\textsc{DGtal}}.
     
+    \RefFigure{fig-curvatures} displays the results of CNC curvature
+    estimations on the digitization of a piecewise smooth shape
+    ``Talking D20'', taken from
+    \href{https://ten-thousand-models.appspot.com/detail.html?file_id=1533028}{Thingi10K}.
+    We compare the differences obtained by just changing the discrete
+    normal estimator (available in the \textsc{DGtal} library):
+    (column II normals) Integral Invariant normals with $r=6$, (column
+    CTriv normals) convolved trivial normals with $r=6$, (column
+    Visibility normals) our proposed estimator (VN) with $\sigma=4$ and
+    maximal visibility distance $2\sigma$. These parameters were
+    chosen so that the respective computation windows of the different
+    estimators are approximately the same.
 
-    Then,
-    to compute the curvatures, we use the Corrected Normal Current
-    estimator~\cite{lachaud:2022-dcg} which are based on the normals
-    computed above.
+    II estimator is good along digitization of smooth or flat parts of
+    the dice, but presents curious artefacts near sharp features
+    induced by the hollowed out numbers: this is due to the nature of
+    II normal estimates, which computes a PCA of a ball centered on
+    the point of interest and may include points on the other side of
+    the saliencies.
+
+    CTriv estimator only performs averaging of trivial normal
+    directions along the surface. It behaves much better than II near
+    features (although it tends to smooth curvatures) since it does
+    not use information from across the gap. However some oscillations
+    of the curvatures are distinguishable especially along the flat
+    parts, and some curvature estimates are erroneous on smoother
+    parts (like the edge above 6 for $\kappa_2$ or several dice
+    vertices).
+
+    VN estimator takes the best of the two previous approaches. It
+    remains precise and stable on smooth and flat regions, while
+    perfectly delineating sharp features and holes, whatever the kind
+    of estimated curvatures. Its only drawback is the computation
+    time, which is [TO COMPLETE], compared to $2.3$s for II and $0.1s$
+    for CTriv.
+    
 
     \newcommand{\MyZoom}[1]{%
       \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
@@ -1014,20 +1045,20 @@
                 \MyZoom{pictures/d20-G-VN.jpg}\\ \hline
             \end{tabular}
         \end{center}
-        \caption{Estimation of curvatures using Corrected Normal
-          Current estimators \cite{lachaud:2022-dcg} with a measure of
-          radius $2$ for the shape ``Dice-20'' of Thingi10K database
-          at resolution $256^3$. This estimator is parameterized by an
-          input normal estimator: first column by ``Integral Invariant
-          normals'' (radius $r=6$, second column by ``Convolved
-          Trivial normals'' (radius $k=6$), third column by our
-          presented normal estimator (deviation $\sigma=4$, radius
-          $r=2\sigma=8$). Per row are displayed the estimated
-          curvatures in order: first and second principal curvatures
-          $\kappa_1$ and $\kappa_2$, mean curvature $H$, Gaussian
-          curvature $G$. The range of curvature between deep blue and
-          deep red is $\lbrack -0.1, 0.1 \rbrack$ with white color
-          equal to $0$.}
+        \caption{\label{fig-curvatures}Estimation of curvatures using
+          Corrected Normal Current estimators \cite{lachaud:2022-dcg}
+          with a measure of radius $2$ for the shape ``Dice-20'' of
+          Thingi10K database at resolution $256^3$. This estimator is
+          parameterized by an input normal estimator: first column by
+          ``Integral Invariant normals'' (radius $r=6$, second column
+          by ``Convolved Trivial normals'' (radius $k=6$), third
+          column by our presented normal estimator (deviation
+          $\sigma=4$, radius $r=2\sigma=8$). Per row are displayed the
+          estimated curvatures in order: first and second principal
+          curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
+          Gaussian curvature $G$. The range of curvature between deep
+          blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
+          color equal to $0$.}
     \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
