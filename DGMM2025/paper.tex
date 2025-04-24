@@ -26,8 +26,6 @@
 \usepackage{wrapfig}
 \usepackage{environ}
 \usepackage{bbm}
-%\usepackage{array}
-%\usepackage{multirow}
 
 \usepackage{changes}
 \usepackage{algorithm}
@@ -651,28 +649,42 @@
     % Insert visibility results images
 
     \begin{figure}
-        \begin{center}
-            \includegraphics[width=0.8\textwidth]{pictures/visibility_from_given_point_r_10}
-            \caption{Visibility of a point on an edge of a fandisk}
-            \label{fig:visibility-fandisk}
-        \end{center}
+        \centering
+        \begin{tabular}{c c}
+            \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} &
+            \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_features}
+        \end{tabular}
+        \caption{Examples of visibility on a fandisk and a torus knot. First one is on the edge
+        of a fandisk, where the visibility stops at the edges. The other one is in the interior
+        of a torus knot, where we can see that the visibility is feature-aware and doesn't see
+        the other side of the torus' branch.}
+        \label{fig:visibility-examples}
     \end{figure}
-    \begin{figure}
-        \begin{center}
-            \includegraphics[width=0.8\textwidth]{pictures/visibility_aware_of_features}
-            \caption{Visibility of a point on a torus knot (the visibility is feature-aware)}
-            \label{fig:visibility-torus-knot}
-        \end{center}
-    \end{figure}
+%
+%    \begin{figure}
+%        \begin{center}
+%            \includegraphics[width=0.8\textwidth]{pictures/visibility_from_given_point_r_10}
+%            \caption{Visibility of a point on an edge of a fandisk}
+%            \label{fig:visibility-fandisk}
+%        \end{center}
+%    \end{figure}
+%    \begin{figure}
+%        \begin{center}
+%            \includegraphics[width=0.8\textwidth]{pictures/visibility_aware_of_features}
+%            \caption{Visibility of a point on a torus knot (the visibility is feature-aware)}
+%            \label{fig:visibility-torus-knot}
+%        \end{center}
+%    \end{figure}
 
 
     % Quantitative results
 
-    \pgfplotsset{width=13cm}
     \begin{figure}
         \begin{tikzpicture}
             \centering
             \begin{axis}[
+                width=0.8\textwidth,
+                legend columns=3,
                 xlabel={Gridstep},
                 ylabel={Mean distance},
                 x dir=reverse,
@@ -731,6 +743,7 @@
         \begin{tikzpicture}
             \centering
             \begin{axis}[
+                width=0.8\textwidth,
                 xlabel={\#Pointels},
                 ylabel={Computation Time (ms)},
                 legend pos=north west,
@@ -906,10 +919,10 @@
     better approximates the geometry near sharp or salient features.
 
     More precisely, we choose a Gaussian function
-    $\Kernel{x}:=e^{-\frac{x^2}{2\sigma^2}}$ as a weight kernel. Let
+    $\Kernel{x}\coloneqq e^{-\frac{x^2}{2\sigma^2}}$ as a weight kernel. Let
     $V_p$ be the set of visible points from the point $p$.  Let $c_p$
     be the weighted centroid of the visible points around $p$,
-    i.e. $c_p := \frac{\sum_{q \in V_p} \Kernel{\|q-p\|}q}{\sum_{q \in
+    i.e. $c_p \coloneqq \frac{\sum_{q \in V_p} \Kernel{\|q-p\|}q}{\sum_{q \in
         V_p} \Kernel{\|q-p\|}}$.  We form the weighted covariance matrix
     $\mathcal{V}_p$ of the points $V_p$ as:
     \begin{equation}
@@ -920,34 +933,35 @@
     of the visible points, corresponding to its smallest
     eigenvalue. Its orientation is chosen so as to point in the same
     direction as the average of the trivial normals to the surfels
-    touching the point $p$.
-    
-    %% Let $V_p$ be the set of visible points from the point $p$. Let
-    %% $c_p$ be the weighted centroid of the visible points around $p$.
-    %% The normal $\vec{n}$ is defined as the first eigenvector of the
-    %% covariance matrix $\mathcal{V}$ of the visible points:
-    %% \begin{equation}
-    %%     \mathcal{V} = \frac{1}{\#V} \sum_{i=1}^{\#V} (p_i - c)(p_i - c)^T
-    %% \end{equation}
-    %% In order to reorient the normal, we use the trivial normal of the
-    %% surface as a reference.
+    touching the point $p$. \ref{fig:normals-estimation} shows an example
+    of our normals compared to normals computed with II
 
     \begin{figure}
-        \begin{center}
-            \includegraphics[width=0.8\textwidth]{pictures/torus-knot-normal-estimation}
-            \caption{Normal estimation on a torus knot using the visibility
-            algorithm. The normals are colored according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$
-                .}
-            \label{fig:normal-estimation}
-        \end{center}
+        \centering
+        \begin{tabular}{|c||c|c|}
+            \hline
+            II normals &
+            \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-cubes-II} &
+            \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-smooth-II} \\
+            \hline
+            Visibility normals &
+            \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-cubes-NV} &
+            \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-smooth-NV} \\
+            \hline
+        \end{tabular}
+        \caption{Examples of normals computed on a chinese dragon as a color map. First set displays II normals, second set uses the visibility
+        algorithm to compute them. The normals are colored according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$
+            . The right images are the smooth version of the left images}
+        \label{fig:normals-estimation}
     \end{figure}
 
-    \paragraph*{Experimental convergence of normal estimation.}
-    [TODO] Show normal estimations along smooth shapes and compare with Integral Invariant.
+    Then, to compute the curvatures, we use the Corrected Normal Current
+    estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
+    above.
 
-    
 
-    
+
+
     \paragraph*{Application to curvature estimation.}
     Then, to compute the curvatures, we use the Corrected Normal
     Current estimator~\cite{lachaud:2022-dcg} which are based on the
@@ -959,7 +973,7 @@
         \spy[overlay,blue] on (0.4,0.2) in node at (-0.8,0.8);
       \end{tikzpicture}}
     % \newcommand{\MyZoom}[1]{\includegraphics[width=0.3\textwidth]{#1}}
-    
+
     \begin{figure}
         \begin{center}
             \begin{tabular}{|c||c|c|c|}
