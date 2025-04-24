@@ -263,7 +263,7 @@
     \end{figure}
 
 
-    We note that one particular aspect of this visibility definition is that all visible points from a given point taken as a separate complex are not necessarily 26-connected~\ref{fig:visibility-2d-not-connected}.
+    Figure~\ref{fig:visibility-2d} shows what is considered visible or not. We note that one particular aspect of this visibility definition is that all visible points from a given point taken as a separate complex are not necessarily 26-connected~\ref{fig:visibility-2d-not-connected}.
     Furthermore, we conjecture that they even may not be $n$-connected for $n$ arbitrarily large.
     This characteristic has implications for the applicability of Algorithm 3 from~\cite{lachaud:2022-jmiv}, as the algorithm assumes that visited points are 26-connected, potentially leading to incomplete collection of visible points.
 
@@ -317,7 +317,8 @@
         All translations $T$ of an interval or a sequence of intervals $A$ in a sequence of intervals $L$ are defined as $ T \coloneqq \{ t, st. A+t \subset L\}$
     \end{definition}
 
-    We will consider lattice maps as pairs of (shift, intervals), where shifts are points $p \in \R^{d-1}$. All coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod d\right)$. Note that all examples are in 2-d while the shown algorithm is in n-d.
+    We will consider lattice maps as pairs of (shift, intervals), where shifts are points $p \in \R^{d-1}$. All coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod d\right)$.
+    In figure~\ref{fig:lattice-representation}, we display a representation of lattice maps applied to a 2-d cell complex where all coordinates are already doubled. Note that the examples are in 2-d, the shown results are in 3-d and the algorithm is for n-d.
 
     \begin{figure}
         \centering
@@ -584,7 +585,7 @@
                 \end{tikzpicture}}
         \end{tabular}
         \caption{Evolution of the visibility check algorithm for a 2,1 vector. Green is the vector lattice map, black is the figure lattice map, red are the current intervals of positions where the visibility is still possible. The last red intervals are the visible positions. We travel the lattice maps from bottom-up. The found possible visibilities are shown on the original figure}
-        \label{fig:enter-label}
+        \label{fig:visibility-algorithm-evolution}
     \end{figure}
 
     \begin{algorithm}
@@ -613,7 +614,7 @@
     In order to compute the visibility, we first compute $\Omega = \text{Star}(C)$. Then for each primal direction of
     coordinates at most $r$, we look at all the possible positions this specific direction does link 2 visible points
     of the cell complex. In order to do so, for each shift in $\Omega$, we compute the positions where points are
-    visible using the same method as presented in~\ref{fig:enter-label}.
+    visible using the same method as presented in~\ref{fig:visibility-algorithm-evolution}.
 
     \begin{algorithm}
         \caption{Given 2 lists of intervals $K$ and $L$, find $K \cap L$, the intersection of those 2 lists}
@@ -971,15 +972,14 @@
     staying meaningfull in digitization of smooth parts, we compare
     the curvature estimates induced by different discrete normal
     estimators. We exploit the \emph{Corrected Normal Current (CNC)
-    estimator}, whose theory is detailed in \cite{lachaud:2022-dcg}
+    estimator}, whose theory is detailed in~\cite{lachaud:2022-dcg}
     and which can estimate all kinds of curvatures given positions and
     normals. It produces state-of-the-art curvature estimates on
-    polygonal surfaces \cite{lachaud:2020-cgf}, point clouds
-    \cite{lachaud:2023-cgf}, and even outperforms Integral Invariant
-    curvature estimates \cite{coeurjolly:2014-cviu} on digital
-    surfaces \cite{lachaud:2022-dcg}. Its implementation is also
+    polygonal surfaces~\cite{lachaud:2020-cgf}, point clouds~\cite{lachaud:2023-cgf}, and even outperforms Integral Invariant
+    curvature estimates~\cite{coeurjolly:2014-cviu} on digital
+    surfaces~\cite{lachaud:2022-dcg}. Its implementation is also
     available in    \href{https://dgtal-team.github.io/doc-nightly/moduleCurvatureMeasures.html}{\textsc{DGtal}}.
-    
+
     \RefFigure{fig-curvatures} displays the results of CNC curvature
     estimations on the digitization of a piecewise smooth shape
     ``Talking D20'', taken from
@@ -1015,7 +1015,7 @@
     of estimated curvatures. Its only drawback is the computation
     time, which is [TO COMPLETE], compared to $2.3$s for II and $0.1s$
     for CTriv.
-    
+
 
     \newcommand{\MyZoom}[1]{%
       \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
