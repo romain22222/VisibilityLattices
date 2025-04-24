@@ -892,17 +892,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    \section{Feature-aware normal estimation and curvature estimation on digital surfaces}
+    \section{Saliency-aware normal and curvature estimation}
 
     \newcommand{\Kernel}[1]{\ensuremath{w_{\sigma}(#1)}}
+    \paragraph*{Saliency-aware normal estimator.}
     We propose a new normal estimator on digital surfaces, which uses
     the visibility of the point of interest while taking into account
     a user-given scale $\sigma$. If $\sigma$ is proportionnal to the
-    average length between visible points (so some $c\sqrt{h}$ for $c$
-    some constant), then this estimator is observed to be multigrid
-    convergent along digitization of smooth shapes. However, since the
-    computation window is limited by the visibility, it better
-    approximates the geometry near sharp or salient features.
+    average length between visible points (so some
+    $\Theta(\sqrt{h})$), then this estimator is observed to be
+    multigrid convergent along digitization of smooth shapes. However,
+    since the computation window is limited by the visibility, it
+    better approximates the geometry near sharp or salient features.
 
     More precisely, we choose a Gaussian function
     $\Kernel{x}:=e^{-\frac{x^2}{2\sigma^2}}$ as a weight kernel. Let
@@ -941,9 +942,16 @@
         \end{center}
     \end{figure}
 
-    Then, to compute the curvatures, we use the Corrected Normal Current
-    estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
-    above.
+    \paragraph*{Experimental convergence of normal estimation.}
+    [TODO] Show normal estimations along smooth shapes and compare with Integral Invariant.
+
+    
+
+    
+    \paragraph*{Application to curvature estimation.}
+    Then, to compute the curvatures, we use the Corrected Normal
+    Current estimator~\cite{lachaud:2022-dcg} which are based on the
+    normals computed above.
 
     \newcommand{\MyZoom}[1]{%
       \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
