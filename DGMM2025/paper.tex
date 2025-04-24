@@ -34,6 +34,7 @@
 \usepackage{mathtools}
 \usepackage{pgfplots}
 \usepackage[dvipsnames]{xcolor}
+\usepackage[utf8]{inputenc}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary {spy,arrows.meta,decorations.shapes}
 \setauthormarkup{}
@@ -614,7 +615,8 @@
     In order to compute the visibility, we first compute $\Omega = \text{Star}(C)$. Then for each primal direction of
     coordinates at most $r$, we look at all the possible positions this specific direction does link 2 visible points
     of the cell complex. In order to do so, for each shift in $\Omega$, we compute the positions where points are
-    visible using the same method as presented in~\ref{fig:visibility-algorithm-evolution}.
+    visible using the same method as presented in~\ref{fig:visibility-algorithm-evolution}. Some results of visible
+    points are present in figure~\ref{fig:visibility-results}.
 
     \begin{algorithm}
         \caption{Given 2 lists of intervals $K$ and $L$, find $K \cap L$, the intersection of those 2 lists}
@@ -659,7 +661,7 @@
         of a fandisk, where the visibility stops at the edges. The other one is in the interior
         of a torus knot, where we can see that the visibility is feature-aware and doesn't see
         the other side of the torus' branch.}
-        \label{fig:visibility-examples}
+        \label{fig:visibility-results}
     \end{figure}
 %
 %    \begin{figure}
