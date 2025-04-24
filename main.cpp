@@ -52,8 +52,12 @@ CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 
 std::vector<RealPoint> visibility_normals;
-std::vector<RealPoint> normal_colors;
+std::vector<RealPoint> normalVisibilityColors;
+std::vector<RealPoint> normalIIColors;
 std::vector<RealPoint> visibility_sharps;
+
+std::vector<RealPoint> ii_normals;
+std::vector<RealPoint> surfel_ii_normals;
 
 // Curvature variables
 CountedPtr<CNC> pCNC;
@@ -654,12 +658,19 @@ void doRedisplayCurvatures() {
 }
 
 void doRedisplayNormalAsColors() {
-  normal_colors.clear();
-  normal_colors.reserve(visibility_normals.size());
+  normalVisibilityColors.clear();
+  normalIIColors.clear();
+  normalVisibilityColors.reserve(visibility_normals.size());
+  normalIIColors.reserve(visibility_normals.size());
   for (const auto& n : visibility_normals) {
-    normal_colors.push_back(0.5f * (n + 1.0f));
+    normalVisibilityColors.push_back(0.5f * (n + 1.0f));
   }
-  psPrimalMesh->addVertexColorQuantity("Normals as colors", normal_colors);
+  for (const auto& n : ii_normals) {
+    normalIIColors.push_back(0.5f * (n + 1.0f));
+  }
+
+  psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
+  psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
 }
 
 void myCallback() {
@@ -840,6 +851,7 @@ int main(int argc, char *argv[]) {
   int t_ring = int(round(params["t-ring"].as<double>()));
   auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
   primal_surface->faceNormals() = surfel_trivial_normals;
+  surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
   for (auto i = 1; i < t_ring + 3; i++) {
     primal_surface->computeVertexNormalsFromFaceNormals();
     primal_surface->computeFaceNormalsFromVertexNormals();
@@ -847,7 +859,9 @@ int main(int argc, char *argv[]) {
   }
   auto trivial_normals = primal_surface->vertexNormals();
   trivial_normals.resize(pointels.size());
+  ii_normals.resize(pointels.size());
   for (auto &n: trivial_normals) n = RealVector::zero;
+  for (auto &n: ii_normals) n = RealVector::zero;
   for (auto k = 0; k < surfels.size(); k++) {
     const auto &surf = surfels[k];
     const auto cells0 = SH3::getPrimalVertices(K, surf);
@@ -855,9 +869,11 @@ int main(int argc, char *argv[]) {
       const auto p = K.uCoords(c0);
       const auto idx = pTC->index(p);
       trivial_normals[idx] += surfel_trivial_normals[k];
+      ii_normals[idx] += surfel_ii_normals[k];
     }
   }
   for (auto &n: trivial_normals) n /= n.norm();
+  for (auto &n: ii_normals) n /= n.norm();
 
   primal_surface->vertexNormals() = trivial_normals;
 
