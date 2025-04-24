@@ -949,9 +949,26 @@
 
     
     \paragraph*{Application to curvature estimation.}
-    Then, to compute the curvatures, we use the Corrected Normal
-    Current estimator~\cite{lachaud:2022-dcg} which are based on the
-    normals computed above.
+    In order to illustrate better that the visibility normals better
+    take into account the sharp features of a digital surface while
+    staying meaningfull in digitization of smooth parts, we compare
+    the curvature estimates induced by different discrete normal
+    estimators. We exploit the \emph{Corrected Normal Current (CNC)
+    estimator}, whose theory is detailed in \cite{lachaud:2022-dcg}
+    and which can estimate all kinds of curvatures given positions and
+    normals. It produces state-of-the-art curvature estimates on
+    polygonal surfaces \cite{lachaud:2020-cgf}, point clouds
+    \cite{lachaud:2023-cgf}, and even outperforms Integral Invariant
+    curvature estimates \cite{coeurjolly:2014-cviu} on digital
+    surfaces \cite{lachaud:2022-dcg}. Its implementation is also
+    available in
+    \href{https://dgtal-team.github.io/doc-nightly/moduleCurvatureMeasures.html}{\textsc{DGtal}}.
+    
+
+    Then,
+    to compute the curvatures, we use the Corrected Normal Current
+    estimator~\cite{lachaud:2022-dcg} which are based on the normals
+    computed above.
 
     \newcommand{\MyZoom}[1]{%
       \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
