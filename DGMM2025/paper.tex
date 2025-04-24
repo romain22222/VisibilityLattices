@@ -89,20 +89,20 @@
 
     Visibility is a fundamental concept in computational geometry and
     digital topology, with applications ranging from computer vision
-    (identifying occlusions) to geometric modeling (feature detection, geodesics)
-    and computer graphics (path tracing, shadowmap). Visibility within
-    polygons in the plane has been extensively studied in the
-    litterature~\cite{ghosh:2007-book} and is still studied in higher
-    dimensional spaces~\cite{orourke:2017-book}. The general problem
-    has a high complexity. For instance, the 3d visibility complex
-    between $n$ spheres and occluding spheres has a complexity
+    (occlusions), geometric modeling (feature detection,
+    geodesics) to computer graphics (path tracing,
+    shadowmap). Visibility within polygons in the plane has been
+    extensively studied in the litterature~\cite{ghosh:2007-book} and
+    is still studied in higher dimensional
+    spaces~\cite{orourke:2017-book}. The general problem has a high
+    complexity. For instance, the 3d visibility complex between $n$
+    spheres and occluding spheres has a complexity
     $O(n^4)$~\cite{durand:2002-tog}. Exact 3d visibility between
-    polygons and occluding polygons is often casted into 5d Euclidean
-    space derived from Plücker space~\cite{nirenstein:2002-ewr}, which
-    nicely represents 3d lines and their respective positions. The
-    computational cost remains high even with decomposition into
-    coarse cells for speed up (several days of computation for a
-    million triangles at the time).
+    polygons and occluding polygons is often casted into 5d Plücker
+    space~\cite{nirenstein:2002-ewr}, which nicely represents 3d lines
+    and their respective positions. The computational cost remains
+    high even with decomposition into coarse cells for speed up
+    (several days of computation for 1M triangles at the time).
 
     To increase efficiency, several authors have proposed to cast the
     visibility problem into a digital space, generally $\Z^3$ or its
@@ -134,7 +134,6 @@
     testing all sought directions within a given range, and is
     parallelized straightforwardly.
 
-
     We focus on solving efficiently this problem because it is crucial
     in computing geometric normals along digital surfaces that are
     aware of salient features. Indeed, 2d discrete tangent estimators
@@ -154,7 +153,7 @@
     the point of interest. Visibility is high in smooth regions and
     the induced visibility vectors are good approximations of tangent
     vectors. On the contrary the visibility is blocked at sharp
-    features, so the normal vector is then not influenced by the
+    features, so the normal vector is not influenced by the
     geometry on the other side of the features. We demonstrate the
     superiority of this normal estimator for estimating curvatures
     along digital surfaces with sharp features.
