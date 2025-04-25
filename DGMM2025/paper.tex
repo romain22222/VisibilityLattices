@@ -92,19 +92,47 @@
 
     \section{Visibility through tangency of chords}
 
+    All the theory and algorithms presented in this section are
+    defined and valid in arbitrary dimension $d$. They will however be
+    illustrated in 2d for clarity, while experiments willl be
+    performed on 3d digital shapes.  Let $\Z^d$ be the $d$-dimensional
+    digital space.  Let $\mathcal{C}^d$ be the (cubical) cell complex
+    induced by the lattice $\Z^d$ : its 0-cells are the points of
+    $\Z^d$, its 1-cells are the open unit segments joining two 0-cells
+    at distance 1, its 2-cells are the open unit squares, \ldots, and
+    its $d$-cells are the $d$-dimensional open unit hypercubes with
+    vertices in $\Z^d$.  We denote by $\mathcal{C}^d_k$ the set of its
+    $k$-cells, for $0 \Le k \Le d$.  In the following, a cell always
+    designates an element of $\mathcal{C}^d$, and the term subcomplex
+    always indicates a subset of $\mathcal{C}^d$.
 
-    Let $\Z^d$ be the d-dimensional digital space, $d$ > 0.
-    Let $\mathcal{C}^d$ be the (cubical) cell complex induced by the lattice $\Z^d$ : its 0-cells are the points of $\Z^d$, its 1-cells are the open unit segments joining two 0-cells at distance 1, its 2-cells are the open unit squares, etc., and its d-cells are the d-dimensional open unit hypercubes with vertices in $\Z^d$.
-    We denote $\mathcal{C}^d_k$ the set of its k-cells.
-    In the following, a cell will always designate an element of $\mathcal{C}^d$, and the term subcomplex always designates a subset of $\mathcal{C}^d$.
+    The \emph{topological closure} of a cell $\tau$ is denoted by
+    $\bar{\tau}$. The \emph{star} of a cell $\sigma$ is the subcomplex
+    $\Star{\sigma}:=\{\tau \in \mathcal{C}, \sigma \subset \bar{\tau}
+    \}$. It is naturally extended to any subcomplex $K$ by union,
+    i.e. $\Star{K} := \cup_{\sigma \in K} \Star{\sigma}$, and more
+    generally to any subset $Y$ of $\R^d$ as $\Star{Y}:=\{ c \in \C,
+    \bar{c} \cap Y \neq \emptyset \}$. The \emph{body} $\|K\|$ of $K$
+    is its realization in $\R^d$, i.e. $\|K\|:=\cup_{c \in K} c$. One
+    can check that $\Star{K}=\Star{\|K\|}$, so these definitions are
+    sound.
 
-    A cell $\sigma$ is a face of another cell $\tau$ whenever $\sigma$ is a subset of the topological closure $\bar{\tau}$ of $\tau$, written $\sigma \preccurlyeq \tau$.
-    Given any subcomplex K of $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq \tau\}$
-
-    \begin{definition}
-        Two points \( p \) and \( q \) on \( K \) are visible if and only if the segment \([p, q]\) is included in \(\text{Star}(K)\), i.e., \( [p, q] \subseteq \text{Star}(K)\)
+    %% A cell $\sigma$ is a face of another cell $\tau$ whenever $\sigma$
+    %% is a subset of the topological closure $\bar{\tau}$ of $\tau$,
+    %% written $\sigma \preccurlyeq \tau$.  Given any subcomplex K of
+    %% $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in
+    %% \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq
+    %% \tau\}$.
+    \begin{definition}[Visibility]
+      Let $Z \subset \Z^d$ be a digital set. Two digital points $p$
+      and $q$ are \emph{visible in $Z$} if and only if the straight
+      segment $[p, q]$ is included in $\Star{Z}$, i.e., $\Star{[p, q]}
+      \subseteq \Star{Z}$.
     \end{definition}
-
+    This definition corresponds to the concept of tangency presented
+    in \cite{lachaud:2022-jmiv}, limited to pair of points. One can
+    check that $p$ and $q$ must belong to $Z$ to be visible.
+    
     % Examples of visibility in 2D
     \begin{figure}
         \centering
