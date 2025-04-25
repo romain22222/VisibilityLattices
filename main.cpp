@@ -563,8 +563,8 @@ void computeVisibilityDirectionToSharpFeatures() {
 double sigma = 5;
 double minus2SigmaSquare = -2*sigma*sigma;
 
-double wSig(double d) {
-  return exp(d/minus2SigmaSquare);
+double wSig( double d2) {
+  return exp(d2 / minus2SigmaSquare);
 }
 
 void computeVisibilityNormals() {
@@ -574,15 +574,18 @@ void computeVisibilityNormals() {
   for (const auto &pointel: pointels) {
     std::vector<Point> visibles;
     RealPoint centroid(0, 0, 0);
+    double total_w = 0.0;
     for (auto point_idx: kdTree.pointsInBall(pointel, 2*sigma)) {
       auto tmp = kdTree.position(point_idx);
-      if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
+      if (visibility.isVisible(pointel, tmp) ) { //  && tmp != pointel) {
         visibles.push_back(tmp);
 //        centroid += tmp;
-        centroid += wSig((pointel-tmp).squaredNorm())*tmp;
+	const double w = wSig((pointel-tmp).squaredNorm());
+        centroid += w * tmp;
+	total_w  += w;
       }
     }
-    centroid /= (double) visibles.size();
+    centroid /= total_w; // (double) visibles.size();
     Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
     for (const auto &pt: visibles) {
       auto diff = pt - centroid;
@@ -599,6 +602,7 @@ void computeVisibilityNormals() {
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
+    //psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
   }
 }
 
@@ -792,7 +796,7 @@ int main(int argc, char *argv[]) {
   app.add_flag("-l", listP, "lists the known named polynomials.");
   app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
   app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
-  double sigmaTmp;
+  double sigmaTmp = 3.0;
   app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
@@ -891,7 +895,7 @@ int main(int argc, char *argv[]) {
 
   primal_surface->vertexNormals() = trivial_normals;
 
-  if (sigmaTmp) {
+  if (sigmaTmp != -1.0 ) {
     sigma = sigmaTmp;
   } else {
     sigma = 5*pow(gridstep,-0.5);
