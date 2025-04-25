@@ -33,7 +33,94 @@ Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 
 \begin{figure}
+    \begin{tikzpicture}
+        \centering
+        \begin{axis}[
+            width=0.8\textwidth,
+            xlabel={Gridstep},
+            ylabel={RMSE error},
+            x dir=reverse,
+            legend pos=north east,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymode=log,
+            xmode=log,
+            log ticks with fixed point,
+        ]
+            \addplot[
+                color=cyan,
+            ] coordinates {
+                (0.125,0.0133408)(0.250,0.0146335)(0.375,0.0178744)(0.500,0.0236486)(0.625,0.0337591)(0.750,0.0408107)(0.875,0.0461201)(1.000,0.0561247)
+            };
+            \addlegendentry{ellipsoid};
+            \addplot[
+                color=red,
+            ] coordinates {
+                (0.125,0.0230513)(0.250,0.0221659)(0.375,0.0396149)(0.500,0.0588389)(0.625,0.0738491)(0.750,0.0919486)(0.875,0.105444)(1.000,0.103468)
+            };
+            \addlegendentry{goursat};
+            \addplot[
+                color=MyGreen,
+            ] coordinates {
+                (0.125,0.0237239)(0.250,0.0258427)(0.375,0.0327462)(0.500,0.0480013)(0.625,0.073239)(0.750,0.0525744)(0.875,0.106525)(1.000,0.0846841)
+            };
+            \addlegendentry{rcube}
+            \addplot[
+                color=orange,
+            ] coordinates {
+                (0.125,0.0132396)(0.250,0.0145537)(0.375,0.0147741)(0.500,0.0164304)(0.625,0.0199195)(0.750,0.0169635)(0.875,0.0258329)(1.000,0.0199903)
+            };
+            \addlegendentry{sphere9}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{RMSE error as a function of Grid Resolution}
+    \label{fig:errorl2-gridstep}
+\end{figure}
 
+\begin{figure}
+    \begin{tikzpicture}
+        \centering
+        \begin{axis}
+            [
+            width=0.8\textwidth,
+            xlabel={Gridstep},
+            ylabel={$E_{\max}$ error},
+            x dir=reverse,
+            legend pos=north east,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymode=log,
+            xmode=log,
+            log ticks with fixed point,
+            ]
+            \addplot[
+                color=cyan,
+            ] coordinates {
+                (0.125,0.0688766)(0.250,0.0581494)(0.375,0.0503613)(0.500,0.0501076)(0.625,0.085362)(0.750,0.0821788)(0.875,0.120426)(1.000,0.102295)
+            };
+            \addlegendentry{ellipsoid}
+            \addplot[
+                color=red,
+            ] coordinates {
+                (0.125,0.116514)(0.250,0.0554448)(0.375,0.111164)(0.500,0.144318)(0.625,0.186091)(0.750,0.151117)(0.875,0.213926)(1.000,0.197462)
+            };
+            \addlegendentry{goursat}
+            \addplot[
+                color=MyGreen,
+            ] coordinates {
+                (0.125,0.0656003)(0.250,0.0685656)(0.375,0.0671931)(0.500,0.105374)(0.625,0.12582)(0.750,0.139846)(0.875,0.192882)(1.000,0.176342)
+            };
+            \addlegendentry{rcube}
+            \addplot[
+                color=orange,
+            ] coordinates {
+                (0.125,0.0702891)(0.250,0.0545056)(0.375,0.0450116)(0.500,0.0432615)(0.625,0.0641199)(0.750,0.0434397)(0.875,0.0639687)(1.000,0.0592979)
+            };
+            \addlegendentry{sphere9}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{$E_{\max}$ error as a function of Grid Resolution}
+    \label{fig:errorloo-gridstep}
 \end{figure}
 
 \begin{figure}
