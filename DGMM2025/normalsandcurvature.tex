@@ -32,7 +32,9 @@ touching the point $p$.
 Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 
-\begin{figure}
+
+\begin{tabular}{|c|c|}
+    \hline
     \begin{tikzpicture}
         \centering
         \begin{axis}[
@@ -72,12 +74,7 @@ of our normals compared to normals computed with the integral invariant (II) est
             };
             \addlegendentry{sphere9}
         \end{axis}
-    \end{tikzpicture}
-    \caption{RMSE error as a function of Grid Resolution}
-    \label{fig:errorl2-gridstep}
-\end{figure}
-
-\begin{figure}
+    \end{tikzpicture} &
     \begin{tikzpicture}
         \centering
         \begin{axis}
@@ -118,10 +115,13 @@ of our normals compared to normals computed with the integral invariant (II) est
             };
             \addlegendentry{sphere9}
         \end{axis}
-    \end{tikzpicture}
-    \caption{$E_{\max}$ error as a function of Grid Resolution}
-    \label{fig:errorloo-gridstep}
-\end{figure}
+    \end{tikzpicture} \\
+    \hline
+    \caption{Error RMSE and $E_{\max}$ as a function of grid resolution}
+    \label{fig:errors-normals}
+\end{tabular}
+
+
 
 \begin{figure}
     \centering
