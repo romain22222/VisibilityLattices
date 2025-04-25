@@ -74,7 +74,7 @@ of our normals compared to normals computed with the integral invariant (II) est
                     thick,
                     domain=0.1:1,
                     samples=200,
-                ] {0.1*x^(0.5)};
+                ] {0.1*x^(0.66)} node[pos=0.2, anchor=south west] {$h^{\frac{2}{3}}$};
             \end{axis}
         \end{tikzpicture} &
         \begin{tikzpicture}
@@ -117,7 +117,7 @@ of our normals compared to normals computed with the integral invariant (II) est
                     thick,
                     domain=0.1:1,
                     samples=200,
-                ] {0.1*x^(0.5)};
+                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
             \end{axis}
         \end{tikzpicture} \\
         \multicolumn{2}{c}{
@@ -134,17 +134,15 @@ of our normals compared to normals computed with the integral invariant (II) est
                         column sep=15pt
                     }
                 ]
-            \addlegendimage{color=cyan}
-            \addlegendentry{ellipsoid}
-            \addlegendimage{color=red}
-            \addlegendentry{goursat}
-            \addlegendimage{color=MyGreen}
-            \addlegendentry{rcube}
-            \addlegendimage{color=orange}
-            \addlegendentry{sphere9}
+                    \addlegendimage{color=cyan}
+                    \addlegendentry{ellipsoid}
+                    \addlegendimage{color=red}
+                    \addlegendentry{goursat}
+                    \addlegendimage{color=MyGreen}
+                    \addlegendentry{rcube}
+                    \addlegendimage{color=orange}
+                    \addlegendentry{sphere9}
 
-            \addlegendimage{color=black,thick};
-            \addlegendentry{$0.1\sqrt{h}$}
                 \end{axis}
             \end{tikzpicture}
         } \\
