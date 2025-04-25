@@ -689,6 +689,57 @@
                     390235 10493200\\
                 };
                 \addlegendentry{radius 30};
+                \addplot[
+                    orange,
+                    only marks,
+                    mark=square,
+                    mark options={solid}
+                ] table[row sep=crcr] {
+                    % torus
+                    10624 7172.49\\
+                    4968 2330.69\\
+                    2584 883.559\\
+                    1840 568.776\\
+                    1176 278.712\\
+                    912 212.285\\
+                    624 122.615\\
+                    % rcube
+                    28568 20358.9\\
+                    12632 5964.1\\
+                    7088 2631.15\\
+                    4664 1394.49\\
+                    3080 742.638\\
+                    2408 554.389\\
+                    1736 334.654\\
+                    % sphere9
+                    24320 21263.4\\
+                    10760 6225.27\\
+                    6056 2829.2\\
+                    3944 1494.98\\
+                    2648 833.047\\
+                    2000 579.561\\
+                    1520 394.169\\
+                    % leopold
+                    8336 6866.82\\
+                    3720 2232.34\\
+                    2104 1050.28\\
+                    1336 576.853\\
+                    928 354.691\\
+                    680 243.249\\
+                    520 174.452\\
+                    % goursat
+                    37592 26954.6\\
+                    16712 8358.2\\
+                    9512 3748.3\\
+                    6056 1921.43\\
+                    4088 1088.38\\
+                    3032 706.378\\
+                    2456 531.932\\
+                    % d20
+                    97844 26392.3\\
+                    390235 110416.0\\
+                };
+                \addlegendentry{naive breadth first};
                 \addplot [
                     color=black,
                     thick,
@@ -771,9 +822,9 @@
         uses the visibility algorithm to compute them. The normals are colored
         according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$. The
         right images are the smooth version of the left images. ``Integral
-        Invariant normals'' are computed using a radius of $r=3$, while
-        our normal estimator are computed using a deviation of $\sigma=3$, and so
-        a radius of $r=2\sigma=6$}
+        Invariant normals'' are computed using a radius of $r=4.5$, while
+        our normal estimator are computed using a deviation of $\sigma=4$, and so
+        a radius of $r=2\sigma=8$}
         \label{fig:normals-estimation}
     \end{figure}
 
