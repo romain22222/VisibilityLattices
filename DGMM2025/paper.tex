@@ -442,7 +442,7 @@
     \end{algorithm}
 
     To efficiently compute the intersection of 2 lists of intervals $K$ and $L$, we go through the first 2 unvisited
-    elements of the 2 lists. If they don't overlap (i.e. the start and end of the 1st interval are both smaller than
+    elements of the 2 lists. If they don't overlap (i.e.\ the start and end of the 1st interval are both smaller than
     the start of the other), then we can discard the smaller interval. Else, we construct the intersection of these
     2 intervals as one of the resulting intervals. We then can skip the interval with the smallest end. If both
     intervals have the same end, then both intervals can be skipped. Doing this computation until one of the lists
@@ -767,7 +767,7 @@
     the visibility of the point of interest while taking into account
     a user-given scale $\sigma$. If $\sigma$ is proportionnal to the
     average length between visible points (so some
-    $\Theta(\sqrt{h})$), then this estimator is observed to be
+    $\Theta\left(\sqrt{h}\right)$), then this estimator is observed to be
     multigrid convergent along digitization of smooth shapes. However,
     since the computation window is limited by the visibility, it
     better approximates the geometry near sharp or salient features.
@@ -914,7 +914,7 @@
                 \MyZoom{pictures/d20-G-VN.jpg}\\ \hline
             \end{tabular}
         \end{center}
-        \caption{\label{fig-curvatures}Estimation of curvatures using
+        \caption{\label{fig:fig-curvatures}Estimation of curvatures using
           Corrected Normal Current estimators \cite{lachaud:2022-dcg}
           with a measure of radius $2$ for the shape ``Dice-20'' of
           Thingi10K database at resolution $256^3$. This estimator is
