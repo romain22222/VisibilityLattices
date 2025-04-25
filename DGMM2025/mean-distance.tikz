@@ -4,7 +4,7 @@
         width=0.8\textwidth,
         height=0.5\textwidth,
         legend columns=3,
-        xlabel={Gridstep},
+        %xlabel={Gridstep},
         ylabel={Mean distance},
         x dir=reverse,
         legend pos=north west,

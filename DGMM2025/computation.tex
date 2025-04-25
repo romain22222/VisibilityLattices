@@ -196,18 +196,20 @@ returns the intersection of both lists of intervals.
 
 
 \begin{figure}[t]
+  \centering
   \input{pointelscomptime.tikz}
   \caption{ \label{fig:meanvisibility-computationComplexity}Computation
     time of visibility as a function of the number of pointels. We
-    compare the computation time of the naive breadth first visibility
+    compare the running time of the naive breadth first visibility
     algorithm against our algorithm using intervals. We input the same
     maximal radius to both versions (10, 20, 30) and test it on 6
-    different figures (goursat, torus, rcube, sphere9, leopold, d20)
-    with various gridsteps, giving us figures with pointel amounts
-    ranging from 520 to 390235.}
+    different figures (goursat, torus, rcube, sphere9, leopold,
+    ``D20'') with various gridsteps, ($\#$ pointels ranging from 520
+    to 390235.}
 \end{figure}
 
 \begin{figure}
+  \centering
   \input{mean-distance.tikz}
-  \caption{  \label{fig:meanvisibility-gridstep}. Mean Visibility Distance as a Function of Grid Resolution}
+  \caption{  \label{fig:meanvisibility-gridstep}. Mean distance of visibility as a function of the gridstep $h$.}
 \end{figure}

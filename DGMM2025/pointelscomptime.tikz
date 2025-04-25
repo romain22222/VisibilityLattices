@@ -2,7 +2,8 @@
     \centering
     \begin{axis}[
         width=0.8\textwidth,
-        xlabel={\#Pointels},
+        height=0.55\textwidth,
+        %xlabel={\#Pointels},
         ylabel={Computation Time (ms)},
         legend pos=north west,
         ymajorgrids=true,
