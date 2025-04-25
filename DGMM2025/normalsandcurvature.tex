@@ -33,8 +33,7 @@ Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 
 \begin{figure}
-    \begin{tabular}{|c|c|}
-        \hline
+    \begin{tabular}{c c}
         \begin{tikzpicture}
             \centering
             \begin{axis}[
@@ -79,7 +78,7 @@ of our normals compared to normals computed with the integral invariant (II) est
             \centering
             \begin{axis}
                 [
-                width=0.4\textwidth,
+                width=0.5\textwidth,
                 xlabel={Gridstep},
                 ylabel={$E_{\max}$ error},
                 x dir=reverse,
@@ -116,7 +115,6 @@ of our normals compared to normals computed with the integral invariant (II) est
                 \addlegendentry{sphere9}
             \end{axis}
         \end{tikzpicture} \\
-        \hline
     \end{tabular}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution}
     \label{fig:errors-normals}
