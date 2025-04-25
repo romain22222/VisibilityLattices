@@ -11,7 +11,33 @@
         xmode=log,
         log ticks with fixed point,
     ]
-        \addplot[
+
+        \addlegendimage{
+            black,
+            only marks,
+            mark=square,
+            mark options={solid}
+        }
+        \addlegendentry{Breadth First}
+        \addlegendimage{
+            black,
+            only marks,
+            mark=halfcircle,
+            mark options={solid}
+        }
+        \addlegendentry{Our version}
+
+        \addlegendimage{only marks, mark=*, color=red, mark size=3pt}
+        \addlegendentry{Radius 10}
+        \addlegendimage{only marks, mark=*, color=MyGreen, mark size=3pt}
+        \addlegendentry{Radius 20}
+        \addlegendimage{only marks, mark=*, color=blue, mark size=3pt}
+        \addlegendentry{Radius 30}
+
+        \addlegendimage{color=black,thick};
+        \addlegendentry{$0.01\times x\sqrt{x}$}
+
+        \addplot+[
             red,
             only marks,
             mark=halfcircle,
@@ -61,8 +87,7 @@
             97844 49226.3\\
             390235 181322\\
         };
-        \addlegendentry{interval based radius 10};
-        \addplot[
+        \addplot+[
             MyGreen,
             only marks,
             mark=halfcircle,
@@ -112,8 +137,7 @@
             97844 378906\\
             390235 1747780\\
         };
-        \addlegendentry{interval based radius 20};
-        \addplot[
+        \addplot+[
             blue,
             only marks,
             mark=halfcircle,
@@ -163,8 +187,7 @@
             97844 1157400\\
             390235 10493200\\
         };
-        \addlegendentry{interval based radius 30};
-        \addplot[
+        \addplot+[
             red,
             only marks,
             mark=square,
@@ -214,8 +237,7 @@
             97844 73606.0\\
             390235 337851.0\\
         };
-        \addlegendentry{breadth first radius 10};
-        \addplot[
+        \addplot+[
             MyGreen,
             only marks,
             mark=square,
@@ -265,8 +287,7 @@
             97844 368339.0\\
             390235 1784570.0\\
             };
-        \addlegendentry{breadth first radius 20};
-        \addplot[
+        \addplot+[
             blue,
             only marks,
             mark=square,
@@ -274,13 +295,11 @@
         ] table[row sep=crcr] {
             10000 10000\\
             };
-        \addlegendentry{breadth first radius 30};
-        \addplot [
+        \addplot+[
             color=black,
             thick,
             domain=500:300000,
             samples=100,
         ] {0.01*x^(1.5)};
-        \addlegendentry{$0.01\times x\sqrt{x}$}
     \end{axis}
 \end{tikzpicture}
