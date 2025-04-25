@@ -687,6 +687,21 @@ void doRedisplayNormalAsColors() {
   psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
 }
 
+void computeL2looErrors() {
+//  std::cout << "Computing L2 and Loo errors" << std::endl;
+  std::vector<double> angle_dev(visibility_normals.size());
+  std::vector<double> dummy(visibility_normals.size(), 0.0);
+  for (int i = 0; i < visibility_normals.size(); ++i) {
+    const auto sp = visibility_normals[i].dot(true_normals[i]);
+    const auto fxp = std::min(1.0, std::max(-1.0, sp));
+    angle_dev[i] = acos(fxp);
+  }
+  if (!noInterface)
+    psPrimalMesh->addVertexScalarQuantity("Angle deviation", angle_dev)->setMapRange({0.0, 0.1})->setColorMap("reds");
+  std::cout << "L2 error: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+  std::cout << "Loo error: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+}
+
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
@@ -738,6 +753,12 @@ void myCallback() {
     reorientVisibilityNormals();
     Time = trace.endBlock();
     doRedisplayNormalAsColors();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Compute normal errors")) {
+    trace.beginBlock("Compute visibilities Normals Errors");
+    computeL2looErrors();
+    Time = trace.endBlock();
   }
   if (ImGui::Button("Compute Curvatures")) {
     trace.beginBlock("Compute visibilities Curvatures");
@@ -878,8 +899,10 @@ int main(int argc, char *argv[]) {
   auto trivial_normals = primal_surface->vertexNormals();
   trivial_normals.resize(pointels.size());
   ii_normals.resize(pointels.size());
+  true_normals.resize(pointels.size());
   for (auto &n: trivial_normals) n = RealVector::zero;
   for (auto &n: ii_normals) n = RealVector::zero;
+  for (auto &n: true_normals) n = RealVector::zero;
   for (auto k = 0; k < surfels.size(); k++) {
     const auto &surf = surfels[k];
     const auto cells0 = SH3::getPrimalVertices(K, surf);
@@ -888,10 +911,14 @@ int main(int argc, char *argv[]) {
       const auto idx = pTC->index(p);
       trivial_normals[idx] += surfel_trivial_normals[k];
       ii_normals[idx] += surfel_ii_normals[k];
+      if (is_polynomial) {
+        true_normals[idx] += surfel_true_normals[k];
+      }
     }
   }
   for (auto &n: trivial_normals) n /= n.norm();
   for (auto &n: ii_normals) n /= n.norm();
+  for (auto &n: true_normals) n /= n.norm();
 
   primal_surface->vertexNormals() = trivial_normals;
 

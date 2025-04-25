@@ -1,7 +1,8 @@
 #!/bin/bash
 
-BASE_COMMAND="$1 --noInterface -r $2 -p $3 -g"
+BASE_COMMAND="$1 --noInterface -p $2 -g"
 
-for count in $(LANG=fr_FR seq 0.25 0.125 1); do
+for count in $(LANG=fr_FR seq 0.125 0.125 1); do
+  echo "Gridstep: $count"
   $BASE_COMMAND $count
 done
