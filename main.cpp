@@ -56,6 +56,8 @@ std::vector<RealPoint> normalVisibilityColors;
 std::vector<RealPoint> normalIIColors;
 std::vector<RealPoint> visibility_sharps;
 
+std::vector<RealPoint> true_normals;
+std::vector<RealPoint> surfel_true_normals;
 std::vector<RealPoint> ii_normals;
 std::vector<RealPoint> surfel_ii_normals;
 
@@ -870,6 +872,9 @@ int main(int argc, char *argv[]) {
   digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
   primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
   surfels = SH3::getSurfelRange(digital_surface, params);
+  if (is_polynomial) {
+    surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+  }
   // Need to convert the faces
   for (auto face = 0; face < primal_surface->nbFaces(); ++face)
     primal_faces.push_back(primal_surface->incidentVertices(face));
