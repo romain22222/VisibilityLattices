@@ -38,6 +38,9 @@
     This definition corresponds to the concept of tangency presented
     in \cite{lachaud:2022-jmiv}, limited to pair of points. One can
     check that $p$ and $q$ must belong to $Z$ to be visible.
+    Figure~\ref{fig:visibility-2d} illustrates what is considered
+    visible or not on some examples.
+
     
     % Examples of visibility in 2D
     \begin{figure}[t]
@@ -49,13 +52,38 @@
     \end{figure}
 
 
-    Figure~\ref{fig:visibility-2d} shows what is considered visible or not. We note that one particular aspect of this visibility definition is that all visible points from a given point taken as a separate complex are not necessarily 26-connected~\ref{fig:visibility-2d-not-connected}.
-    Furthermore, we conjecture that they even may not be $n$-connected for $n$ arbitrarily large.
-    This characteristic has implications for the applicability of Algorithm 3 from~\cite{lachaud:2022-jmiv}, as the algorithm assumes that visited points are 26-connected, potentially leading to incomplete collection of visible points.
+    A quite unexpected fact about visibility it that the set of
+    visible points from a source $p$ is not necessarily digitally
+    connected in $X$. Indeed, for $n \in \Z, n \Ge 1$, we say that
+    $p,q$ are \emph{$n$-neighbors} when $\|q-p\|_\infty \Le n$, and
+    this induces the $n$-adjacency and $n$-connectedness relation in
+    $X$. As illustrated on
+    Figure~\ref{fig:visibility-2d-not-connected}, the set of points
+    visible from $p$ is clearly not $1$-connected. As our experiments
+    have shown, we even conjecture that it may not be $n$-connected
+    for $n$ arbitrarily large.
+
+    This characteristic has implications for the applicability of
+    \cite[Algorithm 3]{lachaud:2022-jmiv}, which is a breadth-first
+    like algorithm for computing all the points of $X$ visible in $X$
+    to a source point $p$. This algorithm sometimes outputs an
+    incomplete collection of visible points. This is why in the next
+    section we present an algorithm that computes the exact visibility
+    pairs within $X$, without recourse to connectedness in its formulation.
+
+    %% We note that one particular
+    %% aspect of this visibility definition is that all visible points
+    %% from a given point taken as a separate complex are not necessarily
+    %% 26-connected~\ref{fig:visibility-2d-not-connected}.  Furthermore,
+    %% we conjecture that they even may not be $n$-connected for $n$
+    %% arbitrarily large.  This characteristic has implications for the
+    %% applicability of Algorithm 3 from~\cite{lachaud:2022-jmiv}, as the
+    %% algorithm assumes that visited points are 26-connected,
+    %% potentially leading to incomplete collection of visible points.
 
     % Example of visibility not necessarily connected
     % Path from p to q : r u r u r r r r r u r
-    \begin{figure}
+    \begin{figure}[t]
         \centering
         \begin{tikzpicture}
             \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (5.25,3.25);
@@ -76,6 +104,6 @@
             \filldraw[black] (3.5,1.5) circle (0.05) node[anchor=west] {q};
             \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0,0.5) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (3,1.5) -- (3,2) -- (4,2) -- (4,0.5) -- (1.5,0.5) -- (1.5,0) -- (1,0) -- (1,-0.5) -- (-0.5,-0.5);
         \end{tikzpicture}
-        \caption{Example of non-connex visibility in 2D, q is visible from p while the visibility points are not 26-connected.}
+        \caption{The set of visible points in $X$ from source $p$ is not $1$-connected.}
         \label{fig:visibility-2d-not-connected}
     \end{figure}
