@@ -75,6 +75,7 @@ float MaxCurv = 0.2;
 
 // Parameters
 int VisibilityRadius = 10;
+double iiRadius = 3;
 double gridstep = 1.0;
 int OMP_max_nb_threads = 1;
 double Time = 0.0;
@@ -559,6 +560,13 @@ void computeVisibilityDirectionToSharpFeatures() {
   }
 }
 
+double sigma = 5;
+double minus2SigmaSquare = -2*sigma*sigma;
+
+double wSig(double d) {
+  return exp(d/minus2SigmaSquare);
+}
+
 void computeVisibilityNormals() {
   visibility_normals.clear();
   visibility_normals.reserve(pointels.size());
@@ -566,11 +574,12 @@ void computeVisibilityNormals() {
   for (const auto &pointel: pointels) {
     std::vector<Point> visibles;
     RealPoint centroid(0, 0, 0);
-    for (auto point_idx: kdTree.pointsInBall(pointel, VisibilityRadius)) {
+    for (auto point_idx: kdTree.pointsInBall(pointel, 2*sigma)) {
       auto tmp = kdTree.position(point_idx);
       if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
         visibles.push_back(tmp);
-        centroid += tmp;
+//        centroid += tmp;
+        centroid += wSig((pointel-tmp).squaredNorm())*tmp;
       }
     }
     centroid /= (double) visibles.size();
@@ -579,7 +588,8 @@ void computeVisibilityNormals() {
       auto diff = pt - centroid;
       for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
-          cov(i, j) += diff[i] * diff[j];
+//          cov(i, j) += diff[i] * diff[j];
+          cov(i, j) += diff[i] * diff[j] * wSig(diff.squaredNorm());
         }
       }
     }
@@ -781,6 +791,7 @@ int main(int argc, char *argv[]) {
   app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
   app.add_flag("-l", listP, "lists the known named polynomials.");
   app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
+  app.add_option("--IIradius", iiRadius, "the radius of the visibility sphere");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
@@ -851,6 +862,7 @@ int main(int argc, char *argv[]) {
   int t_ring = int(round(params["t-ring"].as<double>()));
   auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
   primal_surface->faceNormals() = surfel_trivial_normals;
+  params("r-radius",iiRadius);
   surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
   for (auto i = 1; i < t_ring + 3; i++) {
     primal_surface->computeVertexNormalsFromFaceNormals();
@@ -876,6 +888,11 @@ int main(int argc, char *argv[]) {
   for (auto &n: ii_normals) n /= n.norm();
 
   primal_surface->vertexNormals() = trivial_normals;
+
+  sigma = 5*pow(gridstep,-0.5);
+  minus2SigmaSquare = -2*sigma*sigma;
+
+  std::cout << "sigma = " << sigma << std::endl;
 
 
   pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
