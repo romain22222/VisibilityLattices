@@ -4,11 +4,30 @@ point}. For instance, a standard way is to double the coordinates of
 the centroid of the cell (often called its Khalimsky code). Now we
 have to represent an arbitrary set $K$ of lattice points.
 
-We may choose an arbitrary projection \emph{axis} $a \in
-\{1,\ldots,d\}$. Letting $\pi_a$ be the projector along this axis, we
+Let $(\ve_j)_{j=1,\dots}$ be the canonical basis of $\Z^d$.  We may
+choose an arbitrary projection \emph{axis} $j \in
+\{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
 can collect all the cells of $K$ that projects onto the same
-points. Let $p \in K$. Then $\pi^{-1}_a(p)$ is a set of cells having
-all the same coordinates except along coordinate $a$. This set can be ordered increasingly
+points. Let $p \in K$. Then $\pi^{-1}_j(p)$ is a set of cells having
+all the same coordinates except along coordinate $j$. This set can be
+ordered increasingly and stored as a list of integer intervals (see
+Fig.~\ref{fig:lattice-representation} for an illustration).
+
+A \emph{sequence of intervals} is an ordered list of intervals $L =
+([a_i,b_i])_{i=1,\ldots,n}$ such that $a_i \in \Z, b_i \in \Z, b_i + 1
+< a_{i+1}$, i.e., disjoint intervals with at least a missing
+integer. We denote by $\mathbb{L}$ the set of sequences of
+intervals. An integer $k$ belongs to $L$ iff $\exists i$ such that
+$a_i \Le k \Le b_i$. For a finite set of integers, there is a unique
+sequence of intervals representing it.
+
+A \emph{lattice map along axis $j$} is a set of pairs $(q,L_q)$, with
+$q \in \Z^{d-1}$ and $L_q \in \mathbb{L}$. The lattice map $M_K$
+\emph{represents} $K$ when, for any point $p \in K$, the pair
+$(\pi_j(p), L_{\pi_j(p)})$ exists in $M_K$ and $p_j \in L_{\pi_j(p)}$,
+with $p_j$ the $j$-th coordinate of $p$, and reciprocally, $\forall
+(q,L_q) \in M_K, \forall i \in L_q, q+i\ve_j \in K$.
+
 
 To improve computation time, we will use lattice maps of integer
 intervals.
