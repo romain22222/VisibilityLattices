@@ -1,9 +1,12 @@
-\begin{tabular}{c|c|c|c}
+\begin{tabular}{c@{~}|@{~}c@{~}|@{~}c@{~}|@{~}c}
   \begin{tikzpicture}
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.75,2.75);
     \draw[dashed] (0,0) -- (2,1);
     \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p1};
     \filldraw[black] (2,1) circle (0.05) node[anchor=north] {q1};
+    \foreach \x/\y in {1/0,2/0,2/1,3/1,3/2} {
+      \filldraw[black] (0.5*\x,0.5*\y) circle (0.05);
+    }
     \draw [thick] (0,0) -- (0.5,0) -- (1,0) -- (1,0.5) -- (1.5,0.5) -- (1.5,1) -- (2,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0.5,0.5) -- (0.5,1) -- (1,1) -- (1,1.5) -- (2.5,1.5) -- (2.5,0.5) -- (2,0.5) -- (2,0) -- (1.5,0) -- (1.5,-0.5) -- (-0.5,-0.5);
   \end{tikzpicture} & 
@@ -12,6 +15,9 @@
     \draw[red,dashed,thick] (0,0) -- (1.5,1);
     \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p2};
     \filldraw[black] (1.5,1) circle (0.05) node[anchor=north] {q2};
+    \foreach \x/\y in {0/1,0/2,1/2,1/3,2/3,2/2} {
+      \filldraw[black] (0.5*\x,0.5*\y) circle (0.05);
+    }
     \draw [thick] (0,0) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (1,1.5) -- (1,1) -- (1.5,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (0,1.5) -- (0,2) -- (1.5,2) -- (1.5,1.5) -- (2,1.5)  -- (2,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
   \end{tikzpicture} &
@@ -20,6 +26,9 @@
     \draw[red,dashed,thick] (0,0) -- (1,0);
     \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p3};
     \filldraw[black] (1,0) circle (0.05) node[anchor=north] {q3};
+    \foreach \x/\y in {0/1,0/2,1/2,2/2,2/1} {
+      \filldraw[black] (0.5*\x,0.5*\y) circle (0.05);
+    }
     \draw [thick] (0,0) -- (0,1) -- (1,1) -- (1,0);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,-0.5) -- (-0.5,-0.5) -- (0.5,-0.5) -- (0.5,0.5);
   \end{tikzpicture} & 
@@ -28,11 +37,14 @@
     \draw[red,dashed,thick] (0,0) -- (1,1);
     \filldraw[black] (0,0) circle (0.05) node[anchor=north] {p4};
     \filldraw[black] (1,1) circle (0.05) node[anchor=north] {q4};
+    \foreach \x/\y in {0/1,0/2,1/2} {
+      \filldraw[black] (0.5*\x,0.5*\y) circle (0.05);
+    }
     \draw [thick] (0,0) -- (0,1) -- (1,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
   \end{tikzpicture} \\
-  Visible                       & Non Visible                   &
-  Non Visible (from a 1-d cell) & Non Visible (from a 0-d cell)
+  Visible     & Non Visible                   &
+  Non Visible & Non Visible
 \end{tabular}
 
 %% \begin{tabular}{cc|cc}
