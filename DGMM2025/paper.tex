@@ -665,14 +665,14 @@
     chosen so that the respective computation windows of the different
     estimators are approximately the same.
 
-    II estimator is good along digitization of smooth or flat parts of
+    The II estimator is good along digitization of smooth or flat parts of
     the dice, but presents curious artefacts near sharp features
     induced by the hollowed out numbers: this is due to the nature of
     II normal estimates, which computes a PCA of a ball centered on
     the point of interest and may include points on the other side of
     the saliencies.
 
-    CTriv estimator only performs averaging of trivial normal
+    The CTriv estimator only performs averaging of trivial normal
     directions along the surface. It behaves much better than II near
     features (although it tends to smooth curvatures) since it does
     not use information from across the gap. However some oscillations
@@ -681,12 +681,14 @@
     parts (like the edge above 6 for $\kappa_2$ or several dice
     vertices).
 
-    VN estimator takes the best of the two previous approaches. It
+    The VN estimator takes the best of the two previous approaches. It
     remains precise and stable on smooth and flat regions, while
     perfectly delineating sharp features and holes, whatever the kind
-    of estimated curvatures. Its only drawback is the computation
-    time, which is [TO COMPLETE], compared to $2.3$s for II and $0.1s$
-    for CTriv.
+    of estimated curvatures. Its drawback is the computation time,
+    which is $52s$ for a maximal visibility distance $8$, compared to
+    $2.3$s for II and $0.1s$ for CTriv. Note that the computation time
+    falls back to $33s$ for a maximal distance of $6$ (and same
+    $\sigma=4$) while the result is visually indistinguishable. 
 
 
     \newcommand{\MyZoom}[1]{%
