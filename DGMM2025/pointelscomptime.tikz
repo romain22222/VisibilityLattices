@@ -295,11 +295,11 @@
         ] table[row sep=crcr] {
             10000 10000\\
             };
-        \addplot+[
+        \addplot[
             color=black,
             thick,
             domain=500:300000,
-            samples=100,
+            samples=200,
         ] {0.01*x^(1.5)};
     \end{axis}
 \end{tikzpicture}
