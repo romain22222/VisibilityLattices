@@ -33,11 +33,12 @@ Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 
 \begin{figure}
+    \centering
     \begin{tabular}{c c}
         \begin{tikzpicture}
             \centering
             \begin{axis}[
-                width=0.55\textwidth,
+                width=0.53\textwidth,
                 xlabel={Gridstep},
                 ylabel={RMSE error},
                 x dir=reverse,
@@ -53,32 +54,34 @@ of our normals compared to normals computed with the integral invariant (II) est
                 ] coordinates {
                     (0.125,0.0156736)(0.250,0.031503)(0.375,0.0384303)(0.500,0.0441086)(0.625,0.0418896)(0.750,0.0584604)(0.875,0.065503)(1.000,0.0729735)
                 };
-                \addlegendentry{ellipsoid};
                 \addplot[
                     color=red,
                 ] coordinates {
                     (0.125,0.0221236)(0.250,0.0317159)(0.375,0.0542242)(0.500,0.0706101)(0.625,0.09481)(0.750,0.134544)(0.875,0.130578)(1.000,0.127371)
                 };
-                \addlegendentry{goursat};
                 \addplot[
                     color=MyGreen,
                 ] coordinates {
                     (0.125,0.0203851)(0.250,0.032289)(0.375,0.0353311)(0.500,0.0568694)(0.625,0.0665957)(0.750,0.106711)(0.875,0.0817172)(1.000,0.104688)
                 };
-                \addlegendentry{rcube}
                 \addplot[
                     color=orange,
                 ] coordinates {
                     (0.125,0.0106125)(0.250,0.0223176)(0.375,0.032738)(0.500,0.0365776)(0.625,0.0362568)(0.750,0.0181232)(0.875,0.0303189)(1.000,0.0263066)
                 };
-                \addlegendentry{sphere9}
+                \addplot[
+                    color=black,
+                    thick,
+                    domain=0.1:1,
+                    samples=200,
+                ] {0.1*x^(0.5)};
             \end{axis}
         \end{tikzpicture} &
         \begin{tikzpicture}
             \centering
             \begin{axis}
                 [
-                width=0.55\textwidth,
+                width=0.53\textwidth,
                 xlabel={Gridstep},
                 ylabel={$E_{\max}$ error},
                 x dir=reverse,
@@ -94,27 +97,57 @@ of our normals compared to normals computed with the integral invariant (II) est
                 ] coordinates {
                     (0.125,0.0586128)(0.250,0.0736204)(0.375,0.114564)(0.500,0.114592)(0.625,0.136021)(0.750,0.152418)(0.875,0.139939)(1.000,0.234379)
                 };
-                \addlegendentry{ellipsoid}
                 \addplot[
                     color=red,
                 ] coordinates {
                     (0.125,0.0743185)(0.250,0.0810657)(0.375,0.113504)(0.500,0.145859)(0.625,0.256274)(0.750,0.266855)(0.875,0.259101)(1.000,0.274269)
                 };
-                \addlegendentry{goursat}
                 \addplot[
                     color=MyGreen,
                 ] coordinates {
                     (0.125,0.0670488)(0.250,0.0926269)(0.375,0.0973621)(0.500,0.137059)(0.625,0.155913)(0.750,0.290065)(0.875,0.164799)(1.000,0.317625)
                 };
-                \addlegendentry{rcube}
                 \addplot[
                     color=orange,
                 ] coordinates {
                     (0.125,0.0313599)(0.250,0.044124)(0.375,0.0643389)(0.500,0.0684951)(0.625,0.0853552)(0.750,0.0532733)(0.875,0.064386)(1.000,0.0873334)
                 };
-                \addlegendentry{sphere9}
+                \addplot[
+                    color=black,
+                    thick,
+                    domain=0.1:1,
+                    samples=200,
+                ] {0.1*x^(0.5)};
             \end{axis}
         \end{tikzpicture} \\
+        \multicolumn{2}{c}{
+            \begin{tikzpicture}
+                \begin{axis}[
+                    hide axis,
+                    xmin=0, xmax=1,
+                    ymin=0, ymax=1,
+                    legend columns=5,
+                    legend style={
+                        at={(0.5,-0.2)},
+                        anchor=north,
+                        draw=none,
+                        column sep=15pt
+                    }
+                ]
+            \addlegendimage{color=cyan}
+            \addlegendentry{ellipsoid}
+            \addlegendimage{color=red}
+            \addlegendentry{goursat}
+            \addlegendimage{color=MyGreen}
+            \addlegendentry{rcube}
+            \addlegendimage{color=orange}
+            \addlegendentry{sphere9}
+
+            \addlegendimage{color=black,thick};
+            \addlegendentry{$0.1\sqrt{h}$}
+                \end{axis}
+            \end{tikzpicture}
+        } \\
     \end{tabular}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution}
     \label{fig:errors-normals}
