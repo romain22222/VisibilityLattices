@@ -21,98 +21,32 @@
     In figure~\ref{fig:lattice-representation}, we display a representation of lattice maps applied to a 2-d cell complex where all coordinates are already doubled. Note that the examples are in 2-d, the shown results are in 3-d and the algorithm is for n-d.
 
     \begin{figure}
-        \centering
-        \label{fig:lattice-representation}
-        % \usetikzlibrary {arrows.meta,decorations.shapes}
-        \begin{tabular}{c c}
-            \begin{tikzpicture}[scale=0.75]
-                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,-0.25) grid (7.25,7.25);
-                \filldraw[black] (1,4) circle (0.05);
-                \filldraw[black] (1,5) circle (0.05);
-                \filldraw[black] (2,5) circle (0.05);
-                \filldraw[black] (3,5) circle (0.05);
-                \filldraw[black] (3,4) circle (0.05);
-                \filldraw[black] (3,3) circle (0.05);
-                \filldraw[black] (3,2) circle (0.05);
-                \filldraw[black] (2,2) circle (0.05);
-                \filldraw[black] (2,1) circle (0.05);
-                \filldraw[black] (1,1) circle (0.05);
-                \filldraw[black] (1,0) circle (0.05);
-                \filldraw[black] (2,0) circle (0.05);
-                \filldraw[black] (3,0) circle (0.05);
-                \filldraw[black] (3,1) circle (0.05);
-                \filldraw[black] (4,1) circle (0.05);
-                \filldraw[black] (5,1) circle (0.05);
-                \draw[-{Stealth[length=3mm]}=black] (-1,-1) -- (-1,6.5);
-                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,-1) -- (-1,7)};
-                \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (2,2) -- (2,1) -- (1,1) -- (1,0) -- (3,0) -- (3,1) -- (5,1);
-                \draw[thick,dashed] (1,3) -- (1,2) -- (0,2) -- (0,-1) -- (4,-1) -- (4,0) -- (6,0) -- (6,2) -- (4,2) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
-            \end{tikzpicture} &
-            %      \begin{tikzpicture}
-            %     \foreach \y in {1,1.5,...,6} {
-            %       \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (0.75,\y) -- (6.25,\y);
-            %     }
-            %     \draw[-{Stealth[length=3mm]}=black] (0,0) -- (0,5.5);
-            %     \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10mm}] {(0,0) -- (0,5)};
-            %     \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (2,2) -- (2,1) -- (1,1) -- (1,0) -- (3,0) -- (3,1) -- (5,1);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,5)--(3.1,5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,4.5)--(1.1,4.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,4.5)--(3.1,4.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,4)--(1.1,4);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,4)--(3.1,4);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,3.5)--(3.1,3.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,3)--(3.1,3);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,2.5)--(3.1,2.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.9,2)--(3.1,2);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.9,1.5)--(2.1,1.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,1)--(2.1,1);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,1)--(5.1,1);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,0.5)--(1.1,0.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.9,0.5)--(3.1,0.5);
-            %     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.9,0)--(3.1,0);
-            %     \filldraw[white,yshift=-1cm] (0,0) circle (0.01); % readjust the height to match the original path
-            % \end{tikzpicture} &
-            \begin{tikzpicture}[scale=0.75]
-                \foreach \y in {0,0.5,...,7} {
-                    \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
-                }
-                \draw[-{Stealth[length=3mm]}=black] (-1,-1) -- (-1,6.5);
-                \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,-1) -- (-1,6.5)};
-                \draw[thick,dashed] (1,3) -- (1,2) -- (0,2) -- (0,-1) -- (4,-1) -- (4,0) -- (6,0) -- (6,2) -- (4,2) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4.5)--(3.6,4.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4)--(1.6,4);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,4)--(3.6,4);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,3.5)--(1.6,3.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3.5)--(3.6,3.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3)--(3.6,3);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,2.5)--(3.6,2.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (1.4,2)--(3.6,2);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(5.6,1.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1)--(5.6,1);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0.5)--(5.6,0.5);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0)--(3.6,0);
-                \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,-0.5)--(3.6,-0.5);
-                \filldraw[white,yshift=-1.25cm] (0,0) circle (0.01); % readjust the height to match the original path
-            \end{tikzpicture}
-        \end{tabular}
-        \caption{Representation of a 2d cell complex (here the star of a given curve) as a lattice map. From 31 cells from the star on the left, we get 15 intervals on the right}
+      \centering
+      \input{lattice.tikz}
+      \caption{\label{fig:lattice-representation} Representation of a
+        2d cell complex (here the star of a given curve) as a lattice
+        map. From 65 cells (with two coordinates) on the left, we get 11
+        intervals on the right.}
     \end{figure}
 
     \begin{figure}
       \centering
       \input{algorithm.tikz}
-      
-      \caption{Evolution of the visibility check algorithm for a 2,1 vector. Green is the vector lattice map, black is the figure lattice map, red are the current intervals of positions where the visibility is still possible. The last red intervals are the visible positions. We travel the lattice maps from bottom-up. The found possible visibilities are shown on the original figure}
+      \caption{Evolution of the visibility check algorithm for a $(2,1)$
+        vector. Green is the vector lattice map, black is the figure
+        lattice map, red are the current intervals of positions where
+        the visibility is still possible. The last red intervals are
+        the visible positions. We travel the lattice maps from
+        bottom-up and the found visibilities are drawn on the
+        uppest figure.}
         \label{fig:visibility-algorithm-evolution}
     \end{figure}
 
     \begin{algorithm}
-        \caption{Given a cell complex C and a radius $r$, compute the visibility at every point of C up to distance $r$. We assume z being the main axis of the lattice maps, x and y being the auxiliary axises}
+      \caption{Given a subcomplex $C$ and an integer $r$, returns the visibility from every point of $C$ up to distance $r$. The main axis is supposed to be $z$, while $x,y$ are the auxiliary axes.}
         \label{alg:visibility}
         \begin{algorithmic}
-            \Function{Visibility}{C: Cell complex, r: Integer}
+            \Function{Visibility}{$C$: Subcomplex, $r$: Integer}
                 \State $\Omega \gets \Call{Star}{C}$ \Comment{Lattice map of the star of the studied cell complex}
                 \State $Directions \gets \Call{GetAllPrimalDirections}{r}$
                 \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Directions) \times \#C.pointels$}
@@ -138,22 +72,22 @@
     points are present in figure~\ref{fig:visibility-results}.
 
     \begin{algorithm}
-        \caption{Given 2 lists of intervals $K$ and $L$, find $K \cap L$, the intersection of those 2 lists}
+        \caption{Given 2 lists of integer intervals $K$ and $L$, returns $K \cap L$}
         \label{alg:intersection}
         \begin{algorithmic}
             \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
-                \State $R \gets \emptyset$; $k, l \gets 0$
+                \State $R \gets \emptyset$; $k \gets 0$; $l \gets 0$;
                 \While{$k < K.nbIntervals \And l < L.nbIntervals$}
                     \State $[a,b] \gets K[k]$; $[c,d] \gets L[l]$
-                    \State $e \gets \max(a, c)$; $f \gets \min(b, d)$
+                    \State $e \gets \max(a, c)$; $f \gets \min(b, d)$;
                     \If{$e \leq f$}
-                        \State $R.append([e, f])$
+                         $R.append([e, f])$;
                     \EndIf
                     \If{$b \leq d$}
-                        \State $k \gets k+1$
+                        $k \gets k+1$;
                     \EndIf
                     \If{$d \leq b$}
-                        \State $l \gets l+1$
+                        $l \gets l+1$;
                     \EndIf
                 \EndWhile
                 \State \Return $R$
