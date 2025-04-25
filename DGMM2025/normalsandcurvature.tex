@@ -27,10 +27,17 @@ eigenvalue. Its orientation is chosen to point in the same
 direction as the average of the trivial normals to the surfels
 touching the point $p$.
 
-
-\paragraph{Experimental validation.} [TO COMPLETE]
+\paragraph{Experimental validation.}
 Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
+In order to compare quantitatively the different normal estimators, we compute the
+root mean square error (RMSE) and the maximum error $E_{\max}$ of the
+normals computed on a digital surface with respect to the normals computed
+on the continuous surface. We use 4 different digital surfaces (ellipsoid,
+goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
+estimator are convergent with respect to the grid resolution with a
+rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
+$E_{\max}$.
 
 \begin{figure}
     \centering
