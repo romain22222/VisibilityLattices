@@ -544,7 +544,10 @@
 
     \begin{figure}[t]
         \input{pointelscomptime.tikz}
-        \caption{Computation Time of Visibility as a Function of Grid Resolution}
+        \caption{Computation Time of Visibility as a Function of pointels amount. We compare the computation time of
+        the naive breadth first visibility algorithm against our version using intervals. We input the same radius to
+        both versions (10, 20, 30) and test it on 6 different figures (goursat, torus, rcube, sphere9, leopold, d20)
+        with various gridsteps, giving us figures with pointel amounts ranging from 520 to 390235.}
         \label{fig:meanvisibility-computationComplexity}
     \end{figure}
 
@@ -620,8 +623,8 @@
             %% \includegraphics[width=0.4\textwidth]{pictures/octaflower-normal-estimation-smooth-NV} \\
             \hline
         \end{tabular}
-        \caption{Examples of normals computed on a chinese dragon, then on an
-        octaflower as a color map. First set displays II normals, second set
+        \caption{Examples of normals computed on a cps, then on an
+        tie as a color map. First set displays II normals, second set
         uses the visibility algorithm to compute them. The normals are colored
         according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$. The
         right images are the smooth version of the left images. ``Integral
