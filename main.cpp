@@ -589,7 +589,7 @@ void computeVisibilityNormals() {
       for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
 //          cov(i, j) += diff[i] * diff[j];
-          cov(i, j) += diff[i] * diff[j] * wSig(diff.squaredNorm());
+          cov(i, j) += diff[i] * diff[j] * wSig((pt-pointel).squaredNorm());
         }
       }
     }
@@ -791,7 +791,9 @@ int main(int argc, char *argv[]) {
   app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
   app.add_flag("-l", listP, "lists the known named polynomials.");
   app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
-  app.add_option("--IIradius", iiRadius, "the radius of the visibility sphere");
+  app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
+  double sigmaTmp;
+  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
@@ -889,7 +891,11 @@ int main(int argc, char *argv[]) {
 
   primal_surface->vertexNormals() = trivial_normals;
 
-  sigma = 5*pow(gridstep,-0.5);
+  if (sigmaTmp) {
+    sigma = sigmaTmp;
+  } else {
+    sigma = 5*pow(gridstep,-0.5);
+  }
   minus2SigmaSquare = -2*sigma*sigma;
 
   std::cout << "sigma = " << sigma << std::endl;
