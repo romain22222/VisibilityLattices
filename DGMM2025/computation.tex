@@ -194,6 +194,17 @@ returns the intersection of both lists of intervals.
 
 % Quantitative results
 
+We have plotted on Fig.\ref{fig:meanvisibility-computationComplexity}
+the running times to compute global visibility of both \cite[Algorithm
+  3]{lachaud:2022-jmiv} and our algorithm. Timings are very
+similar. Our algorithm is faster for smaller maximal radii (up to 20),
+while the other is slightly faster for bigger radii. We have also
+measured the (discrete) average visibility distance along digitization
+of smooth shapes (Fig.~\ref{fig:meanvisibility-gridstep}). It follows
+a law proportionnal to $\sqrt{h}$. As shown in the next section, for
+real 3d images, a maximal radius below 10 is sufficient for normal and
+curvature estimation.
+
 
 \begin{figure}[t]
   \centering
@@ -211,5 +222,5 @@ returns the intersection of both lists of intervals.
 \begin{figure}
   \centering
   \input{mean-distance.tikz}
-  \caption{  \label{fig:meanvisibility-gridstep}. Mean distance of visibility as a function of the gridstep $h$.}
+  \caption{\label{fig:meanvisibility-gridstep} Mean distance of visibility as a function of the gridstep $h$ (see text).}
 \end{figure}
