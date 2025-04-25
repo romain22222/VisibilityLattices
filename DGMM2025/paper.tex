@@ -103,16 +103,18 @@
     high even with decomposition into coarse cells for speed up
     (several days of computation for 1M triangles at the time).
 
-    To increase efficiency, several authors have proposed to cast the
+    To increase efficiency, several authors have casted the
     visibility problem into a digital space, generally $\Z^3$ or its
     decomposition into cubical cells. Visibility is simplified as the
-    problem if there is a connected digital straight line joining a
-    pair of cells without occluding cell(s) (e.g.\ Soille~\cite{soille:1994-prl}
-    uses Bresenham line segments). Coeurjolly \emph{et al.}~\cite{coeurjolly:2004-prl}
-    uses a non-symmetric visibility definition and preimage computations
-    to speed up that kind of algorithms. Chica~\cite{chica:2008-spm}
-    uses a half-cell erosion of the complementary space and Bresenham
-    straight lines to decide visibility.
+    question whether there is a connected digital straight line
+    joining a pair of cells without occluding cell(s)
+    (e.g. Soille~\cite{soille:1994-prl} uses Bresenham
+    segments). Coeurjolly \emph{et al.}~\cite{coeurjolly:2004-prl}
+    uses a non-symmetric visibility definition and preimage
+    computations to speed up these
+    algorithms. Chica~\cite{chica:2008-spm} uses a half-cell erosion
+    of the complementary space and Bresenham lines to decide
+    visibility.
 
     We propose an algorithm that solves the following visibility
     problem: given a digital set $X \subset \Z^d$, two points $p,q$ of
@@ -137,7 +139,7 @@
     in computing geometric normals along digital surfaces that are
     aware of salient features. Indeed, 2d discrete tangent estimators
     based on tangency or discrete line segments have proven to be both
-    sensitive to sharp corners while multigrid convergent along the
+    sensitive to sharp corners and multigrid convergent on the
     boundary of digitized smooth shapes~\cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}.
     Many ad hoc methods have been proposed for tangent plane or normal
     estimation on 3d digital surfaces
@@ -170,8 +172,8 @@
     presents experimental results on visibility, its usage as a
     discrete normal estimator, and how it improves curvature estimates
     on digital surfaces. Finally, Section 5 concludes and gives some
-    perspectives to this work, notably other usages of this algorithm
-    in the field.
+    perspectives to this work.
+    %% , notably other usages of this algorithm in the field.
 
 %    \deleted[id=JO]{
 %    Visibility is a fundamental concept in computational geometry and digital topology, with applications ranging from computer vision to geometric modeling and computer graphics.
@@ -937,7 +939,11 @@
     of the visible points, corresponding to its smallest
     eigenvalue. Its orientation is chosen so as to point in the same
     direction as the average of the trivial normals to the surfels
-    touching the point $p$. Figure~\ref{fig:normals-estimation} shows an example
+    touching the point $p$.
+
+
+    \paragraph{Experimental validation.} [TO COMPLETE]
+    Figure~\ref{fig:normals-estimation} shows an example
     of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 
     \begin{figure}
