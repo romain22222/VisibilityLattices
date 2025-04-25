@@ -9,18 +9,18 @@
     complexity. For instance, the 3d visibility complex between $n$
     spheres and occluding spheres has a complexity
     $O(n^4)$~\cite{durand:2002-tog}. Exact 3d visibility between
-    polygons and occluding polygons is often casted into 5d Plücker
+    polygons and occluding polygons is often cast into 5d Plücker
     space~\cite{nirenstein:2002-ewr}, which nicely represents 3d lines
     and their respective positions. The computational cost remains
     high even with decomposition into coarse cells for speed up
     (several days of computation for 1M triangles at the time).
 
-    To increase efficiency, several authors have casted the
+    To increase efficiency, several authors have cast the
     visibility problem into a digital space, generally $\Z^3$ or its
-    decomposition into cubical cells. Visibility is simplified as the
-    question whether there is a connected digital straight line
+    decomposition into cubical cells. Visibility is simplified as
+    whether there is a connected digital straight line
     joining a pair of cells without occluding cell(s)
-    (e.g. Soille~\cite{soille:1994-prl} uses Bresenham
+    (e.g.\ Soille~\cite{soille:1994-prl} uses Bresenham
     segments). Coeurjolly \emph{et al.}~\cite{coeurjolly:2004-prl}
     uses a non-symmetric visibility definition and preimage
     computations to speed up these
@@ -36,7 +36,7 @@
     equivalent to the \emph{cotangency} of $p$ and $q$ in $X$, as
     formalized in~\cite{lachaud:2021-dgmm,lachaud:2022-jmiv}, and can
     be viewed as an inclusion problem between sets of lattice points
-    in this form. Indeed cells surounding $X$ can be encoded as
+    in this form. Indeed, cells surounding $X$ can be encoded as
     lattice points (Khalimsky coding), as well as the cells covering
     lattice directions. The originality of our method is to encode
     subsets of lattice points as sets of integer intervals and to

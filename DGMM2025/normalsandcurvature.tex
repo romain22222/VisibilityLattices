@@ -31,7 +31,7 @@ touching the point $p$.
 Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
 In order to compare quantitatively the different normal estimators, we compute the
-root mean square error (RMSE) and the maximum error $E_{\max}$ of the
+root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
 normals computed on a digital surface with respect to the normals computed
 on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different digital surfaces (ellipsoid,
 goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
@@ -242,7 +242,7 @@ the saliencies.
 The CTriv estimator only performs averaging of trivial normal
 directions along the surface. It behaves much better than II near
 features (although it tends to smooth curvatures) since it does
-not use information from across the gap. However some oscillations
+not use information from across the gap. However, some oscillations
 of the curvatures are distinguishable especially along the flat
 parts, and some curvature estimates are erroneous on smoother
 parts (like the edge above 6 for $\kappa_2$ or several dice

@@ -14,12 +14,12 @@
 
     The \emph{topological closure} of a cell $\tau$ is denoted by
     $\bar{\tau}$. The \emph{star} of a cell $\sigma$ is the subcomplex
-    $\Star{\sigma}:=\{\tau \in \mathcal{C}, \sigma \subset \bar{\tau}
+    $\Star{\sigma}\coloneqq\{\tau \in \mathcal{C}, \sigma \subset \bar{\tau}
     \}$. It is naturally extended to any subcomplex $K$ by union,
-    i.e. $\Star{K} := \cup_{\sigma \in K} \Star{\sigma}$, and more
-    generally to any subset $Y$ of $\R^d$ as $\Star{Y}:=\{ c \in \C,
+    i.e. $\Star{K} \coloneqq \cup_{\sigma \in K} \Star{\sigma}$, and more
+    generally to any subset $Y$ of $\R^d$ as $\Star{Y}\coloneqq\{ c \in \C,
     \bar{c} \cap Y \neq \emptyset \}$. The \emph{body} $\|K\|$ of $K$
-    is its realization in $\R^d$, i.e. $\|K\|:=\cup_{c \in K} c$. One
+    is its realization in $\R^d$, i.e. $\|K\|\coloneqq\cup_{c \in K} c$. One
     can check that $\Star{K}=\Star{\|K\|}$, so these definitions are
     sound.
 
@@ -36,12 +36,12 @@
       \subseteq \Star{Z}$.
     \end{definition}
     This definition corresponds to the concept of tangency presented
-    in \cite{lachaud:2022-jmiv}, limited to pair of points. One can
+    in~\cite{lachaud:2022-jmiv}, limited to pairs of points. One can
     check that $p$ and $q$ must belong to $Z$ to be visible.
     Figure~\ref{fig:visibility-2d} illustrates what is considered
     visible or not on some examples.
 
-    
+
     % Examples of visibility in 2D
     \begin{figure}[t]
       \centering
@@ -63,8 +63,7 @@
     have shown, we even conjecture that it may not be $n$-connected
     for $n$ arbitrarily large.
 
-    This characteristic has implications for the applicability of
-    \cite[Algorithm 3]{lachaud:2022-jmiv}, which is a breadth-first
+    This characteristic has implications for the applicability of~\cite[Algorithm 3]{lachaud:2022-jmiv}, which is a breadth-first
     like algorithm for computing all the points of $X$ visible in $X$
     to a source point $p$. This algorithm sometimes outputs an
     incomplete collection of visible points. This is why in the next

@@ -58,6 +58,6 @@
         domain=0.0625:1,
         samples=100,
       ] {5*x^(-0.5)};
-      \addlegendentry{$\Theta(\sqrt{h})$} %%=\sqrt{\frac{1}{x}}$}
+      \addlegendentry{$\Theta\left(\sqrt{h}\right)$} %%=\sqrt{\frac{1}{x}}$}
     \end{axis}
   \end{tikzpicture}
