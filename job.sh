@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=visibilityTest
-#SBATCH --partition=weekend
+#SBATCH --partition=dayCPU
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=128
@@ -11,7 +11,7 @@
 # export CUDA_VISIBLE_DEVICES=0
 # echo $CUDA_VISIBLE_DEVICES
 
-export OMP_NUM_THREADS=128
+#export OMP_NUM_THREADS=128
 echo $OMP_NUM_THREADS
 
-/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-1024.vol --noInterface -r 60
+/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-128.vol --noInterface -r 30
