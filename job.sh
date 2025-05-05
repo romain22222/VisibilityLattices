@@ -3,9 +3,9 @@
 #SBATCH --partition=dayCPU
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=128
+#SBATCH --cpus-per-task=120
 ## SBATCH --gres=gpu:1
-#SBATCH --mem=200GB
+#SBATCH --mem=2GB
 #SBATCH --time=00:02:00
 
 # export CUDA_VISIBLE_DEVICES=0
