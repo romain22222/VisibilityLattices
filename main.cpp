@@ -57,6 +57,7 @@ std::vector<RealPoint> normalIIColors;
 std::vector<RealPoint> visibility_sharps;
 
 std::vector<RealPoint> true_normals;
+std::vector<RealPoint> trivial_normals;
 std::vector<RealPoint> surfel_true_normals;
 std::vector<RealPoint> ii_normals;
 std::vector<RealPoint> surfel_ii_normals;
@@ -252,7 +253,7 @@ IntegerVectors getAllVectors(int radius) {
  */
 LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
   LatticeSet L_ab(axis);
-  L_ab.insert(emptyIE);
+  L_ab.insert({0, 0, 0});
   for (Dimension k = 0; k < 3; k++) {
     const Integer n = (segment[k] >= 0) ? segment[k] : -segment[k];
     const Integer d = (segment[k] >= 0) ? 1 : -1;
@@ -273,7 +274,7 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
       L_ab.insert(kc);
     }
   }
-  if (segment != emptyIE) L_ab.insert(2 * segment);
+  if (segment != IntegerVector()) L_ab.insert(2 * segment);
   return L_ab.starOfCells();
 }
 
@@ -350,7 +351,8 @@ void computeVisibilityOmp(int radius) {
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // OMP" << std::endl;
-#pragma omp parallel for schedule(dynamic)
+  std::cout << omp_get_num_teams() << " teams" << std::endl;
+#pragma omp target teams distribute parallel for
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
     Intervals eligibles;
@@ -562,10 +564,10 @@ void computeVisibilityDirectionToSharpFeatures() {
   }
 }
 
-double sigma = 5;
-double minus2SigmaSquare = -2*sigma*sigma;
+double sigma = -1;
+double minus2SigmaSquare = -2 * sigma * sigma;
 
-double wSig( double d2) {
+double wSig(double d2) {
   return exp(d2 / minus2SigmaSquare);
 }
 
@@ -577,14 +579,14 @@ void computeVisibilityNormals() {
     std::vector<Point> visibles;
     RealPoint centroid(0, 0, 0);
     double total_w = 0.0;
-    for (auto point_idx: kdTree.pointsInBall(pointel, 2*sigma)) {
+    for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
       auto tmp = kdTree.position(point_idx);
-      if (visibility.isVisible(pointel, tmp) ) { //  && tmp != pointel) {
+      if (visibility.isVisible(pointel, tmp)) { //  && tmp != pointel) {
         visibles.push_back(tmp);
 //        centroid += tmp;
-	const double w = wSig((pointel-tmp).squaredNorm());
+        const double w = wSig((pointel - tmp).squaredNorm());
         centroid += w * tmp;
-	total_w  += w;
+        total_w += w;
       }
     }
     centroid /= total_w; // (double) visibles.size();
@@ -594,7 +596,7 @@ void computeVisibilityNormals() {
       for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
 //          cov(i, j) += diff[i] * diff[j];
-          cov(i, j) += diff[i] * diff[j] * wSig((pt-pointel).squaredNorm());
+          cov(i, j) += diff[i] * diff[j] * wSig((pt - pointel).squaredNorm());
         }
       }
     }
@@ -678,10 +680,10 @@ void doRedisplayNormalAsColors() {
   normalIIColors.clear();
   normalVisibilityColors.reserve(visibility_normals.size());
   normalIIColors.reserve(visibility_normals.size());
-  for (const auto& n : visibility_normals) {
+  for (const auto &n: visibility_normals) {
     normalVisibilityColors.push_back(0.5f * (n + 1.0f));
   }
-  for (const auto& n : ii_normals) {
+  for (const auto &n: ii_normals) {
     normalIIColors.push_back(0.5f * (n + 1.0f));
   }
 
@@ -819,7 +821,7 @@ int main(int argc, char *argv[]) {
   app.add_flag("-l", listP, "lists the known named polynomials.");
   app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
   app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
-  double sigmaTmp = 3.0;
+  double sigmaTmp = -1.0;
   app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
@@ -847,7 +849,6 @@ int main(int argc, char *argv[]) {
     params("closed", 1);
     implicit_shape = SH3::makeImplicitShape3D(params);
     auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-    std::cout << params << std::endl;
     K = SH3::getKSpace(params);
     binary_image = SH3::makeBinaryImage(digitized_shape,
                                         SH3::Domain(K.lowerBound(),
@@ -894,14 +895,14 @@ int main(int argc, char *argv[]) {
   int t_ring = int(round(params["t-ring"].as<double>()));
   auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
   primal_surface->faceNormals() = surfel_trivial_normals;
-  params("r-radius",iiRadius);
+  params("r-radius", iiRadius);
   surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
   for (auto i = 1; i < t_ring + 3; i++) {
     primal_surface->computeVertexNormalsFromFaceNormals();
     primal_surface->computeFaceNormalsFromVertexNormals();
     surfel_trivial_normals = primal_surface->faceNormals();
   }
-  auto trivial_normals = primal_surface->vertexNormals();
+  trivial_normals = primal_surface->vertexNormals();
   trivial_normals.resize(pointels.size());
   ii_normals.resize(pointels.size());
   true_normals.resize(pointels.size());
@@ -940,13 +941,14 @@ int main(int argc, char *argv[]) {
   pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
   // Initialize polyscope
   if (noInterface) {
+    std::cout << "sigma = " << sigma << std::endl;
     checkParallelism();
     trace.beginBlock("Compute visibilities");
     computeVisibilityOmp(VisibilityRadius);
     Time = trace.endBlock();
-    trace.beginBlock("Compute mean distance visibility");
-    computeMeanDistanceVisibility();
-    Time = trace.endBlock();
+//    trace.beginBlock("Compute mean distance visibility");
+//    computeMeanDistanceVisibility();
+//    Time = trace.endBlock();
   } else {
     polyscope::init();
     psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
