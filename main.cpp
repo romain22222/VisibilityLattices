@@ -351,8 +351,7 @@ void computeVisibilityOmp(int radius) {
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // OMP" << std::endl;
-  std::cout << omp_get_num_teams() << " teams" << std::endl;
-#pragma omp target teams distribute parallel for
+#pragma omp parallel for schedule(dynamic)
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     IntegerVector segment;
     Intervals eligibles;
