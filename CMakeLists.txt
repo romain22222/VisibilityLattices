@@ -23,17 +23,27 @@ include(dgtal)
 
 # add_subdirectory( CDT )
 
-# Check if you have OMP support
-find_package(OpenMP)
+# If we are building for CPU, do the belows
 
 # JOL: do not understand why I have to manually set thiis so that it finds Eigen
 # include_directories( /Users/lachaud/GITHUB/DigitalShapeTools/src )
 include_directories( /opt/homebrew/include/eigen3/)
 
-if(OpenMP_CXX_FOUND)
-    add_executable(visibilityLattices main.cpp)
-    target_link_libraries(visibilityLattices PUBLIC polyscope DGtal OpenMP::OpenMP_CXX)
+set(CPU_BUILD ON CACHE BOOL "Build for CPU")
+
+if (CPU_BUILD)
+    # Check if you have OMP support
+    find_package(OpenMP)
+
+    if(OpenMP_CXX_FOUND)
+        add_executable(visibilityLattices main.cpp)
+        target_link_libraries(visibilityLattices PUBLIC polyscope DGtal OpenMP::OpenMP_CXX)
+    else ()
+        # Crash the build
+        message(FATAL_ERROR "OpenMP not found")
+    endif()
 else ()
-    # Crash the build
-    message(FATAL_ERROR "OpenMP not found")
-endif()
+    # If we are building for GPU, do the belows
+    add_executable(visibilityLattices main_gpu.cpp)
+    target_link_libraries(visibilityLattices PUBLIC polyscope DGtal)
+endif ()
