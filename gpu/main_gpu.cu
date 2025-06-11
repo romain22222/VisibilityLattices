@@ -1,21 +1,21 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include <polyscope/polyscope.h>
-#include <polyscope/point_cloud.h>
-#include <polyscope/pick.h>
-#include <polyscope/surface_mesh.h>
-#include <DGtal/arithmetic/IntegerComputer.h>
-#include <DGtal/base/Common.h>
-#include <DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h>
-#include <DGtal/geometry/volumes/DigitalConvexity.h>
-#include <DGtal/geometry/volumes/TangencyComputer.h>
-#include <DGtal/helpers/StdDefs.h>
-#include <DGtal/helpers/Shortcuts.h>
-#include <DGtal/helpers/ShortcutsGeometry.h>
+//#include "polyscope/polyscope.h"
+//#include "polyscope/point_cloud.h"
+//#include "polyscope/pick.h"
+//#include "polyscope/surface_mesh.h"
+#include "DGtal/arithmetic/IntegerComputer.h"
+#include "DGtal/base/Common.h"
+#include "DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h"
+#include "DGtal/geometry/volumes/DigitalConvexity.h"
+#include "DGtal/geometry/volumes/TangencyComputer.h"
+#include "DGtal/helpers/StdDefs.h"
+#include "DGtal/helpers/Shortcuts.h"
+#include "DGtal/helpers/ShortcutsGeometry.h"
 #include <crt/host_defines.h>
-#include "additionnalClasses/LinearKDTree.h"
-#include "CLI11.hpp"
+#include "../additionnalClasses/LinearKDTree.h"
+#include "../CLI11.hpp"
 
 using namespace DGtal;
 using namespace Z3i;
@@ -25,21 +25,22 @@ struct Vec3i {
 
   __host__ __device__
   Vec3i() : x(0), y(0), z(0) {}
+
   __host__ __device__
   Vec3i(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {}
 
   __host__ __device__
-  Vec3i operator+(const Vec3i& other) const {
+  Vec3i operator+(const Vec3i &other) const {
     return {x + other.x, y + other.y, z + other.z};
   }
 
   __host__ __device__
-  Vec3i operator+=(const Vec3i& other) const {
+  Vec3i operator+=(const Vec3i &other) const {
     return {x + other.x, y + other.y, z + other.z};
   }
 
   __host__ __device__
-  Vec3i operator-(const Vec3i& other) const {
+  Vec3i operator-(const Vec3i &other) const {
     return {x - other.x, y - other.y, z - other.z};
   }
 
@@ -53,17 +54,17 @@ struct Vec3i {
   }
 
   __host__ __device__
-  bool operator==(const Vec3i& other) const {
+  bool operator==(const Vec3i &other) const {
     return x == other.x && y == other.y && z == other.z;
   }
 
   __host__ __device__
-  bool operator!=(const Vec3i& other) const {
+  bool operator!=(const Vec3i &other) const {
     return x != other.x || y != other.y || z != other.z;
   }
 
   __host__ __device__
-  int& operator[](int index) {
+  int &operator[](int index) {
     if (index == 0) return x;
     if (index == 1) return y;
     // Assume index == 2
@@ -71,14 +72,13 @@ struct Vec3i {
   }
 
   __host__ __device__
-  const int& operator[](int index) const {
+  const int &operator[](int index) const {
     if (index == 0) return x;
     if (index == 1) return y;
     // Assume index == 2
     return z;
   }
 };
-
 
 
 // Typedefs
@@ -90,13 +90,10 @@ typedef DigitalConvexity<KSpace> Convexity;
 typedef typename Convexity::LatticeSet LatticeSet;
 typedef CorrectedNormalCurrentComputer<RealPoint, RealVector> CNC;
 
-typedef std::pair<int, int> Interval;
-typedef std::vector<Interval> Intervals;
-
 // Polyscope
-polyscope::PointCloud *psVisibility = nullptr;
-polyscope::PointCloud *psVisibilityStart = nullptr;
-polyscope::SurfaceMesh *psPrimalMesh = nullptr;
+//polyscope::PointCloud *psVisibility = nullptr;
+//polyscope::PointCloud *psVisibilityStart = nullptr;
+//polyscope::SurfaceMesh *psPrimalMesh = nullptr;
 
 // Global variables
 KSpace K;
@@ -144,57 +141,109 @@ int OMP_max_nb_threads = 1;
 double Time = 0.0;
 bool noInterface = false;
 
+struct Interval {
+  int start;
+  int end;
+};
+
+struct IntervalList {
+  Interval *data;
+  int capacity;
+  int size;
+
+  __host__ __device__ IntervalList(Interval iStart, int maxCapacity) : data(new Interval[maxCapacity]{iStart}),
+                                                                       capacity(maxCapacity), size(1) {}
+
+  __host__ __device__ IntervalList() : data(nullptr), capacity(0), size(0) {}
+
+  __host__ __device__ IntervalList(int maxCapacity) : data(new Interval[maxCapacity]()), capacity(maxCapacity),
+                                                      size(0) {}
+
+  __host__ __device__ Interval *begin() const {
+    return data;
+  }
+
+  __host__ __device__ Interval *end() const {
+    return data + size;
+  }
+
+  __host__ __device__ bool empty() const {
+    return size == 0;
+  }
+};
+
 // Constants
 const auto emptyIE = Vec3i();
 
-Vec3i pointVectorToVec3i(const Point vector) {
+Vec3i pointVectorToVec3i(const Point &vector) {
   return Vec3i(vector[0], vector[1], vector[2]);
 }
 
+Point vec3iToPointVector(const Vec3i &vector) {
+  return Point(vector.x, vector.y, vector.z);
+}
+
 struct MyLatticeSet {
-  Vec3i* d_keys = nullptr;
-  int* d_offsets = nullptr;
-  std::pair<int, int>* d_intervals = nullptr;
+  Vec3i *d_keys = nullptr;
+  IntervalList *d_intervals = nullptr;
+  int myAxis;
 
-  int numKeys = 0;
-  int numIntervals = 0;
+  size_t numKeys = 0;
+  size_t numIntervals = 0;
 
-  void toGPU(LatticeSet& cpuLattice) {
+  void toGPU(const LatticeSet &cpuLattice) {
     std::vector<Vec3i> keys;
-    std::vector<int> offsets;
-    std::vector<std::pair<int, int>> allIntervals;
+    std::vector<size_t> offsets;
+    std::vector<IntervalList> allIntervals;
 
     size_t offset = 0;
-    for (const auto& [key, intervals] : cpuLattice.data()) {
+
+    const auto &mapRef = const_cast<std::map<Point, IntegralIntervals<Integer >>&>(cpuLattice.data());
+
+    for (const auto &[key, intervals]: mapRef) {
       keys.push_back(pointVectorToVec3i(key));
       offsets.push_back(offset);
-      const auto& ivs = intervals.data();
-      allIntervals.insert(allIntervals.end(), ivs.begin(), ivs.end());
-      offset += ivs.size();
+      const auto &ivs = intervals.data();
+      IntervalList intervalList;
+      intervalList.data = new Interval[ivs.size()];
+      intervalList.capacity = ivs.size();
+      intervalList.size = new int(ivs.size());
+      for (size_t i = 0; i < ivs.size(); ++i) {
+        intervalList.data[i] = {ivs[i].first, ivs[i].second};
+      }
+      allIntervals.push_back(intervalList);
+      offset += intervalList.size;
     }
 
     numKeys = keys.size();
     numIntervals = allIntervals.size();
 
     cudaMalloc(&d_keys, sizeof(Vec3i) * numKeys);
-    cudaMalloc(&d_offsets, sizeof(int) * numKeys);
-    cudaMalloc(&d_intervals, sizeof(std::pair<int, int>) * numIntervals);
+    cudaMalloc(&d_intervals, sizeof(IntervalList) * numIntervals);
 
     cudaMemcpy(d_keys, keys.data(), sizeof(Vec3i) * numKeys, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_offsets, offsets.data(), sizeof(int) * numKeys, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_intervals, allIntervals.data(), sizeof(std::pair<int, int>) * numIntervals, cudaMemcpyHostToDevice)
+    cudaMemcpy(d_intervals, allIntervals.data(), sizeof(IntervalList) * numIntervals, cudaMemcpyHostToDevice);
   }
 
-  __host__ MyLatticeSet( const Vec3i* pointels, const Vec3i* pointelsE, int axis )
-      : myAxis( axis )
-  {
-    LatticeSet l = LatticeSetByIntervals<Space>(pointels, pointelsE, axis).starOfPoints().data();
+  __host__ MyLatticeSet(const LatticeSet &l)
+      : myAxis(l.axis()) {
+    numKeys = l.size();
+    numIntervals = 0;
+    for (const auto &[key, intervals]: l.data()) {
+      numIntervals += intervals.size();
+    }
+
     toGPU(l);
   }
 
-  __host__ MyLatticeSet( const Vec3i segment, int axis )
-        : myAxis(axis)
-  {
+  __host__ MyLatticeSet(const Vec3i *pointels, const Vec3i *pointelsE, int axis)
+      : myAxis(axis) {
+    const auto l = LatticeSetByIntervals<Space>(pointels, pointelsE, axis).starOfPoints();
+    toGPU(l);
+  }
+
+  __host__ MyLatticeSet(const Vec3i segment, int axis)
+      : myAxis(axis) {
     // TODO: Compute directly on GPU
     LatticeSet L_ab(axis);
     L_ab.insert({0, 0, 0});
@@ -218,13 +267,28 @@ struct MyLatticeSet {
         L_ab.insert(kc);
       }
     }
-    if (segment != Vec3i()) L_ab.insert(segment * 2);
-    toGPU(L_ab.starOfCells().data());
+    if (segment != Vec3i()) L_ab.insert(vec3iToPointVector(segment * 2));
+    const auto v = L_ab.starOfCells();
+    toGPU(v);
   }
-  __host__ ~LatticeSetGpu() {
+
+  __host__ ~MyLatticeSet() {
     cudaFree(d_keys);
-    cudaFree(d_offsets);
     cudaFree(d_intervals);
+  }
+
+  __host__ __device__ std::pair<Vec3i, IntervalList> *find(const Vec3i &p) const {
+    // Search for the point p in the lattice set
+    for (size_t i = 0; i < numKeys; ++i) {
+      if (d_keys[i] == p) {
+        return {d_keys[i], d_intervals[i]};
+      }
+    }
+    return this.end();
+  }
+
+  __host__ __device__ std::pair<Vec3i, IntervalList> *end() const {
+    return nullptr;
   }
 };
 
@@ -255,14 +319,14 @@ struct FlatVisibility {
   int mainAxis;
   int vectorsSize;
   int pointsSize;
-  bool* visibles;
+  bool *visibles;
 
-  Vec3i* vectorList;  // flattened IntegerVectors
-  Vec3i* pointList;
+  Vec3i *vectorList;  // flattened IntegerVectors
+  Vec3i *pointList;
 
   FlatVisibility() = default;
 
-  FlatVisibility(int mainAxis_, Vec3i* vectors, int vectorsSz, Vec3i* points, int pointsSz)
+  FlatVisibility(int mainAxis_, Vec3i *vectors, int vectorsSz, Vec3i *points, int pointsSz)
       : mainAxis(mainAxis_), vectorList(vectors), vectorsSize(vectorsSz),
         pointList(points), pointsSize(pointsSz) {
     visibles = new bool[vectorsSize * pointsSize];
@@ -270,9 +334,9 @@ struct FlatVisibility {
   }
 
   __host__ __device__
-  void set(const Vec3i& offset, const std::vector<std::pair<int, int>>& value, size_t vectorIdx) const {
+  void set(const Vec3i &offset, const std::vector<std::pair<int, int>> &value, size_t vectorIdx) const {
     Vec3i p = offset;
-    for (const auto& interval : value) {
+    for (const auto &interval: value) {
       for (int i = interval.first / 2; i <= interval.second / 2; ++i) {
         p[mainAxis] = i;
         int pointIdx = getPointIdx(p);
@@ -284,7 +348,7 @@ struct FlatVisibility {
   }
 
   __host__ __device__
-  int getPointIdx(const Vec3i& p) const {
+  int getPointIdx(const Vec3i &p) const {
     // Search pointList for matching point (or use a flat hash map if performance needed)
     for (int i = 0; i < pointsSize; ++i) {
       if (pointList[i] == p) return i;
@@ -293,14 +357,14 @@ struct FlatVisibility {
   }
 
   __host__ __device__
-  int getVectorIdx(const Vec3i& v) const {
+  int getVectorIdx(const Vec3i &v) const {
     for (int i = 0; i < vectorsSize; ++i) {
       if (vectorList[i] == v) return i;
     }
     return vectorsSize;
   }
 
-  bool isVisible(const Vec3i& p1, const Vec3i& p2) const {
+  bool isVisible(const Vec3i &p1, const Vec3i &p2) const {
     if (p1 == p2) return true;
 
     if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
@@ -358,7 +422,7 @@ void listPolynomials() {
  * Get the main axis of the digital figure
  * @return
  */
-Dimension getLargeAxis() {
+int getLargeAxis() {
   auto axis = 0;
   for (auto i = 1; i < digital_dimensions.size() / 3; i++) {
     if (digital_dimensions[i] > digital_dimensions[axis]) axis = i;
@@ -412,69 +476,31 @@ Vec3is getAllVectors(int radius) {
 }
 
 /**
- * From a given segment, get its star lattice
- * @param segment
- * @param axis
- * @return
- */
-LatticeSet getLatticeVector(const Vec3i &segment, int axis) {
-  LatticeSet L_ab(axis);
-  L_ab.insert({0, 0, 0});
-  for (int k = 0; k < 3; k++) {
-    const int n = (segment[k] >= 0) ? segment[k] : -segment[k];
-    const int d = (segment[k] >= 0) ? 1 : -1;
-    if (n == 0) continue;
-    Point kc;
-    for (int i = 1; i < n; i++) {
-      for (int j = 0; j < 3; j++) {
-        if (j == k) kc[k] = 2 * (d * i);
-        else {
-          const auto v = segment[j];
-          const auto q = (v * i) / n;
-          const auto r = (v * i) % n; // might be negative
-          kc[j] = 2 * q;
-          if (r < 0) kc[j] -= 1;
-          else if (r > 0) kc[j] += 1;
-        }
-      }
-      L_ab.insert(kc);
-    }
-  }
-  if (segment != Vec3i()) L_ab.insert(segment * 2);
-  return L_ab.starOfCells();
-}
-
-/**
  * Check if the interval toCheck is contained in figIntervals
  * @param toCheck
  * @param figIntervals
  * @return
  */
-Intervals
-checkInterval(const Interval toCheck, const Intervals &figIntervals) {
-  Intervals result;
-  result.reserve(figIntervals.size());
+IntervalList checkInterval(const Interval toCheck, const IntervalList &figIntervals) {
+  IntervalList result(figIntervals.size);
   const auto toCheckSize = toCheck.second - toCheck.first;
-  for (auto interval: figIntervals) {
+  for (const auto &interval: figIntervals) {
     if (interval.second - interval.first >= toCheckSize) {
-      result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
+      result.data[result.size++] = {interval.first - toCheck.first, interval.second - toCheck.second};
     }
   }
   return result;
 }
 
-Intervals intersect(const Intervals &l1, const Intervals &l2) {
-  Intervals result;
-  // check 3rd example of testIntersection to see that you need at most this amount
-  result.reserve(l1.size() + l2.size() - 1);
-//  result.reserve( std::max( l1.size(), l2.size() ) );
+IntervalList intersect(const IntervalList &l1, const IntervalList &l2) {
+  IntervalList result(l1.capacity);
   int k1 = 0, k2 = 0;
   while (k1 < l1.size() && k2 < l2.size()) {
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
     const auto i = std::max(interval1.first, interval2.first);
     const auto j = std::min(interval1.second, interval2.second);
-    if (i <= j) result.emplace_back(i, j);
+    if (i <= j) result.data[result.size++] = {i, j};
     if (interval1.second <= interval2.second) k1++;
     if (interval1.second >= interval2.second) k2++;
   }
@@ -488,9 +514,9 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
  * @param figLattices
  * @return
  */
-Intervals matchVector(Intervals &toCheck,
-                      const Intervals &vectorIntervals,
-                      const Intervals &figIntervals) {
+IntervalList matchVector(IntervalList &toCheck,
+                         const IntervalList &vectorIntervals,
+                         const IntervalList &figIntervals) {
   for (const auto &vInterval: vectorIntervals) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
@@ -501,26 +527,25 @@ Intervals matchVector(Intervals &toCheck,
 void computeVisibilityGpu(int radius) {
   std::cout << "Computing visibility GPU" << std::endl;
   auto axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
-  std::map<Point, Intervals> figLattices;
-  for (auto p: tmpFigLattices) {
-    figLattices[p.first] = p.second.data();
-  }
+  MyLatticeSet figLattices(LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints());
   const auto axises_idx = std::vector<int>{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   auto segmentList = getAllVectors(radius);
 
   // avoid thread imbalance
   std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-  visibility = FlatVisibility(axis, segmentList, pointels);
+  Vec3i *pointelsData = new Vec3i[pointels.size()];
+  for (size_t i = 0; i < pointels.size(); ++i) {
+    pointelsData[i] = pointVectorToVec3i(pointels[i]);
+  }
+
+  visibility = FlatVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
   size_t chunkSize = 64;
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // GPU" << std::endl;
-#pragma omp parallel for schedule(dynamic)
   for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
     Vec3i segment;
-    Intervals eligibles;
     int minTx, maxTx, minTy, maxTy;
     for (auto segmentIdx = chunkIdx * chunkSize;
          segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
@@ -532,17 +557,20 @@ void computeVisibilityGpu(int radius) {
       maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
       for (auto tx = minTx; tx < maxTx; tx++) {
         for (auto ty = minTy; ty < maxTy; ty++) {
-          eligibles.clear();
-          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+//          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+          IntervalList eligibles(
+              {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},);
           const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                                 axis == 2 ? 0 : 2 * ty);
-          for (const auto &cInfo: latticeVector) {
-            const auto it = figLattices.find(pInterest + cInfo.first);
+          for (auto i = 0; i < latticeVector.numKeys; i++) {
+            const auto key = latticeVector.d_keys[i];
+            const auto value = *(latticeVector.d_intervals[i]);
+            const auto it = figLattices.find(pInterest + key);
             if (it == figLattices.end()) {
-              eligibles.clear();
+              eligibles = IntervalList();
               break;
             }
-            eligibles = matchVector(eligibles, cInfo.second, it->second);
+            eligibles = matchVector(eligibles, value, it->second);
             if (eligibles.empty()) break;
           }
           if (!eligibles.empty()) {
@@ -554,6 +582,7 @@ void computeVisibilityGpu(int radius) {
   }
   std::cout << "Visibility computed" << std::endl;
 }
+
 /*
 
 void computeVisibilityWithPointShow(std::size_t idx) {
@@ -806,7 +835,7 @@ void computeL2looErrors() {
 }
 */
 
-void myCallback() {
+/*void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
     auto selection = polyscope::pick::getSelection();
@@ -827,16 +856,16 @@ void myCallback() {
     }
   }
   ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
-  /*if (ImGui::Button("Visibility")) {
+  *//*if (ImGui::Button("Visibility")) {
     computeVisibilityWithPointShow(pointel_idx);
   }
-  ImGui::SameLine();*/
+  ImGui::SameLine();*//*
   if (ImGui::Button("Visibilities OMP")) {
     trace.beginBlock("Compute visibilities OMP");
     computeVisibilityGpu(VisibilityRadius);
     Time = trace.endBlock();
   }
-  /*if (ImGui::Button("Measure Mean Distance Visibility")) {
+  *//*if (ImGui::Button("Measure Mean Distance Visibility")) {
     computeMeanDistanceVisibility();
   }
   if (ImGui::Button("Check OMP"))
@@ -865,9 +894,9 @@ void myCallback() {
     Time = trace.endBlock();
     doRedisplayCurvatures();
   }
-  ImGui::SameLine();*/
+  ImGui::SameLine();*//*
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
-}
+}*/
 
 void testIntersection() {
   // 1|2 4|5 7|9
@@ -1023,12 +1052,12 @@ int main(int argc, char *argv[]) {
 
   primal_surface->vertexNormals() = trivial_normals;
 
-  if (sigmaTmp != -1.0 ) {
+  if (sigmaTmp != -1.0) {
     sigma = sigmaTmp;
   } else {
-    sigma = 5*pow(gridstep,-0.5);
+    sigma = 5 * pow(gridstep, -0.5);
   }
-  minus2SigmaSquare = -2*sigma*sigma;
+  minus2SigmaSquare = -2 * sigma * sigma;
 
   std::cout << "sigma = " << sigma << std::endl;
 
@@ -1044,15 +1073,6 @@ int main(int argc, char *argv[]) {
 //    trace.beginBlock("Compute mean distance visibility");
 //    computeMeanDistanceVisibility();
 //    Time = trace.endBlock();
-  } else {
-    polyscope::init();
-    psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
-                                                  primal_positions,
-                                                  primal_faces);
-    psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
-    psPrimalMesh->setEdgeWidth(1.5);
-    polyscope::state::userCallback = myCallback;
-    polyscope::show();
   }
   return EXIT_SUCCESS;
 

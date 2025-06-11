@@ -31,7 +31,7 @@ include_directories( /opt/homebrew/include/eigen3/)
 
 set(CPU_BUILD ON CACHE BOOL "Build for CPU")
 
-if (CPU_BUILD)
+if (CPU_BUILD==ON)
     # Check if you have OMP support
     find_package(OpenMP)
 
@@ -43,7 +43,6 @@ if (CPU_BUILD)
         message(FATAL_ERROR "OpenMP not found")
     endif()
 else ()
-    # If we are building for GPU, do the belows
-    add_executable(visibilityLattices main_gpu.cpp)
-    target_link_libraries(visibilityLattices PUBLIC polyscope DGtal)
-endif ()
+    # Alert the user that they should use the GPU build in the gpu directory
+    message(FATAL_ERROR "Building for GPU is not supported in this directory. Please use the gpu directory for GPU builds.")
+endif()
