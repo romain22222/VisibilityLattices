@@ -1,3 +1,5 @@
 volumes
 cmake-build-*
 .idea
+/.polyscope.ini
+/imgui.ini
