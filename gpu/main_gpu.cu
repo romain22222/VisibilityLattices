@@ -13,7 +13,6 @@
 #include "DGtal/helpers/StdDefs.h"
 #include "DGtal/helpers/Shortcuts.h"
 #include "DGtal/helpers/ShortcutsGeometry.h"
-#include <crt/host_defines.h>
 #include "../additionnalClasses/LinearKDTree.h"
 #include "../CLI11.hpp"
 
@@ -151,12 +150,12 @@ struct IntervalList {
   int capacity;
   int size;
 
-  __host__ __device__ IntervalList(Interval iStart, int maxCapacity) : data(new Interval[maxCapacity]{iStart}),
+  __device__ IntervalList(Interval iStart, int maxCapacity) : data(new Interval[maxCapacity]{iStart}),
                                                                        capacity(maxCapacity), size(1) {}
 
   __host__ __device__ IntervalList() : data(nullptr), capacity(0), size(0) {}
 
-  __host__ __device__ IntervalList(int maxCapacity) : data(new Interval[maxCapacity]()), capacity(maxCapacity),
+  __device__ IntervalList(int maxCapacity) : data(new Interval[maxCapacity]()), capacity(maxCapacity),
                                                       size(0) {}
 
   __host__ __device__ Interval *begin() const {
@@ -169,6 +168,16 @@ struct IntervalList {
 
   __host__ __device__ bool empty() const {
     return size == 0;
+  }
+
+  __host__ __device__ Interval &operator[](int index) {
+    ASSERT(index >= 0 && index < size);
+    return data[index];
+  }
+
+  __host__ __device__ const Interval &operator[](int index) const {
+    ASSERT(index >= 0 && index < size);
+    return data[index];
   }
 };
 
@@ -183,6 +192,11 @@ Point vec3iToPointVector(const Vec3i &vector) {
   return Point(vector.x, vector.y, vector.z);
 }
 
+struct LatticeFoundResult {
+  bool found;
+  IntervalList intervals;
+};
+
 struct MyLatticeSet {
   Vec3i *d_keys = nullptr;
   IntervalList *d_intervals = nullptr;
@@ -191,23 +205,21 @@ struct MyLatticeSet {
   size_t numKeys = 0;
   size_t numIntervals = 0;
 
-  void toGPU(const LatticeSet &cpuLattice) {
+  void toGPU(LatticeSet &cpuLattice) {
     std::vector<Vec3i> keys;
     std::vector<size_t> offsets;
     std::vector<IntervalList> allIntervals;
 
     size_t offset = 0;
 
-    const auto &mapRef = const_cast<std::map<Point, IntegralIntervals<Integer >>&>(cpuLattice.data());
-
-    for (const auto &[key, intervals]: mapRef) {
+    for (auto [key, intervals]: cpuLattice.data()) {
       keys.push_back(pointVectorToVec3i(key));
       offsets.push_back(offset);
       const auto &ivs = intervals.data();
       IntervalList intervalList;
       intervalList.data = new Interval[ivs.size()];
       intervalList.capacity = ivs.size();
-      intervalList.size = new int(ivs.size());
+      intervalList.size = ivs.size();
       for (size_t i = 0; i < ivs.size(); ++i) {
         intervalList.data[i] = {ivs[i].first, ivs[i].second};
       }
@@ -225,7 +237,7 @@ struct MyLatticeSet {
     cudaMemcpy(d_intervals, allIntervals.data(), sizeof(IntervalList) * numIntervals, cudaMemcpyHostToDevice);
   }
 
-  __host__ MyLatticeSet(const LatticeSet &l)
+  __host__ MyLatticeSet(LatticeSet &l)
       : myAxis(l.axis()) {
     numKeys = l.size();
     numIntervals = 0;
@@ -233,12 +245,6 @@ struct MyLatticeSet {
       numIntervals += intervals.size();
     }
 
-    toGPU(l);
-  }
-
-  __host__ MyLatticeSet(const Vec3i *pointels, const Vec3i *pointelsE, int axis)
-      : myAxis(axis) {
-    const auto l = LatticeSetByIntervals<Space>(pointels, pointelsE, axis).starOfPoints();
     toGPU(l);
   }
 
@@ -268,7 +274,7 @@ struct MyLatticeSet {
       }
     }
     if (segment != Vec3i()) L_ab.insert(vec3iToPointVector(segment * 2));
-    const auto v = L_ab.starOfCells();
+    auto v = L_ab.starOfCells();
     toGPU(v);
   }
 
@@ -277,18 +283,14 @@ struct MyLatticeSet {
     cudaFree(d_intervals);
   }
 
-  __host__ __device__ std::pair<Vec3i, IntervalList> *find(const Vec3i &p) const {
+  __host__ __device__ LatticeFoundResult find(const Vec3i &p) {
     // Search for the point p in the lattice set
     for (size_t i = 0; i < numKeys; ++i) {
       if (d_keys[i] == p) {
-        return {d_keys[i], d_intervals[i]};
+        return {true, d_intervals[i]};
       }
     }
-    return this.end();
-  }
-
-  __host__ __device__ std::pair<Vec3i, IntervalList> *end() const {
-    return nullptr;
+    return {false, IntervalList()};
   }
 };
 
@@ -333,11 +335,11 @@ struct FlatVisibility {
     std::fill(visibles, visibles + vectorsSize * pointsSize, false);
   }
 
-  __host__ __device__
-  void set(const Vec3i &offset, const std::vector<std::pair<int, int>> &value, size_t vectorIdx) const {
+  __device__
+  void set(const Vec3i &offset, const IntervalList &value, size_t vectorIdx) const {
     Vec3i p = offset;
     for (const auto &interval: value) {
-      for (int i = interval.first / 2; i <= interval.second / 2; ++i) {
+      for (int i = interval.start / 2; i <= interval.end / 2; ++i) {
         p[mainAxis] = i;
         int pointIdx = getPointIdx(p);
         if (pointIdx < pointsSize && vectorIdx < vectorsSize) {
@@ -481,28 +483,29 @@ Vec3is getAllVectors(int radius) {
  * @param figIntervals
  * @return
  */
-IntervalList checkInterval(const Interval toCheck, const IntervalList &figIntervals) {
+__device__ IntervalList checkInterval(const Interval toCheck, const IntervalList &figIntervals) {
   IntervalList result(figIntervals.size);
-  const auto toCheckSize = toCheck.second - toCheck.first;
+  const auto toCheckSize = toCheck.end - toCheck.start;
   for (const auto &interval: figIntervals) {
-    if (interval.second - interval.first >= toCheckSize) {
-      result.data[result.size++] = {interval.first - toCheck.first, interval.second - toCheck.second};
+    if (interval.end - interval.start >= toCheckSize) {
+      result.data[result.size++] = {interval.start - toCheck.start, interval.end - toCheck.end};
     }
   }
   return result;
 }
 
-IntervalList intersect(const IntervalList &l1, const IntervalList &l2) {
+__device__ IntervalList intersect(const IntervalList &l1, const IntervalList &l2) {
   IntervalList result(l1.capacity);
   int k1 = 0, k2 = 0;
-  while (k1 < l1.size() && k2 < l2.size()) {
+  while (k1 < l1.size && k2 < l2.size) {
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
-    const auto i = std::max(interval1.first, interval2.first);
-    const auto j = std::min(interval1.second, interval2.second);
+//    const auto i = std::max(interval1.start, interval2.start);
+    const auto i = interval1.start > interval2.start ? interval1.start : interval2.start;
+    const auto j = interval1.end < interval2.end ? interval1.end : interval2.end;
     if (i <= j) result.data[result.size++] = {i, j};
-    if (interval1.second <= interval2.second) k1++;
-    if (interval1.second >= interval2.second) k2++;
+    if (interval1.end <= interval2.end) k1++;
+    if (interval1.end >= interval2.end) k2++;
   }
   return result;
 }
@@ -514,7 +517,7 @@ IntervalList intersect(const IntervalList &l1, const IntervalList &l2) {
  * @param figLattices
  * @return
  */
-IntervalList matchVector(IntervalList &toCheck,
+__device__ IntervalList matchVector(IntervalList &toCheck,
                          const IntervalList &vectorIntervals,
                          const IntervalList &figIntervals) {
   for (const auto &vInterval: vectorIntervals) {
@@ -527,7 +530,8 @@ IntervalList matchVector(IntervalList &toCheck,
 void computeVisibilityGpu(int radius) {
   std::cout << "Computing visibility GPU" << std::endl;
   auto axis = getLargeAxis();
-  MyLatticeSet figLattices(LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints());
+  auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
+  MyLatticeSet figLattices(tmpL);
   const auto axises_idx = std::vector<int>{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   auto segmentList = getAllVectors(radius);
 
@@ -557,20 +561,19 @@ void computeVisibilityGpu(int radius) {
       maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
       for (auto tx = minTx; tx < maxTx; tx++) {
         for (auto ty = minTy; ty < maxTy; ty++) {
-//          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
           IntervalList eligibles(
-              {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},);
+              {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},
+              digital_dimensions[axis] + 1);
           const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                                 axis == 2 ? 0 : 2 * ty);
           for (auto i = 0; i < latticeVector.numKeys; i++) {
             const auto key = latticeVector.d_keys[i];
-            const auto value = *(latticeVector.d_intervals[i]);
-            const auto it = figLattices.find(pInterest + key);
-            if (it == figLattices.end()) {
-              eligibles = IntervalList();
-              break;
-            }
-            eligibles = matchVector(eligibles, value, it->second);
+            const auto value = latticeVector.d_intervals[i];
+            const auto res = figLattices.find(pInterest + key);
+            if (res.found)
+              eligibles = matchVector(eligibles, value, res.intervals);
+            else
+              eligibles = res.intervals;
             if (eligibles.empty()) break;
           }
           if (!eligibles.empty()) {
@@ -898,7 +901,7 @@ void computeL2looErrors() {
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }*/
 
-void testIntersection() {
+/*void testIntersection() {
   // 1|2 4|5 7|9
   for (auto v: intersect(Intervals({Interval(0, 9)}), Intervals({Interval(1, 2), Interval(4, 5), Interval(7, 10)}))) {
     std::cout << v << " ";
@@ -917,7 +920,7 @@ void testIntersection() {
     std::cout << v << " ";
   }
   std::cout << std::endl;
-}
+}*/
 
 
 int main(int argc, char *argv[]) {
