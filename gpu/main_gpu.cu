@@ -1,18 +1,14 @@
 #include <iostream>
 #include <random>
 #include <string>
-//#include "polyscope/polyscope.h"
-//#include "polyscope/point_cloud.h"
-//#include "polyscope/pick.h"
-//#include "polyscope/surface_mesh.h"
-#include "DGtal/arithmetic/IntegerComputer.h"
-#include "DGtal/base/Common.h"
-#include "DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h"
-#include "DGtal/geometry/volumes/DigitalConvexity.h"
-#include "DGtal/geometry/volumes/TangencyComputer.h"
-#include "DGtal/helpers/StdDefs.h"
-#include "DGtal/helpers/Shortcuts.h"
-#include "DGtal/helpers/ShortcutsGeometry.h"
+#include <DGtal/arithmetic/IntegerComputer.h>
+#include <DGtal/base/Common.h>
+#include <DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h>
+#include <DGtal/geometry/volumes/DigitalConvexity.h>
+#include <DGtal/geometry/volumes/TangencyComputer.h>
+#include <DGtal/helpers/StdDefs.h>
+#include <DGtal/helpers/Shortcuts.h>
+#include <DGtal/helpers/ShortcutsGeometry.h>
 #include "../additionnalClasses/LinearKDTree.h"
 #include "../CLI11.hpp"
 
@@ -43,6 +39,7 @@ struct Vec3i {
     return {x - other.x, y - other.y, z - other.z};
   }
 
+  __host__ __device__
   Vec3i operator*(int val) const {
     return {x * val, y * val, z * val};
   }
@@ -81,13 +78,12 @@ struct Vec3i {
 
 
 // Typedefs
-typedef Vec3i Vec3i;
-typedef std::vector<Vec3i> Vec3is;
-typedef Shortcuts<KSpace> SH3;
-typedef ShortcutsGeometry<KSpace> SHG3;
-typedef DigitalConvexity<KSpace> Convexity;
+typedef std::vector <Vec3i> Vec3is;
+typedef Shortcuts <KSpace> SH3;
+typedef ShortcutsGeometry <KSpace> SHG3;
+typedef DigitalConvexity <KSpace> Convexity;
 typedef typename Convexity::LatticeSet LatticeSet;
-typedef CorrectedNormalCurrentComputer<RealPoint, RealVector> CNC;
+typedef CorrectedNormalCurrentComputer <RealPoint, RealVector> CNC;
 
 // Polyscope
 //polyscope::PointCloud *psVisibility = nullptr;
@@ -96,30 +92,30 @@ typedef CorrectedNormalCurrentComputer<RealPoint, RealVector> CNC;
 
 // Global variables
 KSpace K;
-IntegerComputer<Integer> ic;
+IntegerComputer <Integer> ic;
 std::vector<int> digital_dimensions;
 SH3::SurfelRange surfels;
-std::vector<Point> pointels;
+std::vector <Point> pointels;
 std::size_t pointel_idx = 0;
 Point selected_point;
-CountedPtr<SH3::ImplicitShape3D> implicit_shape(nullptr);
-CountedPtr<SH3::BinaryImage> binary_image(nullptr);
-CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
-CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
+CountedPtr <SH3::ImplicitShape3D> implicit_shape(nullptr);
+CountedPtr <SH3::BinaryImage> binary_image(nullptr);
+CountedPtr <SH3::DigitalSurface> digital_surface(nullptr);
+CountedPtr <SH3::SurfaceMesh> primal_surface(nullptr);
 
-std::vector<RealPoint> visibility_normals;
-std::vector<RealPoint> normalVisibilityColors;
-std::vector<RealPoint> normalIIColors;
-std::vector<RealPoint> visibility_sharps;
+std::vector <RealPoint> visibility_normals;
+std::vector <RealPoint> normalVisibilityColors;
+std::vector <RealPoint> normalIIColors;
+std::vector <RealPoint> visibility_sharps;
 
-std::vector<RealPoint> true_normals;
-std::vector<RealPoint> trivial_normals;
-std::vector<RealPoint> surfel_true_normals;
-std::vector<RealPoint> ii_normals;
-std::vector<RealPoint> surfel_ii_normals;
+std::vector <RealPoint> true_normals;
+std::vector <RealPoint> trivial_normals;
+std::vector <RealPoint> surfel_true_normals;
+std::vector <RealPoint> ii_normals;
+std::vector <RealPoint> surfel_ii_normals;
 
 // Curvature variables
-CountedPtr<CNC> pCNC;
+CountedPtr <CNC> pCNC;
 CNC::ScalarMeasure mu0;
 CNC::ScalarMeasure mu1;
 CNC::ScalarMeasure mu2;
@@ -128,8 +124,8 @@ std::vector<double> H;
 std::vector<double> G;
 std::vector<double> K1;
 std::vector<double> K2;
-std::vector<RealVector> D1;
-std::vector<RealVector> D2;
+std::vector <RealVector> D1;
+std::vector <RealVector> D2;
 float MaxCurv = 0.2;
 
 // Parameters
@@ -151,12 +147,12 @@ struct IntervalList {
   int size;
 
   __device__ IntervalList(Interval iStart, int maxCapacity) : data(new Interval[maxCapacity]{iStart}),
-                                                                       capacity(maxCapacity), size(1) {}
+                                                              capacity(maxCapacity), size(1) {}
 
   __host__ __device__ IntervalList() : data(nullptr), capacity(0), size(0) {}
 
   __device__ IntervalList(int maxCapacity) : data(new Interval[maxCapacity]()), capacity(maxCapacity),
-                                                      size(0) {}
+                                             size(0) {}
 
   __host__ __device__ Interval *begin() const {
     return data;
@@ -197,18 +193,61 @@ struct LatticeFoundResult {
   IntervalList intervals;
 };
 
+__host__ __device__ int myMax(int a, int b) {
+  return (a > b) ? a : b;
+}
+
+__host__ __device__ int myMax3(int a, int b, int c) {
+  return (a > b) ? myMax(a, c) : myMax(b, c);
+}
+
+__host__ __device__ int myMin(int a, int b) {
+  return (a < b) ? a : b;
+}
+
+__host__ __device__ int myMin3(int a, int b, int c) {
+  return (a < b) ? myMin(a, c) : myMin(b, c);
+}
+
+typename Type
+struct Buffer {
+  Type *data;
+  size_t capacity;
+  size_t size;
+
+  __host__ Buffer(size_t cap) : data(new Type[cap]), capacity(cap), size(0) {
+    cudaMalloc(&data, sizeof(Type) * capacity);
+  }
+
+  __host__ ~Buffer() {
+    if (data) {
+      cudaFree(data);
+      data = nullptr;
+    }
+  }
+
+  __device__ void push_back(const Vec3i &v) {
+    ASSERT(size < capacity);
+    data[size++] = v;
+  }
+
+  __host__ __device__ Vec3i &operator[](size_t index) {
+    ASSERT(index < size);
+    return data[index];
+  }
+};
+
 struct MyLatticeSet {
   Vec3i *d_keys = nullptr;
   IntervalList *d_intervals = nullptr;
   int myAxis;
 
   size_t numKeys = 0;
-  size_t numIntervals = 0;
 
   void toGPU(LatticeSet &cpuLattice) {
-    std::vector<Vec3i> keys;
-    std::vector<size_t> offsets;
-    std::vector<IntervalList> allIntervals;
+    std::vector <Vec3i> keys;
+    std::vector <size_t> offsets;
+    std::vector <IntervalList> allIntervals;
 
     size_t offset = 0;
 
@@ -228,36 +267,31 @@ struct MyLatticeSet {
     }
 
     numKeys = keys.size();
-    numIntervals = allIntervals.size();
 
     cudaMalloc(&d_keys, sizeof(Vec3i) * numKeys);
-    cudaMalloc(&d_intervals, sizeof(IntervalList) * numIntervals);
+    cudaMalloc(&d_intervals, sizeof(IntervalList) * numKeys);
 
     cudaMemcpy(d_keys, keys.data(), sizeof(Vec3i) * numKeys, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_intervals, allIntervals.data(), sizeof(IntervalList) * numIntervals, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_intervals, allIntervals.data(), sizeof(IntervalList) * numKeys, cudaMemcpyHostToDevice);
   }
 
   __host__ MyLatticeSet(LatticeSet &l)
       : myAxis(l.axis()) {
-    numKeys = l.size();
-    numIntervals = 0;
-    for (const auto &[key, intervals]: l.data()) {
-      numIntervals += intervals.size();
-    }
-
     toGPU(l);
   }
 
-  __host__ MyLatticeSet(const Vec3i segment, int axis)
+  __device__ MyLatticeSet(const Vec3i segment, Buffer<Vec3i> mainPointsBuf, Buffer<Vec3i> keysBuf,
+                          Buffer<IntervalList> intervalsBuf, int axis)
       : myAxis(axis) {
-    // TODO: Compute directly on GPU
-    LatticeSet L_ab(axis);
-    L_ab.insert({0, 0, 0});
+    int otherAxis1 = (axis + 1) % 3;
+    int otherAxis2 = (axis + 2) % 3;
+    int currentIndex = 0;
+    mainPointsBuf.push_back(Vec3i(0, 0, 0));
     for (int k = 0; k < 3; k++) {
       const int n = (segment[k] >= 0) ? segment[k] : -segment[k];
       const int d = (segment[k] >= 0) ? 1 : -1;
       if (n == 0) continue;
-      Point kc;
+      Vec3i kc;
       for (int i = 1; i < n; i++) {
         for (int j = 0; j < 3; j++) {
           if (j == k) kc[k] = 2 * (d * i);
@@ -270,17 +304,54 @@ struct MyLatticeSet {
             else if (r > 0) kc[j] += 1;
           }
         }
-        L_ab.insert(kc);
+        mainPointsBuf.push_back(kc);
       }
     }
-    if (segment != Vec3i()) L_ab.insert(vec3iToPointVector(segment * 2));
-    auto v = L_ab.starOfCells();
-    toGPU(v);
+    if (segment != Vec3i()) mainPointsBuf.push_back(segment * 2);
+
+    // Allocate memory for keys and intervals
+    d_keys = keysBuf.data;
+    d_intervals = intervalsBuf.data;
+
+    int currentMaxKey = 0;
+
+    for (size_t i = 0; i < currentIndex; ++i) {
+      for (int j = -1; j < 2; ++j) {
+        for (int k = -1; k < 2; ++k) {
+          Vec3i key = mainPointsBuf[i];
+          key[otherAxis1] += j;
+          key[otherAxis2] += k;
+          auto alreadyExists = this->find(key);
+          if (!alreadyExists.found) {
+            keysBuf.push_back(key);
+            intervalsBuf.push_back(IntervalList());
+            d_intervals[currentMaxKey - 1].size = 1;
+            d_intervals[currentMaxKey - 1].capacity = 1;
+            d_intervals[currentMaxKey - 1].data[0] = {key[axis] - 1, key[axis] + 1};
+          } else {
+            // If the key already exists, merge intervals
+            auto &existingIntervals = d_intervals[alreadyExists.intervals.size - 1];
+            existingIntervals.data[0].start = myMin(existingIntervals.data[existingIntervals.size - 1].start,
+                                                    key[axis] - 1);
+            existingIntervals.data[0].end = myMax(existingIntervals.data[existingIntervals.size - 1].end,
+                                                  key[axis] + 1);
+          }
+        }
+      }
+    }
+
+    numKeys = currentMaxKey;
   }
 
   __host__ ~MyLatticeSet() {
-    cudaFree(d_keys);
-    cudaFree(d_intervals);
+    if (d_keys) {
+      cudaFree(d_keys);
+      d_keys = nullptr;
+    }
+    if (d_intervals) {
+      cudaFree(d_intervals);
+      d_intervals = nullptr;
+    }
   }
 
   __host__ __device__ LatticeFoundResult find(const Vec3i &p) {
@@ -331,8 +402,9 @@ struct FlatVisibility {
   FlatVisibility(int mainAxis_, Vec3i *vectors, int vectorsSz, Vec3i *points, int pointsSz)
       : mainAxis(mainAxis_), vectorList(vectors), vectorsSize(vectorsSz),
         pointList(points), pointsSize(pointsSz) {
-    visibles = new bool[vectorsSize * pointsSize];
-    std::fill(visibles, visibles + vectorsSize * pointsSize, false);
+    size_t totalSize = pointsSize * vectorsSize;
+    cudaMalloc(&visibles, totalSize * sizeof(bool));
+    cudaMemset(visibles, 0, totalSize * sizeof(bool));
   }
 
   __device__
@@ -366,7 +438,7 @@ struct FlatVisibility {
     return vectorsSize;
   }
 
-  bool isVisible(const Vec3i &p1, const Vec3i &p2) const {
+  __host__ bool isVisible(const Vec3i &p1, const Vec3i &p2) const {
     if (p1 == p2) return true;
 
     if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
@@ -385,18 +457,11 @@ struct FlatVisibility {
     }
     return true;
   }
-
-  bool empty() const {
-    for (int i = 0; i < vectorsSize * pointsSize; ++i) {
-      if (visibles[i]) return false;
-    }
-    return true;
-  }
 };
 
 FlatVisibility visibility = FlatVisibility();
 
-void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
+void embedPointels(const std::vector <Point> &vq, std::vector <RealPoint> &vp) {
   vp.clear();
   vp.reserve(vq.size());
   for (const auto &i: vq)
@@ -405,7 +470,7 @@ void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
                     gridstep * (i[2] - 0.5));
 }
 
-void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) {
+void digitizePointels(const std::vector <RealPoint> &vp, std::vector <Point> &vq) {
   vq.clear();
   vq.reserve(vp.size());
   for (const auto &i: vp)
@@ -451,6 +516,33 @@ std::vector<int> getFigSizes() {
   return sizes;
 }
 
+
+std::vector<int> vectAmount = {0, 13, 49, 145, 289, 577, 865, 1441, 2017, 2881, 3745, 5185, 6337, 8353, 10081, 12385,
+                               14689, 18145, 20737, 25057, 28513, 33121, 37441, 43777, 48385, 55585, 61633, 69409,
+                               76321, 86401, 93313, 104833, 114049, 125569, 135937, 149761, 160129, 176545, 189505,
+                               205633, 219457, 239617, 253441, 275617, 292897, 313633, 332641, 359137, 377569, 405793,
+                               427393, 455041, 479233, 512929, 536257, 570817, 598465, 633025, 663265, 705025, 732673,
+                               777313, 811873, 853345, 890209, 938593, 973153, 1027009, 1068481, 1119169, 1160641,
+                               1221121, 1262593, 1326529, 1375777, 1433377, 1485217, 1554337, 1602721, 1677601, 1732897,
+                               1802881, 1863361, 1946017, 2001313, 2084257, 2150785, 2231425, 2300545, 2395585, 2457793,
+                               2554561, 2630593, 2722753, 2802241, 2905921, 2979649, 3092545, 3177217, 3280897, 3367297,
+                               3489697, 3572641, 3699937, 3796705, 3907297, 4008385, 4145761, 4239073, 4381633, 4485313,
+                               4616641, 4727233, 4880449, 4984129, 5136193, 5257153, 5402305, 5527585, 5693473, 5804065,
+                               5978305, 6112225, 6273505, 6411745, 6591745, 6716161, 6909697, 7057153, 7234561, 7379713,
+                               7585633, 7723873, 7931233, 8092801, 8279425, 8445313, 8670529, 8822593, 9054433, 9220321,
+                               9432289, 9613729, 9855649, 10021537, 10263457, 10455265, 10681057, 10878049, 11144449,
+                               11317249, 11590849, 11798209, 12047041, 12254401, 12530881, 12724417, 13020193, 13244833,
+                               13514401, 13735585, 14039713, 14249665, 14568481, 14810401, 15086881, 15334849, 15669505,
+                               15890689, 16231393, 16480225, 16791265, 17057377, 17416513, 17658433, 18004033, 18280513,
+                               18614593, 18899713, 19284193, 19533025, 19926145, 20216449, 20573569, 20877697, 21271681,
+                               21548161, 21962881, 22280833, 22654081, 22965121, 23402881, 23697793, 24144769, 24483457,
+                               24870529, 25209217, 25674913, 25985953, 26461153, 26806753};
+
+int allVectorSize(int radius) {
+  ASSERT(radius >= 0 && radius < vectAmount.size());
+  return vectAmount[radius];
+}
+
 /**
  * Get all the unique integer vectors of maximum coordinate r
  * Only the vectors with gcd(x, y, z) = 1 are considered
@@ -483,7 +575,7 @@ Vec3is getAllVectors(int radius) {
  * @param figIntervals
  * @return
  */
-__device__ IntervalList checkInterval(const Interval toCheck, const IntervalList &figIntervals) {
+__device__ IntervalList checkInterval(const Interval &toCheck, const IntervalList &figIntervals) {
   IntervalList result(figIntervals.size);
   const auto toCheckSize = toCheck.end - toCheck.start;
   for (const auto &interval: figIntervals) {
@@ -500,9 +592,8 @@ __device__ IntervalList intersect(const IntervalList &l1, const IntervalList &l2
   while (k1 < l1.size && k2 < l2.size) {
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
-//    const auto i = std::max(interval1.start, interval2.start);
-    const auto i = interval1.start > interval2.start ? interval1.start : interval2.start;
-    const auto j = interval1.end < interval2.end ? interval1.end : interval2.end;
+    const auto i = myMax(interval1.start, interval2.start);
+    const auto j = myMin(interval1.end, interval2.end);
     if (i <= j) result.data[result.size++] = {i, j};
     if (interval1.end <= interval2.end) k1++;
     if (interval1.end >= interval2.end) k2++;
@@ -518,8 +609,8 @@ __device__ IntervalList intersect(const IntervalList &l1, const IntervalList &l2
  * @return
  */
 __device__ IntervalList matchVector(IntervalList &toCheck,
-                         const IntervalList &vectorIntervals,
-                         const IntervalList &figIntervals) {
+                                    const IntervalList &vectorIntervals,
+                                    const IntervalList &figIntervals) {
   for (const auto &vInterval: vectorIntervals) {
     toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
     if (toCheck.empty()) break;
@@ -527,61 +618,73 @@ __device__ IntervalList matchVector(IntervalList &toCheck,
   return toCheck;
 }
 
+__global__ void computeVisibilityKernel(
+    int axis, int *digital_dimensions, int *axises_idx,
+    MyLatticeSet figLattices, FlatVisibility visibility,
+    Vec3i *segmentList, int segmentSize,
+    Buffer<Vec3i> *mainsPointsBufGlobal, Buffer<Vec3i> *keysBufGlobal, Buffer<IntervalList> *intervalsBufGlobal
+) {
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx >= segmentSize) return;
+
+  Vec3i segment = segmentList[idx];
+  MyLatticeSet latticeVector(segment, mainsPointsBufGlobal[idx], keysBufGlobal[i], intervalsBufGlobal[i], axis);
+  int minTx = digital_dimensions[axises_idx[1] + 3] - myMin(0, segment[axises_idx[1]]);
+  int maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - myMax(0, segment[axises_idx[1]]);
+  int minTy = digital_dimensions[axises_idx[2] + 3] - myMin(0, segment[axises_idx[2]]);
+  int maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - myMax(0, segment[axises_idx[2]]);
+  for (auto tx = minTx; tx < maxTx; tx++) {
+    for (auto ty = minTy; ty < maxTy; ty++) {
+      IntervalList eligibles(
+          {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},
+          digital_dimensions[axis] + 1);
+      const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+                            axis == 2 ? 0 : 2 * ty);
+      for (auto i = 0; i < latticeVector.numKeys; i++) {
+        const auto key = latticeVector.d_keys[i];
+        const auto value = latticeVector.d_intervals[i];
+        const auto res = figLattices.find(pInterest + key);
+        if (res.found)
+          eligibles = matchVector(eligibles, value, res.intervals);
+        else
+          eligibles = res.intervals;
+        if (eligibles.empty()) break;
+      }
+      if (!eligibles.empty()) {
+        visibility.set(pInterest / 2, eligibles, idx);
+      }
+    }
+  }
+}
+
 void computeVisibilityGpu(int radius) {
   std::cout << "Computing visibility GPU" << std::endl;
   auto axis = getLargeAxis();
   auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
   MyLatticeSet figLattices(tmpL);
-  const auto axises_idx = std::vector<int>{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
-  auto segmentList = getAllVectors(radius);
 
-  // avoid thread imbalance
-  std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
+//  const auto axises_idx = std::vector < int > {axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
+  int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
+  auto segmentList = getAllVectors(radius);
+  auto segmentSize = allVectorSize(radius);
 
   Vec3i *pointelsData = new Vec3i[pointels.size()];
   for (size_t i = 0; i < pointels.size(); ++i) {
     pointelsData[i] = pointVectorToVec3i(pointels[i]);
   }
-
   visibility = FlatVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
-  size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize;
-  auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
-  std::cout << "Starting // GPU" << std::endl;
-  for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
-    Vec3i segment;
-    int minTx, maxTx, minTy, maxTy;
-    for (auto segmentIdx = chunkIdx * chunkSize;
-         segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
-      segment = segmentList[segmentIdx];
-      MyLatticeSet latticeVector(segment, axis);
-      minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
-      maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
-      minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
-      maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
-      for (auto tx = minTx; tx < maxTx; tx++) {
-        for (auto ty = minTy; ty < maxTy; ty++) {
-          IntervalList eligibles(
-              {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},
-              digital_dimensions[axis] + 1);
-          const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-                                axis == 2 ? 0 : 2 * ty);
-          for (auto i = 0; i < latticeVector.numKeys; i++) {
-            const auto key = latticeVector.d_keys[i];
-            const auto value = latticeVector.d_intervals[i];
-            const auto res = figLattices.find(pInterest + key);
-            if (res.found)
-              eligibles = matchVector(eligibles, value, res.intervals);
-            else
-              eligibles = res.intervals;
-            if (eligibles.empty()) break;
-          }
-          if (!eligibles.empty()) {
-            visibility.set(pInterest / 2, eligibles, segmentIdx);
-          }
-        }
-      }
-    }
+  delete[] pointelsData;
+
+  computeVisibilityKernel<<<(segmentSize + 255) / 256, 256>>>(
+      axis,
+      digital_dimensions.data(),
+      axises_idx,
+      figLattices, visibility, segmentList.data(), segmentSize);
+  cudaDeviceSynchronize();
+  delete[] axises_idx;
+  if (cudaGetLastError() != cudaSuccess) {
+    std::cerr << "Error in computeVisibilityKernel: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
+    exit(EXIT_FAILURE);
   }
   std::cout << "Visibility computed" << std::endl;
 }
@@ -991,8 +1094,8 @@ int main(int argc, char *argv[]) {
     trace.endBlock();
   }
 
-  std::vector<std::vector<std::size_t>> primal_faces;
-  std::vector<RealPoint> primal_positions;
+  std::vector <std::vector<std::size_t>> primal_faces;
+  std::vector <RealPoint> primal_positions;
 
 
   trace.beginBlock("Computing digital points and primal surface");
@@ -1077,6 +1180,8 @@ int main(int argc, char *argv[]) {
 //    computeMeanDistanceVisibility();
 //    Time = trace.endBlock();
   }
+
+  delete pTC;
   return EXIT_SUCCESS;
 
 }

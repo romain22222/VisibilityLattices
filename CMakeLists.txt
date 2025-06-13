@@ -29,20 +29,13 @@ include(dgtal)
 # include_directories( /Users/lachaud/GITHUB/DigitalShapeTools/src )
 include_directories( /opt/homebrew/include/eigen3/)
 
-set(CPU_BUILD ON CACHE BOOL "Build for CPU")
+# Check if you have OMP support
+find_package(OpenMP)
 
-if (CPU_BUILD==ON)
-    # Check if you have OMP support
-    find_package(OpenMP)
-
-    if(OpenMP_CXX_FOUND)
-        add_executable(visibilityLattices main.cpp)
-        target_link_libraries(visibilityLattices PUBLIC polyscope DGtal OpenMP::OpenMP_CXX)
-    else ()
-        # Crash the build
-        message(FATAL_ERROR "OpenMP not found")
-    endif()
+if(OpenMP_CXX_FOUND)
+    add_executable(visibilityLattices main.cpp)
+    target_link_libraries(visibilityLattices PUBLIC polyscope DGtal OpenMP::OpenMP_CXX)
 else ()
-    # Alert the user that they should use the GPU build in the gpu directory
-    message(FATAL_ERROR "Building for GPU is not supported in this directory. Please use the gpu directory for GPU builds.")
+    # Crash the build
+    message(FATAL_ERROR "OpenMP not found")
 endif()
