@@ -146,13 +146,12 @@ struct IntervalList {
   int capacity;
   int size;
 
-  __device__ IntervalList(Interval iStart, int maxCapacity) : data(new Interval[maxCapacity]{iStart}),
-                                                              capacity(maxCapacity), size(1) {}
-
   __host__ __device__ IntervalList() : data(nullptr), capacity(0), size(0) {}
 
-  __device__ IntervalList(int maxCapacity) : data(new Interval[maxCapacity]()), capacity(maxCapacity),
-                                             size(0) {}
+  __host__ IntervalList(int maxCapacity) : data(nullptr), capacity(maxCapacity),
+                                           size(0) {
+    data = new Interval[capacity];
+  }
 
   __host__ __device__ Interval *begin() const {
     return data;
@@ -167,12 +166,12 @@ struct IntervalList {
   }
 
   __host__ __device__ Interval &operator[](int index) {
-    ASSERT(index >= 0 && index < size);
+    ASSERT(index >= 0 && index < size && size <= capacity);
     return data[index];
   }
 
   __host__ __device__ const Interval &operator[](int index) const {
-    ASSERT(index >= 0 && index < size);
+    ASSERT(index >= 0 && index < size && size <= capacity);
     return data[index];
   }
 };
@@ -209,13 +208,13 @@ __host__ __device__ int myMin3(int a, int b, int c) {
   return (a < b) ? myMin(a, c) : myMin(b, c);
 }
 
-typename Type
+template<typename Type>
 struct Buffer {
   Type *data;
   size_t capacity;
   size_t size;
 
-  __host__ Buffer(size_t cap) : data(new Type[cap]), capacity(cap), size(0) {
+  __host__ Buffer(size_t cap) : data(nullptr), capacity(cap), size(0) {
     cudaMalloc(&data, sizeof(Type) * capacity);
   }
 
@@ -226,12 +225,12 @@ struct Buffer {
     }
   }
 
-  __device__ void push_back(const Vec3i &v) {
+  __device__ void push_back(const Type &v) {
     ASSERT(size < capacity);
     data[size++] = v;
   }
 
-  __host__ __device__ Vec3i &operator[](size_t index) {
+  __host__ __device__ Type &operator[](size_t index) {
     ASSERT(index < size);
     return data[index];
   }
@@ -244,7 +243,7 @@ struct MyLatticeSet {
 
   size_t numKeys = 0;
 
-  void toGPU(LatticeSet &cpuLattice) {
+  __host__ void toGPU(LatticeSet &cpuLattice) {
     std::vector <Vec3i> keys;
     std::vector <size_t> offsets;
     std::vector <IntervalList> allIntervals;
@@ -280,8 +279,8 @@ struct MyLatticeSet {
     toGPU(l);
   }
 
-  __device__ MyLatticeSet(const Vec3i segment, Buffer<Vec3i> mainPointsBuf, Buffer<Vec3i> keysBuf,
-                          Buffer<IntervalList> intervalsBuf, int axis)
+  __device__ MyLatticeSet(const Vec3i segment, Buffer<Vec3i> &mainPointsBuf, Buffer<Vec3i> &keysBuf,
+                          Buffer<IntervalList> &intervalsBuf, int axis)
       : myAxis(axis) {
     int otherAxis1 = (axis + 1) % 3;
     int otherAxis2 = (axis + 2) % 3;
@@ -324,7 +323,6 @@ struct MyLatticeSet {
           auto alreadyExists = this->find(key);
           if (!alreadyExists.found) {
             keysBuf.push_back(key);
-            intervalsBuf.push_back(IntervalList());
             d_intervals[currentMaxKey - 1].size = 1;
             d_intervals[currentMaxKey - 1].capacity = 1;
             d_intervals[currentMaxKey - 1].data[0] = {key[axis] - 1, key[axis] + 1};
@@ -343,25 +341,14 @@ struct MyLatticeSet {
     numKeys = currentMaxKey;
   }
 
-  __host__ ~MyLatticeSet() {
-    if (d_keys) {
-      cudaFree(d_keys);
-      d_keys = nullptr;
-    }
-    if (d_intervals) {
-      cudaFree(d_intervals);
-      d_intervals = nullptr;
-    }
-  }
-
-  __host__ __device__ LatticeFoundResult find(const Vec3i &p) {
+  __device__ LatticeFoundResult find(const Vec3i &p) {
     // Search for the point p in the lattice set
     for (size_t i = 0; i < numKeys; ++i) {
       if (d_keys[i] == p) {
         return {true, d_intervals[i]};
       }
     }
-    return {false, IntervalList()};
+    return {false, d_intervals[0]};
   }
 };
 
@@ -516,33 +503,6 @@ std::vector<int> getFigSizes() {
   return sizes;
 }
 
-
-std::vector<int> vectAmount = {0, 13, 49, 145, 289, 577, 865, 1441, 2017, 2881, 3745, 5185, 6337, 8353, 10081, 12385,
-                               14689, 18145, 20737, 25057, 28513, 33121, 37441, 43777, 48385, 55585, 61633, 69409,
-                               76321, 86401, 93313, 104833, 114049, 125569, 135937, 149761, 160129, 176545, 189505,
-                               205633, 219457, 239617, 253441, 275617, 292897, 313633, 332641, 359137, 377569, 405793,
-                               427393, 455041, 479233, 512929, 536257, 570817, 598465, 633025, 663265, 705025, 732673,
-                               777313, 811873, 853345, 890209, 938593, 973153, 1027009, 1068481, 1119169, 1160641,
-                               1221121, 1262593, 1326529, 1375777, 1433377, 1485217, 1554337, 1602721, 1677601, 1732897,
-                               1802881, 1863361, 1946017, 2001313, 2084257, 2150785, 2231425, 2300545, 2395585, 2457793,
-                               2554561, 2630593, 2722753, 2802241, 2905921, 2979649, 3092545, 3177217, 3280897, 3367297,
-                               3489697, 3572641, 3699937, 3796705, 3907297, 4008385, 4145761, 4239073, 4381633, 4485313,
-                               4616641, 4727233, 4880449, 4984129, 5136193, 5257153, 5402305, 5527585, 5693473, 5804065,
-                               5978305, 6112225, 6273505, 6411745, 6591745, 6716161, 6909697, 7057153, 7234561, 7379713,
-                               7585633, 7723873, 7931233, 8092801, 8279425, 8445313, 8670529, 8822593, 9054433, 9220321,
-                               9432289, 9613729, 9855649, 10021537, 10263457, 10455265, 10681057, 10878049, 11144449,
-                               11317249, 11590849, 11798209, 12047041, 12254401, 12530881, 12724417, 13020193, 13244833,
-                               13514401, 13735585, 14039713, 14249665, 14568481, 14810401, 15086881, 15334849, 15669505,
-                               15890689, 16231393, 16480225, 16791265, 17057377, 17416513, 17658433, 18004033, 18280513,
-                               18614593, 18899713, 19284193, 19533025, 19926145, 20216449, 20573569, 20877697, 21271681,
-                               21548161, 21962881, 22280833, 22654081, 22965121, 23402881, 23697793, 24144769, 24483457,
-                               24870529, 25209217, 25674913, 25985953, 26461153, 26806753};
-
-int allVectorSize(int radius) {
-  ASSERT(radius >= 0 && radius < vectAmount.size());
-  return vectAmount[radius];
-}
-
 /**
  * Get all the unique integer vectors of maximum coordinate r
  * Only the vectors with gcd(x, y, z) = 1 are considered
@@ -575,30 +535,32 @@ Vec3is getAllVectors(int radius) {
  * @param figIntervals
  * @return
  */
-__device__ IntervalList checkInterval(const Interval &toCheck, const IntervalList &figIntervals) {
-  IntervalList result(figIntervals.size);
+__device__ IntervalList checkInterval(IntervalList &buf, const Interval &toCheck, const IntervalList &figIntervals) {
+//  IntervalList result(figIntervals.size);
+  buf.size = 0;
   const auto toCheckSize = toCheck.end - toCheck.start;
   for (const auto &interval: figIntervals) {
     if (interval.end - interval.start >= toCheckSize) {
-      result.data[result.size++] = {interval.start - toCheck.start, interval.end - toCheck.end};
+      buf.data[buf.size++] = {interval.start - toCheck.start, interval.end - toCheck.end};
     }
   }
-  return result;
+  return buf;
 }
 
-__device__ IntervalList intersect(const IntervalList &l1, const IntervalList &l2) {
-  IntervalList result(l1.capacity);
+__device__ IntervalList intersect(IntervalList &buf, const IntervalList &l1, const IntervalList &l2) {
+//  IntervalList result(l1.capacity);
+  buf.size = 0;
   int k1 = 0, k2 = 0;
   while (k1 < l1.size && k2 < l2.size) {
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
     const auto i = myMax(interval1.start, interval2.start);
     const auto j = myMin(interval1.end, interval2.end);
-    if (i <= j) result.data[result.size++] = {i, j};
+    if (i <= j) buf.data[buf.size++] = {i, j};
     if (interval1.end <= interval2.end) k1++;
     if (interval1.end >= interval2.end) k2++;
   }
-  return result;
+  return buf;
 }
 
 /**
@@ -610,9 +572,10 @@ __device__ IntervalList intersect(const IntervalList &l1, const IntervalList &l2
  */
 __device__ IntervalList matchVector(IntervalList &toCheck,
                                     const IntervalList &vectorIntervals,
-                                    const IntervalList &figIntervals) {
+                                    const IntervalList &figIntervals,
+                                    IntervalList &buf) {
   for (const auto &vInterval: vectorIntervals) {
-    toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
+    toCheck = intersect(buf, toCheck, checkInterval(buf, vInterval, figIntervals));
     if (toCheck.empty()) break;
   }
   return toCheck;
@@ -622,22 +585,25 @@ __global__ void computeVisibilityKernel(
     int axis, int *digital_dimensions, int *axises_idx,
     MyLatticeSet figLattices, FlatVisibility visibility,
     Vec3i *segmentList, int segmentSize,
-    Buffer<Vec3i> *mainsPointsBufGlobal, Buffer<Vec3i> *keysBufGlobal, Buffer<IntervalList> *intervalsBufGlobal
+    Buffer<Vec3i> *&mainsPointsBufGlobal, Buffer<Vec3i> *&keysBufGlobal, Buffer<IntervalList> *&intervalsBufGlobal,
+    Buffer<IntervalList> &matchVectorBuf, Buffer<IntervalList> &eligiblesBuf
 ) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= segmentSize) return;
 
   Vec3i segment = segmentList[idx];
-  MyLatticeSet latticeVector(segment, mainsPointsBufGlobal[idx], keysBufGlobal[i], intervalsBufGlobal[i], axis);
+  IntervalList &bufMatchVector = matchVectorBuf[idx];
+  IntervalList &eligibles = eligiblesBuf[idx];
+  MyLatticeSet latticeVector(segment, mainsPointsBufGlobal[idx], keysBufGlobal[idx], intervalsBufGlobal[idx], axis);
   int minTx = digital_dimensions[axises_idx[1] + 3] - myMin(0, segment[axises_idx[1]]);
   int maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - myMax(0, segment[axises_idx[1]]);
   int minTy = digital_dimensions[axises_idx[2] + 3] - myMin(0, segment[axises_idx[2]]);
   int maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - myMax(0, segment[axises_idx[2]]);
   for (auto tx = minTx; tx < maxTx; tx++) {
     for (auto ty = minTy; ty < maxTy; ty++) {
-      IntervalList eligibles(
-          {2 * digital_dimensions[axises_idx[1] + 3] - 1, 2 * digital_dimensions[axises_idx[1] + 6] + 1},
-          digital_dimensions[axis] + 1);
+      eligibles.size = 1;
+      eligibles.data[0] = {2 * digital_dimensions[axises_idx[1] + 3] - 1,
+                           2 * digital_dimensions[axises_idx[1] + 6] + 1};
       const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                             axis == 2 ? 0 : 2 * ty);
       for (auto i = 0; i < latticeVector.numKeys; i++) {
@@ -645,7 +611,7 @@ __global__ void computeVisibilityKernel(
         const auto value = latticeVector.d_intervals[i];
         const auto res = figLattices.find(pInterest + key);
         if (res.found)
-          eligibles = matchVector(eligibles, value, res.intervals);
+          eligibles = matchVector(eligibles, value, res.intervals, bufMatchVector);
         else
           eligibles = res.intervals;
         if (eligibles.empty()) break;
@@ -657,7 +623,7 @@ __global__ void computeVisibilityKernel(
   }
 }
 
-void computeVisibilityGpu(int radius) {
+__host__ void computeVisibilityGpu(int radius) {
   std::cout << "Computing visibility GPU" << std::endl;
   auto axis = getLargeAxis();
   auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
@@ -666,7 +632,6 @@ void computeVisibilityGpu(int radius) {
 //  const auto axises_idx = std::vector < int > {axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   auto segmentList = getAllVectors(radius);
-  auto segmentSize = allVectorSize(radius);
 
   Vec3i *pointelsData = new Vec3i[pointels.size()];
   for (size_t i = 0; i < pointels.size(); ++i) {
@@ -675,12 +640,66 @@ void computeVisibilityGpu(int radius) {
   visibility = FlatVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
   delete[] pointelsData;
 
-  computeVisibilityKernel<<<(segmentSize + 255) / 256, 256>>>(
+  // Create all the buffers
+
+  size_t N = segmentList.size();
+  size_t M = 2 * radius + 1;
+  size_t K = 18 * radius;
+  size_t intervalCapacity = 2 * radius + 1;
+
+  // mainsPointsBufGlobal : 2 * radius + 1 per buffer, segmentList.size() buffers
+  void *raw = operator new[](N * sizeof(Buffer<Vec3i>));
+  Buffer<Vec3i> *mainsPointsBufGlobal = static_cast<Buffer<Vec3i> *>(raw);
+
+  for (size_t i = 0; i < N; ++i) {
+    new(&mainsPointsBufGlobal[i]) Buffer<Vec3i>(M);
+  }
+
+  // keysBufGlobal : segmentList.size() buffers of size 9 * 2 * radius
+  void *keysRaw = operator new[](N * sizeof(Buffer<Vec3i>));
+  Buffer<Vec3i> *keysBufGlobal = static_cast<Buffer<Vec3i> *>(keysRaw);
+
+  for (size_t i = 0; i < N; ++i) {
+    new(&keysBufGlobal[i]) Buffer<Vec3i>(K);
+  }
+
+  // intervalsBufGlobal : segmentList.size() buffers of size 9 * 2 * radius, containing IntervalList of capacity radius * 2 + 1
+  void *intervalsRaw = operator new[](N * sizeof(Buffer<IntervalList>));
+  Buffer<IntervalList> *intervalsBufGlobal = static_cast<Buffer<IntervalList> *>(intervalsRaw);
+
+  for (size_t i = 0; i < N; ++i) {
+    new(&intervalsBufGlobal[i]) Buffer<IntervalList>(K);
+    for (size_t j = 0; j < K; ++j) {
+      new(&intervalsBufGlobal[i][j]) IntervalList(intervalCapacity);
+    }
+  }
+
+  // matchVectorBuf : buffer of size segmentList.size() with IntervalList of capacity 2 * axis size + 1
+  Buffer<IntervalList> matchVectorBuf(segmentList.size());
+  for (size_t i = 0; i < segmentList.size(); ++i) {
+    new(&matchVectorBuf[i]) IntervalList(2 * digital_dimensions[axis] + 1);
+  }
+
+  // eligiblesBuf : buffer of size segmentList.size() with IntervalList of capacity 2 * axis size + 1
+  Buffer<IntervalList> eligiblesBuf(segmentList.size());
+  for (size_t i = 0; i < segmentList.size(); ++i) {
+    new(&eligiblesBuf[i]) IntervalList(2 * digital_dimensions[axis] + 1);
+  }
+
+  computeVisibilityKernel<<<(segmentList.size() + 255) / 256, 256>>>(
       axis,
       digital_dimensions.data(),
       axises_idx,
-      figLattices, visibility, segmentList.data(), segmentSize);
+      figLattices, visibility, segmentList.data(), segmentList.size(),
+      mainsPointsBufGlobal, keysBufGlobal, intervalsBufGlobal, matchVectorBuf, eligiblesBuf
+  );
   cudaDeviceSynchronize();
+
+  // Destruction
+  for (size_t i = 0; i < N; ++i) {
+    mainsPointsBufGlobal[i].~Buffer<Vec3i>();
+  }
+  operator delete[](raw);
   delete[] axises_idx;
   if (cudaGetLastError() != cudaSuccess) {
     std::cerr << "Error in computeVisibilityKernel: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
