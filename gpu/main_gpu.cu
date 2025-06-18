@@ -148,9 +148,9 @@ struct IntervalList {
 
   __host__ __device__ IntervalList() : data(nullptr), capacity(0), size(0) {}
 
-  __host__ IntervalList(int maxCapacity) : data(nullptr), capacity(maxCapacity),
-                                           size(0) {
-    data = new Interval[capacity];
+  __host__ __device__ IntervalList(int maxCapacity) : capacity(maxCapacity),
+                                                      size(0) {
+    cudaMalloc(&data, sizeof(Interval) * capacity);
   }
 
   __host__ __device__ Interval *begin() const {
@@ -188,7 +188,7 @@ Point vec3iToPointVector(const Vec3i &vector) {
 }
 
 struct LatticeFoundResult {
-  bool found;
+  int keyIndex;
   IntervalList intervals;
 };
 
@@ -214,14 +214,13 @@ struct Buffer {
   size_t capacity;
   size_t size;
 
-  __host__ Buffer(size_t cap) : data(nullptr), capacity(cap), size(0) {
+  __host__ __device__ Buffer(size_t cap) : capacity(cap), size(0) {
     cudaMalloc(&data, sizeof(Type) * capacity);
   }
 
-  __host__ ~Buffer() {
+  __host__ __device__ ~Buffer() {
     if (data) {
       cudaFree(data);
-      data = nullptr;
     }
   }
 
@@ -237,8 +236,8 @@ struct Buffer {
 };
 
 struct MyLatticeSet {
-  Vec3i *d_keys = nullptr;
-  IntervalList *d_intervals = nullptr;
+  Vec3i *d_keys;
+  IntervalList *d_intervals;
   int myAxis;
 
   size_t numKeys = 0;
@@ -279,12 +278,12 @@ struct MyLatticeSet {
     toGPU(l);
   }
 
-  __device__ MyLatticeSet(const Vec3i segment, Buffer<Vec3i> &mainPointsBuf, Buffer<Vec3i> &keysBuf,
-                          Buffer<IntervalList> &intervalsBuf, int axis)
+  __device__ MyLatticeSet(const Vec3i segment, int axis)
       : myAxis(axis) {
     int otherAxis1 = (axis + 1) % 3;
     int otherAxis2 = (axis + 2) % 3;
     int currentIndex = 0;
+    Buffer<Vec3i> mainPointsBuf(2 * (segment[0] + segment[1] + segment[2]) + 1);
     mainPointsBuf.push_back(Vec3i(0, 0, 0));
     for (int k = 0; k < 3; k++) {
       const int n = (segment[k] >= 0) ? segment[k] : -segment[k];
@@ -309,8 +308,9 @@ struct MyLatticeSet {
     if (segment != Vec3i()) mainPointsBuf.push_back(segment * 2);
 
     // Allocate memory for keys and intervals
-    d_keys = keysBuf.data;
-    d_intervals = intervalsBuf.data;
+    int allocateAmount = (2 * segment[otherAxis1] + 3) * (2 * segment[otherAxis2] + 3);
+    cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount);
+    cudaMalloc(&d_intervals, sizeof(IntervalList) * allocateAmount);
 
     int currentMaxKey = 0;
 
@@ -321,14 +321,16 @@ struct MyLatticeSet {
           key[otherAxis1] += j;
           key[otherAxis2] += k;
           auto alreadyExists = this->find(key);
-          if (!alreadyExists.found) {
-            keysBuf.push_back(key);
-            d_intervals[currentMaxKey - 1].size = 1;
-            d_intervals[currentMaxKey - 1].capacity = 1;
-            d_intervals[currentMaxKey - 1].data[0] = {key[axis] - 1, key[axis] + 1};
+          if (alreadyExists.keyIndex == -1) {
+            d_keys[currentMaxKey] = key;
+            cudaMalloc(&d_intervals[currentMaxKey].data, sizeof(Interval));
+            d_intervals[currentMaxKey].size = 1;
+            d_intervals[currentMaxKey].capacity = 1;
+            d_intervals[currentMaxKey].data[0] = {key[axis] - 1, key[axis] + 1};
+            currentMaxKey++;
           } else {
             // If the key already exists, merge intervals
-            auto &existingIntervals = d_intervals[alreadyExists.intervals.size - 1];
+            auto &existingIntervals = d_intervals[alreadyExists.keyIndex];
             existingIntervals.data[0].start = myMin(existingIntervals.data[existingIntervals.size - 1].start,
                                                     key[axis] - 1);
             existingIntervals.data[0].end = myMax(existingIntervals.data[existingIntervals.size - 1].end,
@@ -345,10 +347,10 @@ struct MyLatticeSet {
     // Search for the point p in the lattice set
     for (size_t i = 0; i < numKeys; ++i) {
       if (d_keys[i] == p) {
-        return {true, d_intervals[i]};
+        return {i, d_intervals[i]};
       }
     }
-    return {false, d_intervals[0]};
+    return {-1, d_intervals[0]};
   }
 };
 
@@ -375,7 +377,7 @@ inline int gcd3(int a, int b, int c) {
   return gcd(a, gcd(b, c));
 }
 
-struct FlatVisibility {
+struct GpuVisibility {
   int mainAxis;
   int vectorsSize;
   int pointsSize;
@@ -384,9 +386,9 @@ struct FlatVisibility {
   Vec3i *vectorList;  // flattened IntegerVectors
   Vec3i *pointList;
 
-  FlatVisibility() = default;
+  GpuVisibility() = default;
 
-  FlatVisibility(int mainAxis_, Vec3i *vectors, int vectorsSz, Vec3i *points, int pointsSz)
+  GpuVisibility(int mainAxis_, Vec3i *vectors, int vectorsSz, Vec3i *points, int pointsSz)
       : mainAxis(mainAxis_), vectorList(vectors), vectorsSize(vectorsSz),
         pointList(points), pointsSize(pointsSz) {
     size_t totalSize = pointsSize * vectorsSize;
@@ -446,7 +448,67 @@ struct FlatVisibility {
   }
 };
 
-FlatVisibility visibility = FlatVisibility();
+struct HostVisibility {
+  int mainAxis;
+  int vectorsSize;
+  int pointsSize;
+  bool *visibles;
+  Vec3i *vectorList;
+  Vec3i *pointList;
+
+  HostVisibility() = default;
+
+  HostVisibility(GpuVisibility &flatVisibility) {
+    mainAxis = flatVisibility.mainAxis;
+    vectorsSize = flatVisibility.vectorsSize;
+    pointsSize = flatVisibility.pointsSize;
+    vectorList = flatVisibility.vectorList;
+    pointList = flatVisibility.pointList;
+
+    size_t totalSize = pointsSize * vectorsSize;
+    visibles = new bool[totalSize];
+    cudaMemcpy(visibles, flatVisibility.visibles, totalSize * sizeof(bool), cudaMemcpyDeviceToHost);
+  }
+
+  __host__ __device__
+  int getPointIdx(const Vec3i &p) const {
+    // Search pointList for matching point (or use a flat hash map if performance needed)
+    for (int i = 0; i < pointsSize; ++i) {
+      if (pointList[i] == p) return i;
+    }
+    return pointsSize; // Not found
+  }
+
+  __host__ __device__
+  int getVectorIdx(const Vec3i &v) const {
+    for (int i = 0; i < vectorsSize; ++i) {
+      if (vectorList[i] == v) return i;
+    }
+    return vectorsSize;
+  }
+
+  __host__ bool isVisible(const Vec3i &p1, const Vec3i &p2) const {
+    if (p1 == p2) return true;
+
+    if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
+
+    Vec3i v = p2 - p1;
+    int d = gcd3(v.x, v.y, v.z);
+    v = v / d;
+
+    int vIdx = getVectorIdx(v);
+    if (vIdx == vectorsSize) return false;
+
+    for (Vec3i p = p1; p != p2; p += v) {
+      int pIdx = getPointIdx(p);
+      if (pIdx == pointsSize) return false;
+      if (!visibles[pIdx * vectorsSize + vIdx]) return false;
+    }
+    return true;
+  }
+};
+
+HostVisibility visibility = HostVisibility();
 
 void embedPointels(const std::vector <Point> &vq, std::vector <RealPoint> &vp) {
   vp.clear();
@@ -573,7 +635,8 @@ __device__ IntervalList intersect(IntervalList &buf, const IntervalList &l1, con
 __device__ IntervalList matchVector(IntervalList &toCheck,
                                     const IntervalList &vectorIntervals,
                                     const IntervalList &figIntervals,
-                                    IntervalList &buf) {
+                                    const int axisDim) {
+  IntervalList buf(2 * axisDim + 1);
   for (const auto &vInterval: vectorIntervals) {
     toCheck = intersect(buf, toCheck, checkInterval(buf, vInterval, figIntervals));
     if (toCheck.empty()) break;
@@ -583,18 +646,15 @@ __device__ IntervalList matchVector(IntervalList &toCheck,
 
 __global__ void computeVisibilityKernel(
     int axis, int *digital_dimensions, int *axises_idx,
-    MyLatticeSet figLattices, FlatVisibility visibility,
-    Vec3i *segmentList, int segmentSize,
-    Buffer<Vec3i> *&mainsPointsBufGlobal, Buffer<Vec3i> *&keysBufGlobal, Buffer<IntervalList> *&intervalsBufGlobal,
-    Buffer<IntervalList> &matchVectorBuf, Buffer<IntervalList> &eligiblesBuf
+    MyLatticeSet figLattices, GpuVisibility visibility,
+    Vec3i *segmentList, int segmentSize
 ) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= segmentSize) return;
 
   Vec3i segment = segmentList[idx];
-  IntervalList &bufMatchVector = matchVectorBuf[idx];
-  IntervalList &eligibles = eligiblesBuf[idx];
-  MyLatticeSet latticeVector(segment, mainsPointsBufGlobal[idx], keysBufGlobal[idx], intervalsBufGlobal[idx], axis);
+  IntervalList eligibles(2 * digital_dimensions[axis] + 1);
+  MyLatticeSet latticeVector(segment, axis);
   int minTx = digital_dimensions[axises_idx[1] + 3] - myMin(0, segment[axises_idx[1]]);
   int maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - myMax(0, segment[axises_idx[1]]);
   int minTy = digital_dimensions[axises_idx[2] + 3] - myMin(0, segment[axises_idx[2]]);
@@ -610,8 +670,8 @@ __global__ void computeVisibilityKernel(
         const auto key = latticeVector.d_keys[i];
         const auto value = latticeVector.d_intervals[i];
         const auto res = figLattices.find(pInterest + key);
-        if (res.found)
-          eligibles = matchVector(eligibles, value, res.intervals, bufMatchVector);
+        if (res.keyIndex >= 0)
+          eligibles = matchVector(eligibles, value, res.intervals, digital_dimensions[axis]);
         else
           eligibles = res.intervals;
         if (eligibles.empty()) break;
@@ -627,84 +687,57 @@ __host__ void computeVisibilityGpu(int radius) {
   std::cout << "Computing visibility GPU" << std::endl;
   auto axis = getLargeAxis();
   auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
+  std::cout << "Lattice set computed" << std::endl;
   MyLatticeSet figLattices(tmpL);
 
 //  const auto axises_idx = std::vector < int > {axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
   auto segmentList = getAllVectors(radius);
 
+  std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
+
   Vec3i *pointelsData = new Vec3i[pointels.size()];
   for (size_t i = 0; i < pointels.size(); ++i) {
     pointelsData[i] = pointVectorToVec3i(pointels[i]);
   }
-  visibility = FlatVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
+
+  std::cout << "Pointels digitized" << std::endl;
+
+  GpuVisibility tmpVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
   delete[] pointelsData;
 
-  // Create all the buffers
+  std::cout << "Visibility initialized" << std::endl;
 
-  size_t N = segmentList.size();
-  size_t M = 2 * radius + 1;
-  size_t K = 18 * radius;
-  size_t intervalCapacity = 2 * radius + 1;
-
-  // mainsPointsBufGlobal : 2 * radius + 1 per buffer, segmentList.size() buffers
-  void *raw = operator new[](N * sizeof(Buffer<Vec3i>));
-  Buffer<Vec3i> *mainsPointsBufGlobal = static_cast<Buffer<Vec3i> *>(raw);
-
-  for (size_t i = 0; i < N; ++i) {
-    new(&mainsPointsBufGlobal[i]) Buffer<Vec3i>(M);
-  }
-
-  // keysBufGlobal : segmentList.size() buffers of size 9 * 2 * radius
-  void *keysRaw = operator new[](N * sizeof(Buffer<Vec3i>));
-  Buffer<Vec3i> *keysBufGlobal = static_cast<Buffer<Vec3i> *>(keysRaw);
-
-  for (size_t i = 0; i < N; ++i) {
-    new(&keysBufGlobal[i]) Buffer<Vec3i>(K);
-  }
-
-  // intervalsBufGlobal : segmentList.size() buffers of size 9 * 2 * radius, containing IntervalList of capacity radius * 2 + 1
-  void *intervalsRaw = operator new[](N * sizeof(Buffer<IntervalList>));
-  Buffer<IntervalList> *intervalsBufGlobal = static_cast<Buffer<IntervalList> *>(intervalsRaw);
-
-  for (size_t i = 0; i < N; ++i) {
-    new(&intervalsBufGlobal[i]) Buffer<IntervalList>(K);
-    for (size_t j = 0; j < K; ++j) {
-      new(&intervalsBufGlobal[i][j]) IntervalList(intervalCapacity);
-    }
-  }
-
-  // matchVectorBuf : buffer of size segmentList.size() with IntervalList of capacity 2 * axis size + 1
-  Buffer<IntervalList> matchVectorBuf(segmentList.size());
-  for (size_t i = 0; i < segmentList.size(); ++i) {
-    new(&matchVectorBuf[i]) IntervalList(2 * digital_dimensions[axis] + 1);
-  }
-
-  // eligiblesBuf : buffer of size segmentList.size() with IntervalList of capacity 2 * axis size + 1
-  Buffer<IntervalList> eligiblesBuf(segmentList.size());
-  for (size_t i = 0; i < segmentList.size(); ++i) {
-    new(&eligiblesBuf[i]) IntervalList(2 * digital_dimensions[axis] + 1);
-  }
-
+  std::cout << "Launching kernel with " << (segmentList.size() + 255) / 256 << " blocks and 256 threads per block"
+            << std::endl;
   computeVisibilityKernel<<<(segmentList.size() + 255) / 256, 256>>>(
       axis,
       digital_dimensions.data(),
       axises_idx,
-      figLattices, visibility, segmentList.data(), segmentList.size(),
-      mainsPointsBufGlobal, keysBufGlobal, intervalsBufGlobal, matchVectorBuf, eligiblesBuf
+      figLattices, tmpVisibility, segmentList.data(), segmentList.size()
   );
   cudaDeviceSynchronize();
 
-  // Destruction
-  for (size_t i = 0; i < N; ++i) {
-    mainsPointsBufGlobal[i].~Buffer<Vec3i>();
+  std::cout << "Kernel finished" << std::endl;
+
+  visibility = HostVisibility(tmpVisibility);
+
+  // Print visibility visible list
+  for (size_t i = 0; i < visibility.pointsSize; ++i) {
+    std::cout << "Pointel " << i << " is visible from: ";
+    for (size_t j = 0; j < visibility.vectorsSize; ++j) {
+      if (visibility.visibles[i * visibility.vectorsSize + j]) {
+        std::cout << "(" << visibility.pointList[i].x << ", "
+                  << visibility.pointList[i].y << ", "
+                  << visibility.pointList[i].z << ") with vector "
+                  << "(" << visibility.vectorList[j].x << ", "
+                  << visibility.vectorList[j].y << ", "
+                  << visibility.vectorList[j].z << ") ";
+      }
+    }
+    std::cout << std::endl;
   }
-  operator delete[](raw);
   delete[] axises_idx;
-  if (cudaGetLastError() != cudaSuccess) {
-    std::cerr << "Error in computeVisibilityKernel: " << cudaGetErrorString(cudaGetLastError()) << std::endl;
-    exit(EXIT_FAILURE);
-  }
   std::cout << "Visibility computed" << std::endl;
 }
 
@@ -1138,7 +1171,7 @@ int main(int argc, char *argv[]) {
   trace.endBlock();
 
   // Compute trivial normals
-
+/*
   auto pTC = new TangencyComputer<KSpace>(K);
   pTC->init(pointels.cbegin(), pointels.cend(), true);
   int t_ring = int(round(params["t-ring"].as<double>()));
@@ -1186,21 +1219,13 @@ int main(int argc, char *argv[]) {
 
   std::cout << "sigma = " << sigma << std::endl;
 
-
+*/
   pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
-  // Initialize polyscope
-  if (noInterface) {
-    std::cout << "sigma = " << sigma << std::endl;
-//    checkParallelism();
-    trace.beginBlock("Compute visibilities");
-    computeVisibilityGpu(VisibilityRadius);
-    Time = trace.endBlock();
-//    trace.beginBlock("Compute mean distance visibility");
-//    computeMeanDistanceVisibility();
-//    Time = trace.endBlock();
-  }
+  trace.beginBlock("Compute visibilities");
+  computeVisibilityGpu(VisibilityRadius);
+  Time = trace.endBlock();
 
-  delete pTC;
+//  delete pTC;
   return EXIT_SUCCESS;
 
 }
