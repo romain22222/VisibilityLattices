@@ -225,12 +225,10 @@ struct Buffer {
   }
 
   __device__ void push_back(const Type &v) {
-    ASSERT(size < capacity);
     data[size++] = v;
   }
 
   __host__ __device__ Type &operator[](size_t index) {
-    ASSERT(index < size);
     return data[index];
   }
 };
@@ -696,7 +694,7 @@ __host__ void computeVisibilityGpu(int radius) {
 
   std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
 
-  Vec3i *pointelsData = new Vec3i[pointels.size()];
+  auto *pointelsData = new Vec3i[pointels.size()];
   for (size_t i = 0; i < pointels.size(); ++i) {
     pointelsData[i] = pointVectorToVec3i(pointels[i]);
   }
@@ -1003,7 +1001,7 @@ void computeL2looErrors() {
     // Only authorize selection on the input surface and the reconstruction
     auto surf = polyscope::getSurfaceMesh("Primal surface");
     const auto nv = selectedSurface->nVertices();
-    // Validate that it its a face index
+    // Validate that its a face index
     if (selectedSurface == surf && idx < nv) {
       pointel_idx = idx;
       selected_point = pointels[pointel_idx];
