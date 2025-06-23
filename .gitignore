@@ -4,3 +4,6 @@ cmake-build-*
 /.polyscope.ini
 /imgui.ini
 /gpu/buildR
+/auxil
+/out
+/build
