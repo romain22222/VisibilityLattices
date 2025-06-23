@@ -166,12 +166,10 @@ struct IntervalList {
   }
 
   __host__ __device__ Interval &operator[](int index) {
-    ASSERT(index >= 0 && index < size && size <= capacity);
     return data[index];
   }
 
   __host__ __device__ const Interval &operator[](int index) const {
-    ASSERT(index >= 0 && index < size && size <= capacity);
     return data[index];
   }
 };
@@ -1076,154 +1074,238 @@ void computeL2looErrors() {
 }*/
 
 
-int main(int argc, char *argv[]) {
-  // command line inteface options
-  CLI::App app{"A tool to check visibility using lattices."};
-  std::string filename = "../volumes/bunny34.vol";
-  int thresholdMin = 0;
-  int thresholdMax = 255;
-  std::string polynomial;
-  int minAABB = -10;
-  int maxAABB = 10;
-  bool listP = false;
-  app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
-  // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
-  app.add_option("-p,--polynomial", polynomial,
-                 "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
-  app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
-  app.add_option("-m,--thresholdMin", thresholdMin,
-                 "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
-  app.add_option("-M,--thresholdMax", thresholdMax,
-                 "the maximal threshold M (included) for a voxel to belong to the digital shape.");
-  app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
-  app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
-  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
-  app.add_flag("-l", listP, "lists the known named polynomials.");
-  app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
-  app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
-  double sigmaTmp = -1.0;
-  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
-  // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
-  // Parse command line options. Exit on error.
-  CLI11_PARSE(app, argc, argv)
+//int main(int argc, char *argv[]) {
+//  // command line inteface options
+//  CLI::App app{"A tool to check visibility using lattices."};
+//  std::string filename = "../volumes/bunny34.vol";
+//  int thresholdMin = 0;
+//  int thresholdMax = 255;
+//  std::string polynomial;
+//  int minAABB = -10;
+//  int maxAABB = 10;
+//  bool listP = false;
+//  app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
+//  // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
+//  app.add_option("-p,--polynomial", polynomial,
+//                 "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
+//  app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
+//  app.add_option("-m,--thresholdMin", thresholdMin,
+//                 "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
+//  app.add_option("-M,--thresholdMax", thresholdMax,
+//                 "the maximal threshold M (included) for a voxel to belong to the digital shape.");
+//  app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
+//  app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
+//  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+//  app.add_flag("-l", listP, "lists the known named polynomials.");
+//  app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
+//  app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
+//  double sigmaTmp = -1.0;
+//  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
+//  // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
+//  // Parse command line options. Exit on error.
+//  CLI11_PARSE(app, argc, argv)
+//
+//  // React to some options.
+//  if (listP) {
+//    listPolynomials();
+//    return 0;
+//  }
+//  // Use options
+//  auto params = SH3::defaultParameters()
+//                | SHG3::defaultParameters()
+//                | SHG3::parametersGeometryEstimation();
+//  params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
+//  params("surfaceTraversal", "default");
+//  bool is_polynomial = !polynomial.empty();
+//  if (is_polynomial) {
+//    trace.beginBlock("Build polynomial surface");
+//    params("polynomial", polynomial);
+//    params("gridstep", gridstep);
+//    params("minAABB", minAABB);
+//    params("maxAABB", maxAABB);
+//    params("offset", 1.0);
+//    params("closed", 1);
+//    implicit_shape = SH3::makeImplicitShape3D(params);
+//    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+//    K = SH3::getKSpace(params);
+//    binary_image = SH3::makeBinaryImage(digitized_shape,
+//                                        SH3::Domain(K.lowerBound(),
+//                                                    K.upperBound()),
+//                                        params);
+//    trace.endBlock();
+//  } else {
+//    trace.beginBlock("Reading image vol file");
+//    params("thresholdMin", thresholdMin);
+//    params("thresholdMax", thresholdMax);
+//    binary_image = SH3::makeBinaryImage(filename, params);
+//    K = SH3::getKSpace(binary_image, params);
+//    trace.endBlock();
+//  }
+//
+//  std::vector <std::vector<std::size_t>> primal_faces;
+//  std::vector <RealPoint> primal_positions;
+//
+//
+//  trace.beginBlock("Computing digital points and primal surface");
+//  // Build digital surface
+//  digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
+//  primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
+//  surfels = SH3::getSurfelRange(digital_surface, params);
+//  if (is_polynomial) {
+//    surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+//  }
+//  // Need to convert the faces
+//  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+//    primal_faces.push_back(primal_surface->incidentVertices(face));
+//  // Embed with gridstep.
+//  for (auto v = 0; v < primal_surface->nbVertices(); v++)
+//    primal_surface->position(v) *= gridstep;
+//  primal_positions = primal_surface->positions();
+//  digitizePointels(primal_positions, pointels);
+//  digital_dimensions = getFigSizes();
+//  trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
+//  trace.endBlock();
+//
+//  // Compute trivial normals
+///*
+//  auto pTC = new TangencyComputer<KSpace>(K);
+//  pTC->init(pointels.cbegin(), pointels.cend(), true);
+//  int t_ring = int(round(params["t-ring"].as<double>()));
+//  auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
+//  primal_surface->faceNormals() = surfel_trivial_normals;
+//  params("r-radius", iiRadius);
+//  surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+//  for (auto i = 1; i < t_ring + 3; i++) {
+//    primal_surface->computeVertexNormalsFromFaceNormals();
+//    primal_surface->computeFaceNormalsFromVertexNormals();
+//    surfel_trivial_normals = primal_surface->faceNormals();
+//  }
+//  trivial_normals = primal_surface->vertexNormals();
+//  trivial_normals.resize(pointels.size());
+//  ii_normals.resize(pointels.size());
+//  true_normals.resize(pointels.size());
+//  for (auto &n: trivial_normals) n = RealVector::zero;
+//  for (auto &n: ii_normals) n = RealVector::zero;
+//  for (auto &n: true_normals) n = RealVector::zero;
+//  for (auto k = 0; k < surfels.size(); k++) {
+//    const auto &surf = surfels[k];
+//    const auto cells0 = SH3::getPrimalVertices(K, surf);
+//    for (const auto &c0: cells0) {
+//      const auto p = K.uCoords(c0);
+//      const auto idx = pTC->index(p);
+//      trivial_normals[idx] += surfel_trivial_normals[k];
+//      ii_normals[idx] += surfel_ii_normals[k];
+//      if (is_polynomial) {
+//        true_normals[idx] += surfel_true_normals[k];
+//      }
+//    }
+//  }
+//  for (auto &n: trivial_normals) n /= n.norm();
+//  for (auto &n: ii_normals) n /= n.norm();
+//  for (auto &n: true_normals) n /= n.norm();
+//
+//  primal_surface->vertexNormals() = trivial_normals;
+//
+//  if (sigmaTmp != -1.0) {
+//    sigma = sigmaTmp;
+//  } else {
+//    sigma = 5 * pow(gridstep, -0.5);
+//  }
+//  minus2SigmaSquare = -2 * sigma * sigma;
+//
+//  std::cout << "sigma = " << sigma << std::endl;
+//
+//*/
+//  pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+//  trace.beginBlock("Compute visibilities");
+//  computeVisibilityGpu(VisibilityRadius);
+//  Time = trace.endBlock();
+//
+////  delete pTC;
+//  return EXIT_SUCCESS;
+//
+//}
 
-  // React to some options.
-  if (listP) {
-    listPolynomials();
-    return 0;
+__global__ void intersectKernel(Interval *bufData, Interval *l1Data, Interval *l2Data,
+                                int l1Size, int l2Size, Interval *outData, int *outSize) {
+  IntervalList l1;
+  l1.data = l1Data;
+  l1.size = l1Size;
+  l1.capacity = l1Size;
+
+  IntervalList l2;
+  l2.data = l2Data;
+  l2.size = l2Size;
+  l2.capacity = l2Size;
+
+  IntervalList buf;
+  buf.data = bufData;
+  buf.size = 0;
+  buf.capacity = 20;
+
+  IntervalList result = intersect(buf, l1, l2);
+
+  for (int i = 0; i < result.size; ++i) {
+    outData[i] = result[i];
   }
-  // Use options
-  auto params = SH3::defaultParameters()
-                | SHG3::defaultParameters()
-                | SHG3::parametersGeometryEstimation();
-  params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
-  params("surfaceTraversal", "default");
-  bool is_polynomial = !polynomial.empty();
-  if (is_polynomial) {
-    trace.beginBlock("Build polynomial surface");
-    params("polynomial", polynomial);
-    params("gridstep", gridstep);
-    params("minAABB", minAABB);
-    params("maxAABB", maxAABB);
-    params("offset", 1.0);
-    params("closed", 1);
-    implicit_shape = SH3::makeImplicitShape3D(params);
-    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-    K = SH3::getKSpace(params);
-    binary_image = SH3::makeBinaryImage(digitized_shape,
-                                        SH3::Domain(K.lowerBound(),
-                                                    K.upperBound()),
-                                        params);
-    trace.endBlock();
-  } else {
-    trace.beginBlock("Reading image vol file");
-    params("thresholdMin", thresholdMin);
-    params("thresholdMax", thresholdMax);
-    binary_image = SH3::makeBinaryImage(filename, params);
-    K = SH3::getKSpace(binary_image, params);
-    trace.endBlock();
-  }
+  *outSize = result.size;
+}
 
-  std::vector <std::vector<std::size_t>> primal_faces;
-  std::vector <RealPoint> primal_positions;
+int main() {
+  // Define test cases
+  const std::vector<std::vector<Interval>> A = {
+      {{0, 9}},                                             // Test 1 - l1
+      {{0, 3}, {5, 10}},                                    // Test 2 - l1
+      {{0, 3}, {5, 10}, {12, 15}}                           // Test 3 - l1
+  };
 
+  const std::vector<std::vector<Interval>> B = {
+      {{1, 2}, {4, 5}, {7, 10}},                            // Test 1 - l2
+      {{2, 6}, {8, 12}},                                    // Test 2 - l2
+      {{1, 3}, {6, 7}, {9, 12}, {14, 15}}                   // Test 3 - l2
+  };
 
-  trace.beginBlock("Computing digital points and primal surface");
-  // Build digital surface
-  digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
-  primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
-  surfels = SH3::getSurfelRange(digital_surface, params);
-  if (is_polynomial) {
-    surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
-  }
-  // Need to convert the faces
-  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
-    primal_faces.push_back(primal_surface->incidentVertices(face));
-  // Embed with gridstep.
-  for (auto v = 0; v < primal_surface->nbVertices(); v++)
-    primal_surface->position(v) *= gridstep;
-  primal_positions = primal_surface->positions();
-  digitizePointels(primal_positions, pointels);
-  digital_dimensions = getFigSizes();
-  trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
-  trace.endBlock();
+  for (int t = 0; t < A.size(); ++t) {
+    int l1Size = A[t].size();
+    int l2Size = B[t].size();
 
-  // Compute trivial normals
-/*
-  auto pTC = new TangencyComputer<KSpace>(K);
-  pTC->init(pointels.cbegin(), pointels.cend(), true);
-  int t_ring = int(round(params["t-ring"].as<double>()));
-  auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
-  primal_surface->faceNormals() = surfel_trivial_normals;
-  params("r-radius", iiRadius);
-  surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
-  for (auto i = 1; i < t_ring + 3; i++) {
-    primal_surface->computeVertexNormalsFromFaceNormals();
-    primal_surface->computeFaceNormalsFromVertexNormals();
-    surfel_trivial_normals = primal_surface->faceNormals();
-  }
-  trivial_normals = primal_surface->vertexNormals();
-  trivial_normals.resize(pointels.size());
-  ii_normals.resize(pointels.size());
-  true_normals.resize(pointels.size());
-  for (auto &n: trivial_normals) n = RealVector::zero;
-  for (auto &n: ii_normals) n = RealVector::zero;
-  for (auto &n: true_normals) n = RealVector::zero;
-  for (auto k = 0; k < surfels.size(); k++) {
-    const auto &surf = surfels[k];
-    const auto cells0 = SH3::getPrimalVertices(K, surf);
-    for (const auto &c0: cells0) {
-      const auto p = K.uCoords(c0);
-      const auto idx = pTC->index(p);
-      trivial_normals[idx] += surfel_trivial_normals[k];
-      ii_normals[idx] += surfel_ii_normals[k];
-      if (is_polynomial) {
-        true_normals[idx] += surfel_true_normals[k];
-      }
+    // Allocate device memory
+    Interval *d_l1, *d_l2, *d_buf, *d_out;
+    int *d_outSize;
+    cudaMalloc(&d_l1, sizeof(Interval) * l1Size);
+    cudaMalloc(&d_l2, sizeof(Interval) * l2Size);
+    cudaMalloc(&d_buf, sizeof(Interval) * 20);
+    cudaMalloc(&d_out, sizeof(Interval) * 20);
+    cudaMalloc(&d_outSize, sizeof(int));
+
+    // Copy to device
+    cudaMemcpy(d_l1, A[t].data(), sizeof(Interval) * l1Size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_l2, B[t].data(), sizeof(Interval) * l2Size, cudaMemcpyHostToDevice);
+
+    // Launch kernel
+    intersectKernel<<<1, 1>>>(d_buf, d_l1, d_l2, l1Size, l2Size, d_out, d_outSize);
+    cudaDeviceSynchronize();
+
+    // Get results
+    Interval h_result[20];
+    int h_outSize;
+    cudaMemcpy(&h_outSize, d_outSize, sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_result, d_out, sizeof(Interval) * h_outSize, cudaMemcpyDeviceToHost);
+
+    // Print result
+    std::cout << "Test " << t + 1 << ": ";
+    for (int i = 0; i < h_outSize; ++i) {
+      std::cout << h_result[i].start << "|" << h_result[i].end << " ";
     }
+    std::cout << std::endl;
+
+    // Free device memory
+    cudaFree(d_l1);
+    cudaFree(d_l2);
+    cudaFree(d_buf);
+    cudaFree(d_out);
+    cudaFree(d_outSize);
   }
-  for (auto &n: trivial_normals) n /= n.norm();
-  for (auto &n: ii_normals) n /= n.norm();
-  for (auto &n: true_normals) n /= n.norm();
 
-  primal_surface->vertexNormals() = trivial_normals;
-
-  if (sigmaTmp != -1.0) {
-    sigma = sigmaTmp;
-  } else {
-    sigma = 5 * pow(gridstep, -0.5);
-  }
-  minus2SigmaSquare = -2 * sigma * sigma;
-
-  std::cout << "sigma = " << sigma << std::endl;
-
-*/
-  pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
-  trace.beginBlock("Compute visibilities");
-  computeVisibilityGpu(VisibilityRadius);
-  Time = trace.endBlock();
-
-//  delete pTC;
-  return EXIT_SUCCESS;
-
+  return 0;
 }

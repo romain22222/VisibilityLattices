@@ -6,7 +6,7 @@ project(visibilityLatticesCuda LANGUAGES CXX CUDA)
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr -G -g")
 
 # Disabling specific warnings that are not relevant to the project
 # 68: integer conversion resulted in a change of sign
