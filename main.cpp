@@ -18,6 +18,10 @@
 #include "CLI11.hpp"
 #include "omp.h"
 
+#ifdef USE_CUDA_VISIBILITY
+#include "./gpu/main_gpu.cuh"
+#endif
+
 using namespace DGtal;
 using namespace Z3i;
 
@@ -97,6 +101,10 @@ bool isPointLowerThan(const Point &p1, const Point &p2) {
   return p1[0] < p2[0] || (p1[0] == p2[0] && p1[1] < p2[1]) || (p1[0] == p2[0] && p1[1] == p2[1] && p1[2] < p2[2]);
 }
 
+Point vec3iToPointVector(const Vec3i &vector) {
+  return Point(vector.x, vector.y, vector.z);
+}
+
 class Visibility {
 public:
   Dimension mainAxis{};
@@ -119,6 +127,21 @@ public:
       vectorIdxs[vectors[i]] = i;
     }
   }
+
+#ifdef USE_CUDA_VISIBILITY
+  Visibility(const HostVisibility hostVisibility) {
+    mainAxis = hostVisibility.mainAxis;
+    vectorsSize = hostVisibility.vectorsSize;
+    pointsSize = hostVisibility.pointsSize;
+    visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+    for (size_t i = 0; i < pointsSize; i++) {
+      pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+    }
+    for (size_t i = 0; i < vectorsSize; i++) {
+      vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+    }
+  }
+#endif
 
   size_t getVectorIdx(const IntegerVector &v) const {
     auto it = vectorIdxs.find(v);
@@ -705,6 +728,14 @@ void computeL2looErrors() {
   std::cout << "Loo error: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
 
+#ifdef USE_CUDA_VISIBILITY
+void computeVisibilityCuda(int radius) {
+  std::cout << "Computing visibility CUDA" << std::endl;
+  visibility = Visibility(computeVisibilityGpu(radius, digital_dimensions, pointels));
+  std::cout << "Visibility computed" << std::endl;
+}
+#endif
+
 void myCallback() {
   // Select a vertex with the mouse
   if (polyscope::pick::haveSelection()) {
@@ -769,6 +800,13 @@ void myCallback() {
     Time = trace.endBlock();
     doRedisplayCurvatures();
   }
+#ifdef USE_CUDA_VISIBILITY
+  if (ImGui::Button("Compute CUDA visibilities")) {
+    trace.beginBlock("Compute visibilities CUDA");
+    computeVisibilityCuda(VisibilityRadius);
+    Time = trace.endBlock();
+  }
+#endif
   ImGui::SameLine();
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }

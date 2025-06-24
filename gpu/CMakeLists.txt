@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.9/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.8/bin/nvcc")
 enable_language(CUDA)
 project(visibilityLatticesCuda LANGUAGES CXX CUDA)
 
@@ -23,7 +23,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/polyscope.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/dgtal.cmake)
 
 # Define executable
-add_executable(visibilityLatticesCuda main_gpu.cu)
+add_executable(visibilityLatticesCuda main.cpp main_gpu.cu)
 set_target_properties(visibilityLatticesCuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 message(STATUS "CMAKE_CUDA_COMPILER_VERSION = ${CMAKE_CUDA_COMPILER_VERSION}")
 
