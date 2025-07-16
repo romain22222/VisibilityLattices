@@ -361,7 +361,6 @@ HostVisibility computeVisibilityGpu(int radius, std::vector<int> &digital_dimens
   std::cout << "Pointels digitized" << std::endl;
 
   GpuVisibility tmpVisibility(axis, segmentList.data(), segmentList.size(), pointelsData, pointels.size());
-  delete[] pointelsData;
 
   std::cout << "Visibility initialized" << std::endl;
 
