@@ -9,7 +9,7 @@
     }
     \draw [thick] (0,0) -- (0.5,0) -- (1,0) -- (1,0.5) -- (1.5,0.5) -- (1.5,1) -- (2,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,0.5) -- (0.5,0.5) -- (0.5,1) -- (1,1) -- (1,1.5) -- (2.5,1.5) -- (2.5,0.5) -- (2,0.5) -- (2,0) -- (1.5,0) -- (1.5,-0.5) -- (-0.5,-0.5);
-  \end{tikzpicture} & 
+  \end{tikzpicture} &
   \begin{tikzpicture}
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.25,3.25);
     \draw[red,dashed,thick] (0,0) -- (1.5,1);
@@ -31,7 +31,7 @@
     }
     \draw [thick] (0,0) -- (0,1) -- (1,1) -- (1,0);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,-0.5) -- (-0.5,-0.5) -- (0.5,-0.5) -- (0.5,0.5);
-  \end{tikzpicture} & 
+  \end{tikzpicture} &
   \begin{tikzpicture}
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
     \draw[red,dashed,thick] (0,0) -- (1,1);
@@ -43,8 +43,8 @@
     \draw [thick] (0,0) -- (0,1) -- (1,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
   \end{tikzpicture} \\
-  Visible     & Non Visible                   &
-  Non Visible & Non Visible
+  Visible     & Non-Visible                   &
+  Non-Visible & Non-Visible
 \end{tabular}
 
 %% \begin{tabular}{cc|cc}

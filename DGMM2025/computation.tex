@@ -4,14 +4,14 @@ point}. For instance, a standard way is to double the coordinates of
 the centroid of the cell (often called its Khalimsky code). Now we
 have to represent an arbitrary set $K$ of lattice points.
 
-Let $(\ve_j)_{j=1,\dots}$ be the canonical basis of $\Z^d$.  We may
+Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$.  We may
 choose an arbitrary projection \emph{axis} $j \in
 \{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
 can collect all the cells of $K$ that projects onto the same
-points. Let $p \in K$. Then $\pi^{-1}_j(p)$ is a set of cells having
+points. Let $p \in K$. Then $\pi^{-1}_j(p) \cap \Star{K}$ is a set of cells having
 all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
-Fig.~\ref{fig:lattice-representation} for an illustration).
+Figure~\ref{fig:lattice-representation} for an illustration).
 
 \begin{figure}[t]
   \centering
@@ -27,7 +27,7 @@ A \emph{sequence of intervals} is an ordered list of intervals $L =
 ([a_i,b_i])_{i=1,\ldots,n}$ such that $a_i \in \Z, b_i \in \Z, b_i + 1
 < a_{i+1}$, i.e., disjoint intervals with at least a missing
 integer. We denote by $\mathbb{L}$ the set of sequences of
-intervals. An integer $k$ belongs to $L$ iff $\exists i$ such that
+intervals. An integer $k$ belongs to $L$ iff there exists $i$ such that
 $a_i \Le k \Le b_i$. For a finite set of integers, there is a unique
 sequence of intervals representing it.
 
@@ -194,13 +194,13 @@ returns the intersection of both lists of intervals.
 
 % Quantitative results
 
-We have plotted on Fig.\ref{fig:meanvisibility-computationComplexity}
+We have plotted on Figure~\ref{fig:meanvisibility-computationComplexity}
 the running times to compute global visibility of both~\cite[Algorithm
   3]{lachaud:2022-jmiv} and our algorithm. Timings are very
 similar. Our algorithm is faster for smaller maximal radii (up to 20),
 while the other is slightly faster for bigger radii. We have also
 measured the (discrete) average visibility distance along digitization
-of smooth shapes (Fig.~\ref{fig:meanvisibility-gridstep}). It follows
+of smooth shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows
 a law proportionnal to $\sqrt{h}$. As shown in the next section, for
 real 3d images, a maximal radius below 10 is sufficient for normal and
 curvature estimation.
