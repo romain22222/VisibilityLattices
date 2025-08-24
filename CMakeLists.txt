@@ -3,6 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(USE_CUDA_VISIBILITY "Enable CUDA visibility kernel" OFF)
 
+
 set(SOURCES
         main.cpp
         gpu/Vec3i.cu
@@ -33,7 +34,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # set(WITH_EIGEN ON CACHE STRING "DGtal - Eigen")
 # include(dgtal)
 
-include(polyscope)
+#include(polyscope)
 
 FIND_PACKAGE(DGtal REQUIRED)
 INCLUDE_DIRECTORIES(${DGTAL_INCLUDE_DIRS})

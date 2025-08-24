@@ -4,6 +4,9 @@
 #define CUDA_HOSTDEV
 #endif
 
+#ifndef VEC3I_H
+#define VEC3I_H
+
 class Vec3i {
 public:
   int x, y, z;
@@ -51,3 +54,5 @@ public:
     return *this;
   }
 };
+
+#endif // VEC3I_H

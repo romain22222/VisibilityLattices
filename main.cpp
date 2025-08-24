@@ -15,8 +15,10 @@
 #include <DGtal/helpers/Shortcuts.h>
 #include <DGtal/helpers/ShortcutsGeometry.h>
 #include "additionnalClasses/LinearKDTree.h"
+#include "DGtal/io/viewers/PolyscopeViewer.h"
 #include "CLI11.hpp"
 #include "omp.h"
+#include "gpu/Vec3i.cu"
 
 #ifdef USE_CUDA_VISIBILITY
 #include "./gpu/main_gpu.cuh"
@@ -628,7 +630,6 @@ void computeVisibilityNormals() {
   }
   if (!noInterface) {
     psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
-    //psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
   }
 }
 
@@ -738,10 +739,10 @@ void computeVisibilityCuda(int radius) {
 
 void myCallback() {
   // Select a vertex with the mouse
-  if (polyscope::pick::haveSelection()) {
-    auto selection = polyscope::pick::getSelection();
-    auto selectedSurface = static_cast<polyscope::SurfaceMesh *>(selection.first);
-    auto idx = selection.second;
+  if (polyscope::haveSelection()) {
+    auto selection = polyscope::getSelection();
+    auto selectedSurface = static_cast<polyscope::SurfaceMesh *>(selection.structure);
+    auto idx = selection.localIndex;
 
     // Only authorize selection on the input surface and the reconstruction
     auto surf = polyscope::getSurfaceMesh("Primal surface");
