@@ -85,6 +85,7 @@ struct MyLatticeSet {
   __device__ MyLatticeSet(Vec3i segment, int axis);
 
   __device__ LatticeFoundResult find(const Vec3i &p) const;
+  __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p, int axis) const;
 #endif
 };
 
@@ -111,14 +112,11 @@ struct GpuVisibility {
 
   __device__
   void set(const Vec3i &offset, const IntervalList &value, size_t vectorIdx) const {
-    Vec3i p = offset;
+    auto p = offset;
     for (const auto &interval: value) {
       for (int i = interval.start / 2; i <= interval.end / 2; ++i) {
         p[mainAxis] = i;
-        int pointIdx = getPointIdx(p);
-        if (pointIdx < pointsSize && vectorIdx < vectorsSize) {
-          visibles[pointIdx * vectorsSize + vectorIdx] = true;
-        }
+        visibles[getPointIdx(p) * vectorsSize + vectorIdx] = true;
       }
     }
   }
