@@ -3,17 +3,15 @@
 
 #ifdef __CUDACC__
 #define CUDA_HOSTDEV __host__ __device__
+#define CUDA_HOST __host__
 #define CUDA_GLOBAL __global__
 #else
 #define CUDA_HOSTDEV
 #define CUDA_GLOBAL
+#define CUDA_HOST
 #endif
 
-#include <DGtal/helpers/StdDefs.h>
 #include "Vec3i.cu"
-
-using namespace DGtal;
-using namespace Z3i;
 
 struct IntervalGpu {
   int start;
@@ -29,8 +27,6 @@ int gcd3(int a, int b, int c);
 bool isPointLowerThan(const Vec3i &p1, const Vec3i &p2);
 
 // Add declarations of GPU structs and kernels
-
-struct MyLatticeSet;
 
 struct IntervalList {
   IntervalGpu *data;
@@ -67,6 +63,29 @@ struct IntervalList {
   CUDA_HOSTDEV const IntervalGpu &operator[](int index) const {
     return data[index];
   }
+};
+
+struct LatticeFoundResult {
+  int keyIndex{};
+  IntervalList intervals;
+};
+
+struct MyLatticeSet {
+  Vec3i *d_keys{};
+  IntervalList *d_intervals{};
+  int myAxis;
+
+  size_t numKeys = 0;
+
+  CUDA_HOST void toGPU(std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals);
+
+  CUDA_HOST MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals);
+
+#ifdef __CUDACC__
+  __device__ MyLatticeSet(Vec3i segment, int axis);
+
+  __device__ LatticeFoundResult find(const Vec3i &p) const;
+#endif
 };
 
 struct GpuVisibility {
@@ -151,6 +170,12 @@ struct HostVisibility {
 #else
   HostVisibility(GpuVisibility flatVisibility) {
     std::cout << "HostVisibility constructor called without CUDA support!" << std::endl;
+    mainAxis = 0;
+    vectorsSize = 0;
+    pointsSize = 0;
+    visibles = nullptr;
+    vectorList = nullptr;
+    pointList = nullptr;
   }
 #endif
 
@@ -191,12 +216,18 @@ struct HostVisibility {
 };
 
 CUDA_GLOBAL void computeVisibilityKernel(
-    int axis, int *digital_dimensions, int *axises_idx,
+    int axis, int *digital_dimensions, const int *axises_idx,
     MyLatticeSet figLattices, GpuVisibility visibility,
     Vec3i *segmentList, int segmentSize
 );
 
-HostVisibility computeVisibilityGpu(int radius, std::vector<int> &digital_dimensions,
-                                    std::vector<Point> &pointels);
+
+HostVisibility computeVisibility(
+    int chunkAmount, int chunkSize,
+    int axis, int *digital_dimensions, int *axises_idx,
+    MyLatticeSet figLattices,
+    Vec3i *segmentList, int segmentSize,
+    Vec3i *pointels, int pointelsSize
+);
 
 #endif //MAIN_GPU_CUH

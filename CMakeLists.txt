@@ -7,6 +7,8 @@ option(USE_CUDA_VISIBILITY "Enable CUDA visibility kernel" OFF)
 set(SOURCES
         main.cpp
         gpu/Vec3i.cu
+        gpu/middleware.cpp
+        gpu/middleware.h
 )
 
 # If you want to use CUDA, uncomment the following lines

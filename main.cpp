@@ -21,7 +21,7 @@
 #include "gpu/Vec3i.cu"
 
 #ifdef USE_CUDA_VISIBILITY
-#include "./gpu/main_gpu.cuh"
+#include "./gpu/middleware.h"
 #endif
 
 using namespace DGtal;
