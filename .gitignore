@@ -7,3 +7,5 @@ cmake-build-*
 /auxil
 /out
 /build
+/DGMM2025_arXiv.zip
+/DGMM2025_arXiv/**
