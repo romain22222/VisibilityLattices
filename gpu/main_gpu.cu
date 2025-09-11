@@ -87,7 +87,7 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
   if (segment != Vec3i()) mainPointsBuf.push_back(segment * 2);
 
   // Allocate memory for keys and intervals
-  int allocateAmount = (2 * segment[otherAxis1] + 3) * (2 * segment[otherAxis2] + 3);
+  int allocateAmount = (2 * abs(segment[otherAxis1]) + 3) * (2 * abs(segment[otherAxis2]) + 3);
   cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount);
   cudaMalloc(&d_intervals, sizeof(IntervalList) * allocateAmount);
 
@@ -101,6 +101,7 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
         if (alreadyExists.keyIndex == -1) {
           if (numKeys >= allocateAmount) {
             printf("Exceeded allocated amount for lattice keys\n");
+            printf("segment: (%d, %d, %d)\n", segment.x, segment.y, segment.z);
           }
           d_keys[numKeys] = key;
           cudaMalloc(&d_intervals[numKeys].data, sizeof(IntervalGpu));
@@ -255,8 +256,8 @@ __global__ void computeVisibilityKernel(
   for (auto tx = minTx; tx < maxTx; tx++) {
     for (auto ty = minTy; ty < maxTy; ty++) {
       eligibles.size = 1;
-      eligibles.data[0] = {2 * digital_dimensions[axises_idx[1] + 3] - 1,
-                           2 * digital_dimensions[axises_idx[1] + 6] + 1};
+      eligibles.data[0] = {2 * digital_dimensions[axis + 3] - 1,
+                           2 * digital_dimensions[axis + 6] + 1};
       const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                             axis == 2 ? 0 : 2 * ty);
       for (auto i = 0; i < latticeVector.numKeys; i++) {
