@@ -84,6 +84,8 @@ struct MyLatticeSet {
 #ifdef __CUDACC__
   __device__ MyLatticeSet(Vec3i segment, int axis);
 
+  __device__ ~MyLatticeSet();
+
   __device__ LatticeFoundResult find(const Vec3i &p) const;
   __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p, int axis) const;
 #endif
@@ -157,12 +159,18 @@ struct HostVisibility {
     mainAxis = flatVisibility.mainAxis;
     vectorsSize = flatVisibility.vectorsSize;
     pointsSize = flatVisibility.pointsSize;
-    vectorList = flatVisibility.vectorList;
-    pointList = flatVisibility.pointList;
-
     size_t totalSize = pointsSize * vectorsSize;
+
     visibles = new bool[totalSize];
     cudaMemcpy(visibles, flatVisibility.visibles, totalSize * sizeof(bool), cudaMemcpyDeviceToHost);
+    vectorList = new Vec3i[vectorsSize];
+    cudaMemcpy(vectorList, flatVisibility.vectorList, vectorsSize * sizeof(Vec3i), cudaMemcpyDeviceToHost);
+    pointList = new Vec3i[pointsSize];
+    cudaMemcpy(pointList, flatVisibility.pointList, pointsSize * sizeof(Vec3i), cudaMemcpyDeviceToHost);
+
+    cudaFree(flatVisibility.visibles);
+    cudaFree(flatVisibility.vectorList);
+    cudaFree(flatVisibility.pointList);
   }
 
 #else
@@ -214,8 +222,8 @@ struct HostVisibility {
 };
 
 CUDA_GLOBAL void computeVisibilityKernel(
-    int axis, int *digital_dimensions, const int *axises_idx,
-    MyLatticeSet figLattices, GpuVisibility visibility,
+    int axis, const int *digital_dimensions, const int *axises_idx,
+    const MyLatticeSet& figLattices, GpuVisibility visibility,
     Vec3i *segmentList, int segmentSize
 );
 
@@ -223,7 +231,7 @@ CUDA_GLOBAL void computeVisibilityKernel(
 HostVisibility computeVisibility(
     int chunkAmount, int chunkSize,
     int axis, int *digital_dimensions, int *axises_idx,
-    MyLatticeSet figLattices,
+    const MyLatticeSet& figLattices,
     Vec3i *segmentList, int segmentSize,
     Vec3i *pointels, int pointelsSize
 );

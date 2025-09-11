@@ -1,7 +1,5 @@
 #include <iostream>
-#include <random>
 #include <string>
-#include "../additionnalClasses/LinearKDTree.h"
 #include "../CLI11.hpp"
 #include "main_gpu.cuh"
 
@@ -19,7 +17,7 @@ struct Buffer {
   size_t capacity;
   size_t size;
 
-  __host__ __device__ Buffer(size_t cap) : capacity(cap), size(0) {
+  __host__ __device__ explicit Buffer(size_t cap) : capacity(cap), size(0) {
     cudaMalloc(&data, sizeof(Type) * capacity);
   }
 
@@ -30,10 +28,16 @@ struct Buffer {
   }
 
   __device__ void push_back(const Type &v) {
+    if (size >= capacity) {
+      printf("Buffer overflow in push_back\n");
+    }
     data[size++] = v;
   }
 
   __host__ __device__ Type &operator[](size_t index) {
+    if (index >= size) {
+      printf("Buffer index out of range in operator[]\n");
+    }
     return data[index];
   }
 };
@@ -58,7 +62,7 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
     : myAxis(axis) {
   int otherAxis1 = (axis + 1) % 3;
   int otherAxis2 = (axis + 2) % 3;
-  Buffer<Vec3i> mainPointsBuf(2 * (segment[0] + segment[1] + segment[2]) + 1);
+  Buffer<Vec3i> mainPointsBuf(abs(segment[0]) + abs(segment[1]) + abs(segment[2]) + 1);
   mainPointsBuf.push_back(Vec3i(0, 0, 0));
   for (int k = 0; k < 3; k++) {
     const int n = (segment[k] >= 0) ? segment[k] : -segment[k];
@@ -95,6 +99,9 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
         key[otherAxis2] += k;
         auto alreadyExists = this->findWithoutAxis(key, axis);
         if (alreadyExists.keyIndex == -1) {
+          if (numKeys >= allocateAmount) {
+            printf("Exceeded allocated amount for lattice keys\n");
+          }
           d_keys[numKeys] = key;
           cudaMalloc(&d_intervals[numKeys].data, sizeof(IntervalGpu));
           d_intervals[numKeys].size = 1;
@@ -104,9 +111,9 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
         } else {
           // If the key already exists, merge intervals
           auto &existingIntervals = d_intervals[alreadyExists.keyIndex];
-          existingIntervals.data[0].start = myMin(existingIntervals.data[existingIntervals.size - 1].start,
+          existingIntervals.data[0].start = myMin(existingIntervals.data[0].start,
                                                   key[axis] - 1);
-          existingIntervals.data[0].end = myMax(existingIntervals.data[existingIntervals.size - 1].end,
+          existingIntervals.data[0].end = myMax(existingIntervals.data[0].end,
                                                 key[axis] + 1);
         }
       }
@@ -114,11 +121,25 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
   }
 }
 
+__device__ MyLatticeSet::~MyLatticeSet() {
+  if (d_keys) {
+    cudaFree(d_keys);
+  }
+  if (d_intervals) {
+    for (size_t i = 0; i < numKeys; ++i) {
+      if (d_intervals[i].data) {
+        cudaFree(d_intervals[i].data);
+      }
+    }
+    cudaFree(d_intervals);
+  }
+}
+
 __device__ LatticeFoundResult MyLatticeSet::find(const Vec3i &p) const {
   // Search for the point p in the lattice set
   for (size_t i = 0; i < numKeys; ++i) {
     if (d_keys[i] == p) {
-      return {i, d_intervals[i]};
+      return {static_cast<int>(i), d_intervals[i]};
     }
   }
   return {-1, d_intervals[0]};
@@ -130,7 +151,7 @@ __device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p, int 
   int otherAxis2 = (axis + 2) % 3;
   for (size_t i = 0; i < numKeys; ++i) {
     if (d_keys[i][otherAxis1] == p[otherAxis1] && d_keys[i][otherAxis2] == p[otherAxis2]) {
-      return {i, d_intervals[i]};
+      return {static_cast<int>(i), d_intervals[i]};
     }
   }
   return {-1, d_intervals[0]};
@@ -216,8 +237,8 @@ __device__ IntervalList matchVector(
 }
 
 __global__ void computeVisibilityKernel(
-    int axis, int *digital_dimensions, const int *axises_idx,
-    MyLatticeSet figLattices, GpuVisibility visibility,
+    int axis, const int *digital_dimensions, const int *axises_idx,
+    const MyLatticeSet& figLattices, GpuVisibility visibility,
     Vec3i *segmentList, int segmentSize
 ) {
   auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -259,24 +280,56 @@ __global__ void computeVisibilityKernel(
 HostVisibility computeVisibility(
     int chunkAmount, int chunkSize,
     int axis, int *digital_dimensions, int *axises_idx,
-    MyLatticeSet figLattices,
+    const MyLatticeSet& figLattices,
     Vec3i *segmentList, int segmentSize,
     Vec3i *pointels, int pointelsSize
 ) {
 
   // Malloc every list on GPU
-  int* d_digital_dimensions;
-  int* d_axises_idx;
-  Vec3i* d_segmentList;
-  Vec3i* d_pointels;
-  cudaMalloc(&d_digital_dimensions, sizeof(int) * 9);
-  cudaMalloc(&d_axises_idx, sizeof(int) * 3);
-  cudaMalloc(&d_segmentList, sizeof(Vec3i) * segmentSize);
-  cudaMalloc(&d_pointels, sizeof(Vec3i) * pointelsSize);
-  cudaMemcpy(d_digital_dimensions, digital_dimensions, sizeof(int) * 9, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_axises_idx, axises_idx, sizeof(int) * 3, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_segmentList, segmentList, sizeof(Vec3i) * segmentSize, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_pointels, pointels, sizeof(Vec3i) * pointelsSize, cudaMemcpyHostToDevice);
+  int *d_digital_dimensions;
+  int *d_axises_idx;
+  Vec3i *d_segmentList;
+  Vec3i *d_pointels;
+  auto err = cudaMalloc(&d_digital_dimensions, sizeof(int) * 9);
+  if (err != cudaSuccess) {
+    std::cerr << "Error allocating memory for digital_dimensions: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMalloc(&d_axises_idx, sizeof(int) * 3);
+  if (err != cudaSuccess) {
+    std::cerr << "Error allocating memory for axises_idx: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMalloc(&d_segmentList, sizeof(Vec3i) * segmentSize);
+  if (err != cudaSuccess) {
+    std::cerr << "Error allocating memory for segmentList: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMalloc(&d_pointels, sizeof(Vec3i) * pointelsSize);
+  if (err != cudaSuccess) {
+    std::cerr << "Error allocating memory for pointels: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMemcpy(d_digital_dimensions, digital_dimensions, sizeof(int) * 9, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    std::cerr << "Error copying digital_dimensions to device: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMemcpy(d_axises_idx, axises_idx, sizeof(int) * 3, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    std::cerr << "Error copying axises_idx to device: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMemcpy(d_segmentList, segmentList, sizeof(Vec3i) * segmentSize, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    std::cerr << "Error copying segmentList to device: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  err = cudaMemcpy(d_pointels, pointels, sizeof(Vec3i) * pointelsSize, cudaMemcpyHostToDevice);
+  if (err != cudaSuccess) {
+    std::cerr << "Error copying pointels to device: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
 
   GpuVisibility tmpVisibility(axis, d_segmentList, segmentSize, d_pointels, pointelsSize);
@@ -295,5 +348,11 @@ HostVisibility computeVisibility(
   std::cout << "Kernel finished" << std::endl;
 
   HostVisibility visibility(tmpVisibility);
+
+  cudaFree(d_digital_dimensions);
+  cudaFree(d_axises_idx);
+  cudaFree(d_segmentList);
+  cudaFree(d_pointels);
+
   return visibility;
 }

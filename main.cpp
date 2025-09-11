@@ -132,6 +132,7 @@ public:
 
 #ifdef USE_CUDA_VISIBILITY
   Visibility(const HostVisibility hostVisibility) {
+    std::cout << "Reading visibility from GPU" << std::endl;
     mainAxis = hostVisibility.mainAxis;
     vectorsSize = hostVisibility.vectorsSize;
     pointsSize = hostVisibility.pointsSize;

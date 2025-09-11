@@ -109,8 +109,9 @@ HostVisibility computeVisibilityGpu(int radius, std::vector<int> &digital_dimens
   std::cout << "Pointels digitized" << std::endl;
 
   HostVisibility visibility = computeVisibility(
-//        (segmentList.size() + 255) / 256, 256,
-      segmentList.size(), 1,
+        (segmentList.size() + 255) / 256, 256,
+//      segmentList.size(), 1,
+//      1, 1,
       axis, digital_dimensions.data(), axises_idx,
       figLattices,
       segmentList.data(), segmentList.size(),
