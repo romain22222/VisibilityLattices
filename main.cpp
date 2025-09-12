@@ -186,6 +186,21 @@ public:
     return std::all_of(visibles.begin(), visibles.end(), [](bool v) { return !v; });
   }
 
+  void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
+    this->mainAxis = mainAxis;
+    vectorsSize = vectors.size();
+    pointsSize = points.size();
+    visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+    pointIdxs.clear();
+    vectorIdxs.clear();
+    for (size_t i = 0; i < pointsSize; i++) {
+      pointIdxs[points[i]] = i;
+    }
+    for (size_t i = 0; i < vectorsSize; i++) {
+      vectorIdxs[vectors[i]] = i;
+    }
+  }
+
 };
 
 Visibility visibility = Visibility();
@@ -372,7 +387,7 @@ void computeVisibilityOmp(int radius) {
   // avoid thread imbalance
   std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-  visibility = Visibility(axis, segmentList, pointels);
+  visibility.reset(axis, segmentList, pointels);
   size_t chunkSize = 64;
   auto chunkAmount = segmentList.size() / chunkSize;
   auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
@@ -436,7 +451,7 @@ void computeVisibility(int radius) {
   IntegerVector segment;
   Intervals eligibles;
   auto segmentList = getAllVectors(radius);
-  visibility = Visibility(axis, segmentList, pointels);
+  visibility.reset(axis, segmentList, pointels);
   int minTx, maxTx, minTy, maxTy;
   std::vector<long> durations = std::vector<long>(segmentList.size() / 100, 0);
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
