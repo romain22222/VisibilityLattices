@@ -63,6 +63,15 @@ struct IntervalList {
   CUDA_HOSTDEV const IntervalGpu &operator[](int index) const {
     return data[index];
   }
+
+  CUDA_HOSTDEV int push_back(const IntervalGpu &interval) {
+    if (size >= capacity) {
+      data[size++] = interval;
+      return 1;
+    }
+    data[size++] = interval;
+    return 0;
+  }
 };
 
 struct LatticeFoundResult {
@@ -74,6 +83,8 @@ struct MyLatticeSet {
   Vec3i *d_keys{};
   IntervalList *d_intervals{};
   int myAxis;
+  int myOtherAxis1;
+  int myOtherAxis2;
 
   size_t numKeys = 0;
 
@@ -87,7 +98,7 @@ struct MyLatticeSet {
   __device__ ~MyLatticeSet();
 
   __device__ LatticeFoundResult find(const Vec3i &p) const;
-  __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p, int axis) const;
+  __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p) const;
 #endif
 };
 
@@ -118,7 +129,7 @@ struct GpuVisibility {
     for (const auto &interval: value) {
       for (int i = interval.start / 2; i <= interval.end / 2; ++i) {
         p[mainAxis] = i;
-        visibles[getPointIdx(p) * vectorsSize + vectorIdx] = true;
+        visibles[pointsSize * vectorIdx + this->getPointIdx(p)] = true;
       }
     }
   }
@@ -215,7 +226,7 @@ struct HostVisibility {
     for (Vec3i p = p1; p != p2; p += v) {
       int pIdx = getPointIdx(p);
       if (pIdx == pointsSize) return false;
-      if (!visibles[pIdx * vectorsSize + vIdx]) return false;
+      if (!visibles[vIdx * pointsSize + pIdx]) return false;
     }
     return true;
   }

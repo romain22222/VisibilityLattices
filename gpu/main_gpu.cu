@@ -59,9 +59,7 @@ __host__  MyLatticeSet::MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::ve
 }
 
 __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
-    : myAxis(axis) {
-  int otherAxis1 = (axis + 1) % 3;
-  int otherAxis2 = (axis + 2) % 3;
+    : myAxis(axis), myOtherAxis1((axis + 1) % 3), myOtherAxis2((axis + 2) % 3) {
   Buffer<Vec3i> mainPointsBuf(abs(segment[0]) + abs(segment[1]) + abs(segment[2]) + 1);
   mainPointsBuf.push_back(Vec3i(0, 0, 0));
   for (int k = 0; k < 3; k++) {
@@ -87,7 +85,7 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
   if (segment != Vec3i()) mainPointsBuf.push_back(segment * 2);
 
   // Allocate memory for keys and intervals
-  int allocateAmount = (2 * abs(segment[otherAxis1]) + 3) * (2 * abs(segment[otherAxis2]) + 3);
+  int allocateAmount = (2 * abs(segment[myOtherAxis1]) + 3) * (2 * abs(segment[myOtherAxis2]) + 3);
   cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount);
   cudaMalloc(&d_intervals, sizeof(IntervalList) * allocateAmount);
 
@@ -95,9 +93,9 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
     for (int j = -1; j < 2; ++j) {
       for (int k = -1; k < 2; ++k) {
         Vec3i key = mainPointsBuf[i];
-        key[otherAxis1] += j;
-        key[otherAxis2] += k;
-        auto alreadyExists = this->findWithoutAxis(key, axis);
+        key[myOtherAxis1] += j;
+        key[myOtherAxis2] += k;
+        auto alreadyExists = this->findWithoutAxis(key);
         if (alreadyExists.keyIndex == -1) {
           if (numKeys >= allocateAmount) {
             printf("Exceeded allocated amount for lattice keys\n");
@@ -146,12 +144,10 @@ __device__ LatticeFoundResult MyLatticeSet::find(const Vec3i &p) const {
   return {-1, d_intervals[0]};
 }
 
-__device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p, int axis) const {
+__device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p) const {
   // Search for the point p in the lattice set
-  int otherAxis1 = (axis + 1) % 3;
-  int otherAxis2 = (axis + 2) % 3;
   for (size_t i = 0; i < numKeys; ++i) {
-    if (d_keys[i][otherAxis1] == p[otherAxis1] && d_keys[i][otherAxis2] == p[otherAxis2]) {
+    if (d_keys[i][myOtherAxis1] == p[myOtherAxis1] && d_keys[i][myOtherAxis2] == p[myOtherAxis2]) {
       return {static_cast<int>(i), d_intervals[i]};
     }
   }
@@ -193,29 +189,39 @@ inline int gcd3(int a, int b, int c) {
 __device__ IntervalList checkInterval(IntervalList &buf, const IntervalGpu &toCheck, const IntervalList &figIntervals) {
 //  IntervalList result(figIntervals.size);
   buf.size = 0;
+  int err = 0;
   const auto toCheckSize = toCheck.end - toCheck.start;
   for (const auto &interval: figIntervals) {
     if (interval.end - interval.start >= toCheckSize) {
-      buf.data[buf.size++] = {interval.start - toCheck.start, interval.end - toCheck.end};
+      err = buf.push_back({interval.start - toCheck.start, interval.end - toCheck.end});
+      if (err) {
+        printf("Error pushing back in checkInterval\n");
+      }
     }
   }
   return buf;
 }
 
-__device__ IntervalList intersect(IntervalList &buf, const IntervalList &l1, const IntervalList &l2) {
-//  IntervalList result(l1.capacity);
+__device__ void intersect(IntervalList &buf, IntervalList &l1, const IntervalList &l2) {
   buf.size = 0;
+  int err = 0;
   int k1 = 0, k2 = 0;
   while (k1 < l1.size && k2 < l2.size) {
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
     const auto i = myMax(interval1.start, interval2.start);
     const auto j = myMin(interval1.end, interval2.end);
-    if (i <= j) buf.data[buf.size++] = {i, j};
+    if (i <= j) {
+      err = buf.push_back({i, j});
+      if (err) printf("Error pushing back in intersect\n");
+    }
     if (interval1.end <= interval2.end) k1++;
     if (interval1.end >= interval2.end) k2++;
   }
-  return buf;
+  l1.size = 0;
+  for (int i = 0; i < buf.size; i++) {
+    l1.push_back(buf[i]);
+  }
 }
 
 /**
@@ -227,11 +233,12 @@ __device__ IntervalList intersect(IntervalList &buf, const IntervalList &l1, con
  */
 __device__ IntervalList matchVector(
     IntervalList &buf,
+    IntervalList &buf2,
     IntervalList &toCheck,
     const IntervalList &vectorIntervals,
     const IntervalList &figIntervals) {
   for (const auto &vInterval: vectorIntervals) {
-    toCheck = intersect(buf, toCheck, checkInterval(buf, vInterval, figIntervals));
+    intersect(buf2, toCheck, checkInterval(buf, vInterval, figIntervals));
     if (toCheck.empty()) break;
   }
   return toCheck;
@@ -239,7 +246,7 @@ __device__ IntervalList matchVector(
 
 __global__ void computeVisibilityKernel(
     int axis, const int *digital_dimensions, const int *axises_idx,
-    const MyLatticeSet& figLattices, GpuVisibility visibility,
+    const MyLatticeSet &figLattices, GpuVisibility visibility,
     Vec3i *segmentList, int segmentSize
 ) {
   auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -247,6 +254,7 @@ __global__ void computeVisibilityKernel(
 
   Vec3i segment = segmentList[idx];
   IntervalList buf(2 * digital_dimensions[axis] + 1);
+  IntervalList buf2(2 * digital_dimensions[axis] + 1);
   IntervalList eligibles(2 * digital_dimensions[axis] + 1);
   MyLatticeSet latticeVector(segment, axis);
   int minTx = digital_dimensions[axises_idx[1] + 3] - myMin(0, segment[axises_idx[1]]);
@@ -258,17 +266,17 @@ __global__ void computeVisibilityKernel(
       eligibles.size = 1;
       eligibles.data[0] = {2 * digital_dimensions[axis + 3] - 1,
                            2 * digital_dimensions[axis + 6] + 1};
-      const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+      const Vec3i pInterest(axis == 0 ? 0 : 2 * tx, 2 * (axis == 0 ? tx : ty),
                             axis == 2 ? 0 : 2 * ty);
       for (auto i = 0; i < latticeVector.numKeys; i++) {
         const auto key = latticeVector.d_keys[i];
         const auto value = latticeVector.d_intervals[i];
-        const auto res = figLattices.findWithoutAxis(pInterest + key, axis);
+        const auto res = figLattices.findWithoutAxis(pInterest + key);
         if (res.keyIndex < 0) {
           eligibles.size = 0;
           break;
         }
-        eligibles = matchVector(buf, eligibles, value, res.intervals);
+        eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
         if (eligibles.empty()) break;
       }
       if (!eligibles.empty()) {
@@ -281,7 +289,7 @@ __global__ void computeVisibilityKernel(
 HostVisibility computeVisibility(
     int chunkAmount, int chunkSize,
     int axis, int *digital_dimensions, int *axises_idx,
-    const MyLatticeSet& figLattices,
+    const MyLatticeSet &figLattices,
     Vec3i *segmentList, int segmentSize,
     Vec3i *pointels, int pointelsSize
 ) {
