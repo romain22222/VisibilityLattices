@@ -183,7 +183,7 @@ public:
   }
 
   bool empty() const {
-    return visibles.empty();
+    return std::all_of(visibles.cbegin(), visibles.cend(), [](bool v) { return !v; });
   }
 
   void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
@@ -294,7 +294,7 @@ IntegerVectors getAllVectors(int radius) {
  */
 LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
   LatticeSet L_ab(axis);
-  L_ab.insert({0, 0, 0});
+  L_ab.insert(emptyIE);
   for (Dimension k = 0; k < 3; k++) {
     const Integer n = (segment[k] >= 0) ? segment[k] : -segment[k];
     const Integer d = (segment[k] >= 0) ? 1 : -1;
@@ -315,7 +315,7 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
       L_ab.insert(kc);
     }
   }
-  if (segment != IntegerVector()) L_ab.insert(2 * segment);
+  if (segment != emptyIE) L_ab.insert(2 * segment);
   return L_ab.starOfCells();
 }
 
@@ -389,11 +389,11 @@ void computeVisibilityOmp(int radius) {
 
   visibility.reset(axis, segmentList, pointels);
   size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize;
-  auto shouldHaveOneMoreChunk = segmentList.size() % chunkSize == 0;
+  auto chunkAmount = segmentList.size() / chunkSize +1;
+  auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // OMP" << std::endl;
 #pragma omp parallel for schedule(dynamic)
-  for (auto chunkIdx = 0; chunkIdx < chunkAmount + shouldHaveOneMoreChunk; chunkIdx++) {
+  for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
     IntegerVector segment;
     Intervals eligibles;
     int minTx, maxTx, minTy, maxTy;
@@ -426,6 +426,8 @@ void computeVisibilityOmp(int radius) {
           }
           if (!eligibles.empty()) {
             visibility.set(pInterest / 2, eligibles, segmentIdx);
+            std::cout << "Thread " << omp_get_thread_num() << " found visibility for segment " << segmentIdx
+                      << " at (" << tx << "," << ty << ")" << std::endl;
           }
         }
       }
