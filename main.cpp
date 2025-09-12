@@ -183,7 +183,7 @@ public:
   }
 
   bool empty() const {
-    return std::all_of(visibles.begin(), visibles.end(), [](bool v) { return !v; });
+    return visibles.empty();
   }
 
   void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
