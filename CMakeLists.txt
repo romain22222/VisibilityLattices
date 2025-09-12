@@ -7,12 +7,13 @@ option(USE_CUDA_VISIBILITY "Enable CUDA visibility kernel" OFF)
 set(SOURCES
         main.cpp
         gpu/Vec3i.cu
-        gpu/middleware.cpp
-        gpu/middleware.h
 )
 
 # If you want to use CUDA, uncomment the following lines
 if (USE_CUDA_VISIBILITY)
+    set(SOURCES ${SOURCES}
+            gpu/middleware.cpp
+            gpu/middleware.h)
     set(CMAKE_CUDA_COMPILER "/usr/local/cuda-12.8/bin/nvcc")
     enable_language(CUDA)
     project(VisibilityLattices LANGUAGES CXX CUDA)
