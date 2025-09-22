@@ -88,14 +88,14 @@ struct MyLatticeSet {
 
   size_t numKeys = 0;
 
-  CUDA_HOST void toGPU(std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals);
+  CUDA_HOST MyLatticeSet() = default;
 
   CUDA_HOST MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals);
 
 #ifdef __CUDACC__
   __device__ MyLatticeSet(Vec3i segment, int axis);
 
-  __device__ ~MyLatticeSet();
+//  __device__ ~MyLatticeSet();
 
   __device__ LatticeFoundResult find(const Vec3i &p) const;
   __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p) const;
@@ -129,7 +129,7 @@ struct GpuVisibility {
     for (const auto &interval: value) {
       for (int i = interval.start / 2; i <= interval.end / 2; ++i) {
         p[mainAxis] = i;
-        visibles[pointsSize * vectorIdx + this->getPointIdx(p)] = true;
+        visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
       }
     }
   }

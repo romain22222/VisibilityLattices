@@ -1,7 +1,11 @@
 #include <iostream>
 #include <string>
+#include <DGtal/base/Trace.h>
 #include "../CLI11.hpp"
 #include "main_gpu.cuh"
+
+DGtal::TraceWriterTerm traceWriterTerm(std::cerr);
+DGtal::Trace trace(traceWriterTerm);
 
 __host__ __device__ int myMax(int a, int b) {
   return (a > b) ? a : b;
@@ -42,20 +46,14 @@ struct Buffer {
   }
 };
 
-__host__ void MyLatticeSet::toGPU(std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals) {
-  numKeys = keys.size();
-
-  cudaMalloc(&d_keys, sizeof(Vec3i) * numKeys);
-  cudaMalloc(&d_intervals, sizeof(IntervalList) * numKeys);
-
-  cudaMemcpy(d_keys, keys.data(), sizeof(Vec3i) * numKeys, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_intervals, allIntervals.data(), sizeof(IntervalList) * numKeys, cudaMemcpyHostToDevice);
-
-}
-
 __host__  MyLatticeSet::MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals)
-    : myAxis(axis) {
-  toGPU(keys, allIntervals);
+    : myAxis(axis), myOtherAxis1((axis + 1) % 3), myOtherAxis2((axis + 2) % 3), numKeys(keys.size()) {
+  d_keys = new Vec3i[numKeys];
+  d_intervals = new IntervalList[numKeys];
+  for (auto i = 0; i < keys.size(); i++) {
+    d_keys[i] = keys[i];
+    d_intervals[i] = allIntervals[i];
+  }
 }
 
 __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
@@ -120,7 +118,7 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
   }
 }
 
-__device__ MyLatticeSet::~MyLatticeSet() {
+/*__device__ MyLatticeSet::~MyLatticeSet() {
   if (d_keys) {
     cudaFree(d_keys);
   }
@@ -132,7 +130,7 @@ __device__ MyLatticeSet::~MyLatticeSet() {
     }
     cudaFree(d_intervals);
   }
-}
+}*/
 
 __device__ LatticeFoundResult MyLatticeSet::find(const Vec3i &p) const {
   // Search for the point p in the lattice set
@@ -246,7 +244,7 @@ __device__ IntervalList matchVector(
 
 __global__ void computeVisibilityKernel(
     int axis, const int *digital_dimensions, const int *axises_idx,
-    const MyLatticeSet &figLattices, GpuVisibility visibility,
+    MyLatticeSet *figLattices, GpuVisibility visibility,
     Vec3i *segmentList, int segmentSize
 ) {
   auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -256,6 +254,7 @@ __global__ void computeVisibilityKernel(
   IntervalList buf(2 * digital_dimensions[axis] + 1);
   IntervalList buf2(2 * digital_dimensions[axis] + 1);
   IntervalList eligibles(2 * digital_dimensions[axis] + 1);
+
   MyLatticeSet latticeVector(segment, axis);
   int minTx = digital_dimensions[axises_idx[1] + 3] - myMin(0, segment[axises_idx[1]]);
   int maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - myMax(0, segment[axises_idx[1]]);
@@ -271,7 +270,7 @@ __global__ void computeVisibilityKernel(
       for (auto i = 0; i < latticeVector.numKeys; i++) {
         const auto key = latticeVector.d_keys[i];
         const auto value = latticeVector.d_intervals[i];
-        const auto res = figLattices.findWithoutAxis(pInterest + key);
+        const auto res = figLattices->findWithoutAxis(pInterest + key);
         if (res.keyIndex < 0) {
           eligibles.size = 0;
           break;
@@ -294,6 +293,7 @@ HostVisibility computeVisibility(
     Vec3i *pointels, int pointelsSize
 ) {
 
+  trace.beginBlock("GPU memory allocation and copy");
   // Malloc every list on GPU
   int *d_digital_dimensions;
   int *d_axises_idx;
@@ -339,7 +339,55 @@ HostVisibility computeVisibility(
     std::cerr << "Error copying pointels to device: " << cudaGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE);
   }
+  trace.endBlock();
 
+  trace.beginBlock("FigLattices copy to GPU");
+  // Malloc figLattices on GPU
+  // 1. Copy d_keys
+  Vec3i* d_keys = nullptr;
+  cudaMalloc(&d_keys, sizeof(Vec3i) * figLattices.numKeys);
+  cudaMemcpy(d_keys, figLattices.d_keys,
+             sizeof(Vec3i) * figLattices.numKeys,
+             cudaMemcpyHostToDevice);
+
+// 2. Build IntervalList array (on host, but pointing to device IntervalGpu arrays)
+  std::vector<IntervalList> hostIntervals(figLattices.numKeys);
+
+  for (size_t i = 0; i < figLattices.numKeys; ++i) {
+    hostIntervals[i].capacity = figLattices.d_intervals[i].capacity;
+    hostIntervals[i].size     = figLattices.d_intervals[i].size;
+
+    IntervalGpu* d_data = nullptr;
+    cudaMalloc(&d_data, sizeof(IntervalGpu) * figLattices.d_intervals[i].size);
+    cudaMemcpy(d_data, figLattices.d_intervals[i].data,
+               sizeof(IntervalGpu) * figLattices.d_intervals[i].size,
+               cudaMemcpyHostToDevice);
+
+    hostIntervals[i].data = d_data; // now points to device memory
+  }
+
+  IntervalList* d_intervals = nullptr;
+  cudaMalloc(&d_intervals, sizeof(IntervalList) * figLattices.numKeys);
+  cudaMemcpy(d_intervals, hostIntervals.data(),
+             sizeof(IntervalList) * figLattices.numKeys,
+             cudaMemcpyHostToDevice);
+
+// 3. Build a host mirror of MyLatticeSet with patched device pointers
+  MyLatticeSet hostFig;
+  hostFig.d_keys       = d_keys;
+  hostFig.d_intervals  = d_intervals;
+  hostFig.myAxis       = figLattices.myAxis;
+  hostFig.myOtherAxis1 = figLattices.myOtherAxis1;
+  hostFig.myOtherAxis2 = figLattices.myOtherAxis2;
+  hostFig.numKeys      = figLattices.numKeys;
+
+// 4. Copy it to device
+  MyLatticeSet* d_figLattices = nullptr;
+  cudaMalloc(&d_figLattices, sizeof(MyLatticeSet));
+  cudaMemcpy(d_figLattices, &hostFig,
+             sizeof(MyLatticeSet), cudaMemcpyHostToDevice);
+
+  trace.endBlock();
 
   GpuVisibility tmpVisibility(axis, d_segmentList, segmentSize, d_pointels, pointelsSize);
 
@@ -349,12 +397,19 @@ HostVisibility computeVisibility(
 
   computeVisibilityKernel<<<chunkAmount, chunkSize>>>(
       axis, d_digital_dimensions, d_axises_idx,
-      figLattices, tmpVisibility,
+      d_figLattices, tmpVisibility,
       d_segmentList, segmentSize
   );
   cudaDeviceSynchronize();
 
   std::cout << "Kernel finished" << std::endl;
+
+  // Check for kernel launch errors
+  err = cudaGetLastError();
+  if (err != cudaSuccess) {
+      std::cerr << "Kernel launch error: " << cudaGetErrorString(err) << std::endl;
+      exit(EXIT_FAILURE);
+  }
 
   HostVisibility visibility(tmpVisibility);
 

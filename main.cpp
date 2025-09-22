@@ -167,7 +167,7 @@ public:
     auto vIdx = this->getVectorIdx(v);
     if (vIdx == vectorsSize) return false; // vector not computed
     for (IntegerVector p = p1; p != p2; p += v) {
-      if (!visibles[this->getPointIdx(p) * vectorsSize + vIdx]) return false;
+      if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
     }
     return true;
   }
