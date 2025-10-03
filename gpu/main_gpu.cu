@@ -1,8 +1,25 @@
 #include <iostream>
-#include <string>
+#include <vector>
 #include <DGtal/base/Trace.h>
-#include "../CLI11.hpp"
 #include "main_gpu.cuh"
+
+
+// helper macro for brevity (or use proper error handling)
+#define CUDA_CHECK(call) do { \
+  cudaError_t e = (call); \
+  if (e != cudaSuccess) { \
+    fprintf(stderr, "CUDA error %s:%d: %s\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
+    exit(EXIT_FAILURE); \
+  } \
+} while(0)
+
+#define CUDA_CHECK_DEVICE(call) do { \
+  cudaError_t e = (call); \
+  if (e != cudaSuccess) { \
+    printf("CUDA error %s:%d: %s\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
+    return; \
+  } \
+} while(0)
 
 DGtal::TraceWriterTerm traceWriterTerm(std::cerr);
 DGtal::Trace trace(traceWriterTerm);
@@ -22,7 +39,7 @@ struct Buffer {
   size_t size;
 
   __host__ __device__ explicit Buffer(size_t cap) : capacity(cap), size(0) {
-    cudaMalloc(&data, sizeof(Type) * capacity);
+    CUDA_CHECK_DEVICE(cudaMalloc(&data, sizeof(Type) * capacity));
   }
 
   __host__ __device__ ~Buffer() {
@@ -46,10 +63,10 @@ struct Buffer {
   }
 };
 
-__host__  MyLatticeSet::MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals)
+__host__  MyLatticeSet::MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList *> &allIntervals)
     : myAxis(axis), myOtherAxis1((axis + 1) % 3), myOtherAxis2((axis + 2) % 3), numKeys(keys.size()) {
   d_keys = new Vec3i[numKeys];
-  d_intervals = new IntervalList[numKeys];
+  d_intervals = new IntervalList *[numKeys];
   for (auto i = 0; i < keys.size(); i++) {
     d_keys[i] = keys[i];
     d_intervals[i] = allIntervals[i];
@@ -84,8 +101,8 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
 
   // Allocate memory for keys and intervals
   int allocateAmount = (2 * abs(segment[myOtherAxis1]) + 3) * (2 * abs(segment[myOtherAxis2]) + 3);
-  cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount);
-  cudaMalloc(&d_intervals, sizeof(IntervalList) * allocateAmount);
+  CUDA_CHECK_DEVICE(cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount));
+  CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals, sizeof(IntervalList *) * allocateAmount));
 
   for (size_t i = 0; i < mainPointsBuf.size; ++i) {
     for (int j = -1; j < 2; ++j) {
@@ -100,18 +117,18 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
             printf("segment: (%d, %d, %d)\n", segment.x, segment.y, segment.z);
           }
           d_keys[numKeys] = key;
-          cudaMalloc(&d_intervals[numKeys].data, sizeof(IntervalGpu));
-          d_intervals[numKeys].size = 1;
-          d_intervals[numKeys].capacity = 1;
-          d_intervals[numKeys].data[0] = {key[axis] - 1, key[axis] + 1};
+          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys], sizeof(IntervalList)));
+          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys]->data, sizeof(IntervalGpu)));
+          d_intervals[numKeys]->size = 1;
+          d_intervals[numKeys]->capacity = 1;
+          d_intervals[numKeys]->data[0] = {key[axis] - 1, key[axis] + 1};
           numKeys++;
         } else {
           // If the key already exists, merge intervals
-          auto &existingIntervals = d_intervals[alreadyExists.keyIndex];
-          existingIntervals.data[0].start = myMin(existingIntervals.data[0].start,
-                                                  key[axis] - 1);
-          existingIntervals.data[0].end = myMax(existingIntervals.data[0].end,
-                                                key[axis] + 1);
+          alreadyExists.intervals->data[0].start = myMin(alreadyExists.intervals->data[0].start,
+                                                         key[axis] - 1);
+          alreadyExists.intervals->data[0].end = myMax(alreadyExists.intervals->data[0].end,
+                                                       key[axis] + 1);
         }
       }
     }
@@ -139,7 +156,7 @@ __device__ LatticeFoundResult MyLatticeSet::find(const Vec3i &p) const {
       return {static_cast<int>(i), d_intervals[i]};
     }
   }
-  return {-1, d_intervals[0]};
+  return {-1, nullptr};
 }
 
 __device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p) const {
@@ -149,7 +166,7 @@ __device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p) cons
       return {static_cast<int>(i), d_intervals[i]};
     }
   }
-  return {-1, d_intervals[0]};
+  return {-1, nullptr};
 }
 
 /**
@@ -275,19 +292,26 @@ __global__ void computeVisibilityKernel(
           eligibles.size = 0;
           break;
         }
-        eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
+        eligibles = matchVector(buf, buf2, eligibles, *value, *res.intervals);
         if (eligibles.empty()) break;
       }
-      if (!eligibles.empty()) {
+      if (!eligibles.empty())
         visibility.set(pInterest / 2, eligibles, idx);
-      }
     }
   }
+  CUDA_CHECK_DEVICE(cudaFree(buf.data));
+  CUDA_CHECK_DEVICE(cudaFree(buf2.data));
+  CUDA_CHECK_DEVICE(cudaFree(eligibles.data));
+  CUDA_CHECK_DEVICE(cudaFree(latticeVector.d_keys));
+  for (size_t i = 0; i < latticeVector.numKeys; ++i) {
+    CUDA_CHECK_DEVICE(cudaFree(latticeVector.d_intervals[i]->data));
+  }
+  CUDA_CHECK_DEVICE(cudaFree(latticeVector.d_intervals));
 }
 
 HostVisibility computeVisibility(
     int chunkAmount, int chunkSize,
-    int axis, int *digital_dimensions, int *axises_idx,
+    int axis, const int *digital_dimensions, const int *axises_idx,
     const MyLatticeSet &figLattices,
     Vec3i *segmentList, int segmentSize,
     Vec3i *pointels, int pointelsSize
@@ -299,93 +323,93 @@ HostVisibility computeVisibility(
   int *d_axises_idx;
   Vec3i *d_segmentList;
   Vec3i *d_pointels;
-  auto err = cudaMalloc(&d_digital_dimensions, sizeof(int) * 9);
-  if (err != cudaSuccess) {
-    std::cerr << "Error allocating memory for digital_dimensions: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMalloc(&d_axises_idx, sizeof(int) * 3);
-  if (err != cudaSuccess) {
-    std::cerr << "Error allocating memory for axises_idx: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMalloc(&d_segmentList, sizeof(Vec3i) * segmentSize);
-  if (err != cudaSuccess) {
-    std::cerr << "Error allocating memory for segmentList: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMalloc(&d_pointels, sizeof(Vec3i) * pointelsSize);
-  if (err != cudaSuccess) {
-    std::cerr << "Error allocating memory for pointels: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMemcpy(d_digital_dimensions, digital_dimensions, sizeof(int) * 9, cudaMemcpyHostToDevice);
-  if (err != cudaSuccess) {
-    std::cerr << "Error copying digital_dimensions to device: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMemcpy(d_axises_idx, axises_idx, sizeof(int) * 3, cudaMemcpyHostToDevice);
-  if (err != cudaSuccess) {
-    std::cerr << "Error copying axises_idx to device: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMemcpy(d_segmentList, segmentList, sizeof(Vec3i) * segmentSize, cudaMemcpyHostToDevice);
-  if (err != cudaSuccess) {
-    std::cerr << "Error copying segmentList to device: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  err = cudaMemcpy(d_pointels, pointels, sizeof(Vec3i) * pointelsSize, cudaMemcpyHostToDevice);
-  if (err != cudaSuccess) {
-    std::cerr << "Error copying pointels to device: " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  CUDA_CHECK(cudaMalloc(&d_digital_dimensions, sizeof(int) * 9));
+  CUDA_CHECK(cudaMalloc(&d_axises_idx, sizeof(int) * 3));
+  CUDA_CHECK(cudaMalloc(&d_segmentList, sizeof(Vec3i) * segmentSize));
+  CUDA_CHECK(cudaMalloc(&d_pointels, sizeof(Vec3i) * pointelsSize));
+  CUDA_CHECK(cudaMemcpy(d_digital_dimensions, digital_dimensions, sizeof(int) * 9, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(d_axises_idx, axises_idx, sizeof(int) * 3, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(d_segmentList, segmentList, sizeof(Vec3i) * segmentSize, cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpy(d_pointels, pointels, sizeof(Vec3i) * pointelsSize, cudaMemcpyHostToDevice));
   trace.endBlock();
 
   trace.beginBlock("FigLattices copy to GPU");
-  // Malloc figLattices on GPU
-  // 1. Copy d_keys
-  Vec3i* d_keys = nullptr;
-  cudaMalloc(&d_keys, sizeof(Vec3i) * figLattices.numKeys);
-  cudaMemcpy(d_keys, figLattices.d_keys,
-             sizeof(Vec3i) * figLattices.numKeys,
-             cudaMemcpyHostToDevice);
 
-// 2. Build IntervalList array (on host, but pointing to device IntervalGpu arrays)
-  std::vector<IntervalList> hostIntervals(figLattices.numKeys);
+// 1) Copy keys
+  Vec3i *d_keys = nullptr;
+  CUDA_CHECK(cudaMalloc(&d_keys, sizeof(Vec3i) * figLattices.numKeys));
+  CUDA_CHECK(cudaMemcpy(d_keys,       // dst (device)
+                        figLattices.d_keys, // src (host) -- ensure this is actually host memory
+                        sizeof(Vec3i) * figLattices.numKeys,
+                        cudaMemcpyHostToDevice));
+
+// 2) Build IntervalList array: for each key allocate device IntervalGpu[] and device IntervalList, store device IntervalList* in a host array
+  std::vector<IntervalList> hostIntervals(figLattices.numKeys); // local copies containing sizes + device data pointer
+  std::vector<IntervalList *> hostIntervalPtrs(figLattices.numKeys, nullptr); // host array of device pointers
 
   for (size_t i = 0; i < figLattices.numKeys; ++i) {
-    hostIntervals[i].capacity = figLattices.d_intervals[i].capacity;
-    hostIntervals[i].size     = figLattices.d_intervals[i].size;
+    // copy capacity/size into hostIntervals[i]
+    hostIntervals[i].capacity = figLattices.d_intervals[i]->capacity; // ensure figLattices.d_intervals[i] is host pointer
+    hostIntervals[i].size = figLattices.d_intervals[i]->size;
 
-    IntervalGpu* d_data = nullptr;
-    cudaMalloc(&d_data, sizeof(IntervalGpu) * figLattices.d_intervals[i].size);
-    cudaMemcpy(d_data, figLattices.d_intervals[i].data,
-               sizeof(IntervalGpu) * figLattices.d_intervals[i].size,
-               cudaMemcpyHostToDevice);
+    // allocate device buffer for IntervalGpu data
+    IntervalGpu *d_data = nullptr;
+    if (hostIntervals[i].size > 0) {
+      CUDA_CHECK(cudaMalloc(&d_data, sizeof(IntervalGpu) * hostIntervals[i].size));
+      CUDA_CHECK(cudaMemcpy(d_data,
+                            figLattices.d_intervals[i]->data, // src host data pointer
+                            sizeof(IntervalGpu) * hostIntervals[i].size,
+                            cudaMemcpyHostToDevice));
+    } else {
+      d_data = nullptr;
+    }
 
-    hostIntervals[i].data = d_data; // now points to device memory
+    // set host copy's data pointer to point to device memory
+    hostIntervals[i].data = d_data;
+
+    // allocate a device IntervalList and copy the hostIntervals[i] structure to device
+    IntervalList *d_interval = nullptr;
+    CUDA_CHECK(cudaMalloc(&d_interval, sizeof(IntervalList)));
+    CUDA_CHECK(cudaMemcpy(d_interval,
+                          &hostIntervals[i], // NOTE the & here
+                          sizeof(IntervalList),
+                          cudaMemcpyHostToDevice));
+
+    // store the device pointer in the host pointer-array so we can later copy the array to device
+    hostIntervalPtrs[i] = d_interval;
   }
 
-  IntervalList* d_intervals = nullptr;
-  cudaMalloc(&d_intervals, sizeof(IntervalList) * figLattices.numKeys);
-  cudaMemcpy(d_intervals, hostIntervals.data(),
-             sizeof(IntervalList) * figLattices.numKeys,
-             cudaMemcpyHostToDevice);
+// Allocate device array of IntervalList* and copy hostIntervalPtrs to it in one go
+  IntervalList **d_intervals = nullptr;
+  CUDA_CHECK(cudaMalloc(&d_intervals, sizeof(IntervalList *) * figLattices.numKeys));
+  CUDA_CHECK(cudaMemcpy(d_intervals,
+                        hostIntervalPtrs.data(), // src host array of device pointers
+                        sizeof(IntervalList *) * figLattices.numKeys,
+                        cudaMemcpyHostToDevice));
 
-// 3. Build a host mirror of MyLatticeSet with patched device pointers
+// 3) Build host mirror of MyLatticeSet with patched device pointers
   MyLatticeSet hostFig;
-  hostFig.d_keys       = d_keys;
-  hostFig.d_intervals  = d_intervals;
-  hostFig.myAxis       = figLattices.myAxis;
+  hostFig.d_keys = d_keys;
+  hostFig.d_intervals = d_intervals;
+  hostFig.myAxis = figLattices.myAxis;
   hostFig.myOtherAxis1 = figLattices.myOtherAxis1;
   hostFig.myOtherAxis2 = figLattices.myOtherAxis2;
-  hostFig.numKeys      = figLattices.numKeys;
+  hostFig.numKeys = figLattices.numKeys;
 
-// 4. Copy it to device
-  MyLatticeSet* d_figLattices = nullptr;
-  cudaMalloc(&d_figLattices, sizeof(MyLatticeSet));
-  cudaMemcpy(d_figLattices, &hostFig,
-             sizeof(MyLatticeSet), cudaMemcpyHostToDevice);
+// 4) Copy the MyLatticeSet struct to device
+  MyLatticeSet *d_figLattices = nullptr;
+  CUDA_CHECK(cudaMalloc(&d_figLattices, sizeof(MyLatticeSet)));
+  CUDA_CHECK(cudaMemcpy(d_figLattices, &hostFig,
+                        sizeof(MyLatticeSet), cudaMemcpyHostToDevice));
+
+// optional: sync & check
+  CUDA_CHECK(cudaDeviceSynchronize());
+  cudaError_t lastErr = cudaGetLastError();
+  if (lastErr != cudaSuccess) {
+    fprintf(stderr, "Post-copy CUDA error: %s\n", cudaGetErrorString(lastErr));
+    // handle/exit as appropriate
+    exit(EXIT_FAILURE);
+  }
 
   trace.endBlock();
 
@@ -400,23 +424,29 @@ HostVisibility computeVisibility(
       d_figLattices, tmpVisibility,
       d_segmentList, segmentSize
   );
-  cudaDeviceSynchronize();
+  CUDA_CHECK(cudaDeviceSynchronize());
 
   std::cout << "Kernel finished" << std::endl;
 
   // Check for kernel launch errors
-  err = cudaGetLastError();
+  auto err = cudaGetLastError();
   if (err != cudaSuccess) {
-      std::cerr << "Kernel launch error: " << cudaGetErrorString(err) << std::endl;
-      exit(EXIT_FAILURE);
+    std::cerr << "Kernel launch error: " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
   }
 
   HostVisibility visibility(tmpVisibility);
 
-  cudaFree(d_digital_dimensions);
-  cudaFree(d_axises_idx);
-  cudaFree(d_segmentList);
-  cudaFree(d_pointels);
+  CUDA_CHECK(cudaFree(d_digital_dimensions));
+  CUDA_CHECK(cudaFree(d_axises_idx));
+  CUDA_CHECK(cudaFree(d_segmentList));
+  CUDA_CHECK(cudaFree(d_pointels));
+  CUDA_CHECK(cudaFree(d_keys));
+  for (size_t i = 0; i < figLattices.numKeys; ++i) {
+    CUDA_CHECK(cudaFree(hostIntervals[i].data));
+  }
+  CUDA_CHECK(cudaFree(d_intervals));
+  CUDA_CHECK(cudaFree(d_figLattices));
 
   return visibility;
 }

@@ -144,6 +144,20 @@ public:
       vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
     }
   }
+
+  Visibility(const HostVisibilityCPU hostVisibility) {
+    std::cout << "Reading visibility from GPU" << std::endl;
+    mainAxis = hostVisibility.mainAxis;
+    vectorsSize = hostVisibility.vectorsSize;
+    pointsSize = hostVisibility.pointsSize;
+    visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+    for (size_t i = 0; i < pointsSize; i++) {
+      pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+    }
+    for (size_t i = 0; i < vectorsSize; i++) {
+      vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+    }
+  }
 #endif
 
   size_t getVectorIdx(const IntegerVector &v) const {
@@ -753,6 +767,12 @@ void computeVisibilityCuda(int radius) {
   visibility = Visibility(computeVisibilityGpu(radius, digital_dimensions, pointels));
   std::cout << "Visibility computed" << std::endl;
 }
+
+void computeVisibilityCudaCPU(int radius) {
+  std::cout << "Computing visibility CUDA" << std::endl;
+  visibility = Visibility(computeVisibilityGpuCPU(radius, digital_dimensions, pointels));
+  std::cout << "Visibility computed" << std::endl;
+}
 #endif
 
 void myCallback() {
@@ -823,6 +843,12 @@ void myCallback() {
   if (ImGui::Button("Compute CUDA visibilities")) {
     trace.beginBlock("Compute visibilities CUDA");
     computeVisibilityCuda(VisibilityRadius);
+    Time = trace.endBlock();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Compute CUDA CPU vers. visibilities")) {
+    trace.beginBlock("Compute visibilities CUDA CPU Vers.");
+    computeVisibilityCudaCPU(VisibilityRadius);
     Time = trace.endBlock();
   }
 #endif

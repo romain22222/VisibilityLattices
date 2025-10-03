@@ -35,6 +35,8 @@ struct IntervalList {
 
   CUDA_HOSTDEV IntervalList() : data(nullptr), capacity(0), size(0) {}
 
+  CUDA_HOSTDEV ~IntervalList() = default;
+
 #ifdef __CUDACC__
 
   __host__ __device__ IntervalList(int maxCapacity) : capacity(maxCapacity),
@@ -76,12 +78,12 @@ struct IntervalList {
 
 struct LatticeFoundResult {
   int keyIndex{};
-  IntervalList intervals;
+  IntervalList* intervals;
 };
 
 struct MyLatticeSet {
   Vec3i *d_keys{};
-  IntervalList *d_intervals{};
+  IntervalList **d_intervals{};
   int myAxis;
   int myOtherAxis1;
   int myOtherAxis2;
@@ -90,7 +92,7 @@ struct MyLatticeSet {
 
   CUDA_HOST MyLatticeSet() = default;
 
-  CUDA_HOST MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList> &allIntervals);
+  CUDA_HOST MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList*> &allIntervals);
 
 #ifdef __CUDACC__
   __device__ MyLatticeSet(Vec3i segment, int axis);
@@ -241,7 +243,7 @@ CUDA_GLOBAL void computeVisibilityKernel(
 
 HostVisibility computeVisibility(
     int chunkAmount, int chunkSize,
-    int axis, int *digital_dimensions, int *axises_idx,
+    int axis, const int *digital_dimensions, const int *axises_idx,
     const MyLatticeSet& figLattices,
     Vec3i *segmentList, int segmentSize,
     Vec3i *pointels, int pointelsSize
