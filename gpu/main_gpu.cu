@@ -309,6 +309,8 @@ __global__ void computeVisibilityKernel(
           break;
         }
         if (idx == 0) {
+          TIMER_TOC(tid_this)
+        }
         eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
 //        eligibles.size = 0; // test no visibility
         if (idx == 0) {
