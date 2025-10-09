@@ -21,6 +21,21 @@
   } \
 } while(0)
 
+#define USETIMERS
+enum {
+  tid_this = 0,
+  tid_that,
+  tid_count
+};
+__device__ float cuda_timers[tid_count];
+#ifdef USETIMERS
+#define TIMER_TIC clock_t tic; if ( threadIdx.x == 0 ) tic = clock();
+#define TIMER_TOC(tid) clock_t toc = clock(); if ( threadIdx.x == 0 ) atomicAdd( &cuda_timers[tid] , ( toc > tic ) ? (toc - tic) : ( toc + (0xffffffff - tic) ) );
+#else
+#define TIMER_TIC
+#define TIMER_TOC(tid)
+#endif
+
 DGtal::TraceWriterTerm traceWriterTerm(std::cerr);
 DGtal::Trace trace(traceWriterTerm);
 
@@ -277,6 +292,7 @@ __global__ void computeVisibilityKernel(
   int maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - myMax(0, segment[axises_idx[1]]);
   int minTy = digital_dimensions[axises_idx[2] + 3] - myMin(0, segment[axises_idx[2]]);
   int maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - myMax(0, segment[axises_idx[2]]);
+  TIMER_TIC
   for (auto tx = minTx; tx < maxTx; tx++) {
     for (auto ty = minTy; ty < maxTy; ty++) {
       eligibles.size = 1;
@@ -292,8 +308,14 @@ __global__ void computeVisibilityKernel(
           eligibles.size = 0;
           break;
         }
+        if (idx == 0) {
         eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
 //        eligibles.size = 0; // test no visibility
+        if (idx == 0) {
+          TIMER_TOC(tid_that)
+          printf("Thread %d key %d/%d, time so far: %f\n", idx, i, static_cast<int>(latticeVector.numKeys),
+                 cuda_timers[tid_that] / 1000000.0f - cuda_timers[tid_that-1] / 1000000.0f );
+        }
         if (eligibles.empty()) break;
       }
       if (!eligibles.empty())

@@ -491,7 +491,13 @@ void computeVisibility(int radius) {
         const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
                               axis == 2 ? 0 : 2 * ty);
         for (const auto &cInfo: latticeVector) {
+          // time this call
+          time_t t1 = clock();
           eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
+          time_t t2 = clock();
+          std::cout << "Matching vector at (" << tx << "," << ty << ")"
+                    << " for segment " << segment[0] << "," << segment[1] << "," << segment[2]
+                    << " took " << double(t2 - t1) / CLOCKS_PER_SEC << " seconds." << std::endl;
           if (eligibles.empty()) break;
         }
         if (!eligibles.empty()) {
