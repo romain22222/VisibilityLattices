@@ -122,7 +122,7 @@ struct GpuVisibility {
         pointList(points), pointsSize(pointsSz) {
     size_t totalSize = pointsSize * vectorsSize;
     cudaMalloc(&visibles, totalSize * sizeof(bool));
-    cudaMemset(visibles, 0, totalSize * sizeof(bool));
+    cudaMemset(visibles, false, totalSize * sizeof(bool));
   }
 
   __device__

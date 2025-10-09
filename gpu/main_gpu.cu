@@ -201,14 +201,14 @@ inline int gcd3(int a, int b, int c) {
  * @param figIntervals
  * @return
  */
-__device__ IntervalList checkInterval(IntervalList &buf, const IntervalGpu &toCheck, const IntervalList &figIntervals) {
+__device__ IntervalList checkInterval(IntervalList &buf, IntervalGpu *toCheck, const IntervalList *figIntervals) {
 //  IntervalList result(figIntervals.size);
   buf.size = 0;
   int err = 0;
-  const auto toCheckSize = toCheck.end - toCheck.start;
-  for (const auto &interval: figIntervals) {
-    if (interval.end - interval.start >= toCheckSize) {
-      err = buf.push_back({interval.start - toCheck.start, interval.end - toCheck.end});
+  const auto toCheckSize = toCheck->end - toCheck->start;
+  for (auto i = 0; i < figIntervals->size; i++) {
+    if (figIntervals->data[i].end - figIntervals->data[i].start >= toCheckSize) {
+      err = buf.push_back({figIntervals->data[i].start - toCheck->start, figIntervals->data[i].end - toCheck->end});
       if (err) {
         printf("Error pushing back in checkInterval\n");
       }
@@ -250,10 +250,10 @@ __device__ IntervalList matchVector(
     IntervalList &buf,
     IntervalList &buf2,
     IntervalList &toCheck,
-    const IntervalList &vectorIntervals,
-    const IntervalList &figIntervals) {
-  for (const auto &vInterval: vectorIntervals) {
-    intersect(buf2, toCheck, checkInterval(buf, vInterval, figIntervals));
+    const IntervalList *vectorIntervals,
+    const IntervalList *figIntervals) {
+  for (auto i = 0; i < vectorIntervals->size; i++) {
+    intersect(buf2, toCheck, checkInterval(buf, &vectorIntervals->data[i], figIntervals));
     if (toCheck.empty()) break;
   }
   return toCheck;
@@ -292,7 +292,8 @@ __global__ void computeVisibilityKernel(
           eligibles.size = 0;
           break;
         }
-        eligibles = matchVector(buf, buf2, eligibles, *value, *res.intervals);
+        eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
+//        eligibles.size = 0; // test no visibility
         if (eligibles.empty()) break;
       }
       if (!eligibles.empty())
