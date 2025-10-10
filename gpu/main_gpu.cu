@@ -54,12 +54,14 @@ struct Buffer {
   size_t size;
 
   __host__ __device__ explicit Buffer(size_t cap) : capacity(cap), size(0) {
-    CUDA_CHECK_DEVICE(cudaMalloc(&data, sizeof(Type) * capacity));
+//    CUDA_CHECK_DEVICE(cudaMalloc(&data, sizeof(Type) * capacity));
+    data = new Type[capacity];
   }
 
   __host__ __device__ ~Buffer() {
     if (data) {
-      cudaFree(data);
+//      cudaFree(data);
+        delete[] data;
     }
   }
 
@@ -116,8 +118,10 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
 
   // Allocate memory for keys and intervals
   int allocateAmount = (2 * abs(segment[myOtherAxis1]) + 3) * (2 * abs(segment[myOtherAxis2]) + 3);
-  CUDA_CHECK_DEVICE(cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount));
-  CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals, sizeof(IntervalList *) * allocateAmount));
+  d_keys = new Vec3i[allocateAmount];
+  d_intervals = new IntervalList *[allocateAmount];
+//  CUDA_CHECK_DEVICE(cudaMalloc(&d_keys, sizeof(Vec3i) * allocateAmount));
+//  CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals, sizeof(IntervalList *) * allocateAmount));
 
   for (size_t i = 0; i < mainPointsBuf.size; ++i) {
     for (int j = -1; j < 2; ++j) {
@@ -126,23 +130,25 @@ __device__ MyLatticeSet::MyLatticeSet(const Vec3i segment, int axis)
         key[myOtherAxis1] += j;
         key[myOtherAxis2] += k;
         auto alreadyExists = this->findWithoutAxis(key);
-        if (alreadyExists.keyIndex == -1) {
+        if (alreadyExists == -1) {
           if (numKeys >= allocateAmount) {
             printf("Exceeded allocated amount for lattice keys\n");
             printf("segment: (%d, %d, %d)\n", segment.x, segment.y, segment.z);
           }
           d_keys[numKeys] = key;
-          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys], sizeof(IntervalList)));
-          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys]->data, sizeof(IntervalGpu)));
+          d_intervals[numKeys] = new IntervalList(1);
+          d_intervals[numKeys]->data = new IntervalGpu[1];
+//          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys], sizeof(IntervalList)));
+//          CUDA_CHECK_DEVICE(cudaMalloc(&d_intervals[numKeys]->data, sizeof(IntervalGpu)));
           d_intervals[numKeys]->size = 1;
           d_intervals[numKeys]->capacity = 1;
           d_intervals[numKeys]->data[0] = {key[axis] - 1, key[axis] + 1};
           numKeys++;
         } else {
           // If the key already exists, merge intervals
-          alreadyExists.intervals->data[0].start = myMin(alreadyExists.intervals->data[0].start,
+          d_intervals[alreadyExists]->data[0].start = myMin(d_intervals[alreadyExists]->data[0].start,
                                                          key[axis] - 1);
-          alreadyExists.intervals->data[0].end = myMax(alreadyExists.intervals->data[0].end,
+          d_intervals[alreadyExists]->data[0].end = myMax(d_intervals[alreadyExists]->data[0].end,
                                                        key[axis] + 1);
         }
       }
@@ -174,14 +180,14 @@ __device__ LatticeFoundResult MyLatticeSet::find(const Vec3i &p) const {
   return {-1, nullptr};
 }
 
-__device__ LatticeFoundResult MyLatticeSet::findWithoutAxis(const Vec3i &p) const {
+__device__ int MyLatticeSet::findWithoutAxis(const Vec3i &p) const {
   // Search for the point p in the lattice set
   for (size_t i = 0; i < numKeys; ++i) {
     if (d_keys[i][myOtherAxis1] == p[myOtherAxis1] && d_keys[i][myOtherAxis2] == p[myOtherAxis2]) {
-      return {static_cast<int>(i), d_intervals[i]};
+      return i;
     }
   }
-  return {-1, nullptr};
+  return -1;
 }
 
 /**
@@ -216,12 +222,15 @@ inline int gcd3(int a, int b, int c) {
  * @param figIntervals
  * @return
  */
-__device__ IntervalList checkInterval(IntervalList &buf, IntervalGpu *toCheck, const IntervalList *figIntervals) {
+__device__ IntervalList
+checkInterval(IntervalList &buf, IntervalGpu *toCheck, const IntervalList *figIntervals, bool debug = false) {
 //  IntervalList result(figIntervals.size);
   buf.size = 0;
   int err = 0;
   const auto toCheckSize = toCheck->end - toCheck->start;
+  int count = 0;
   for (auto i = 0; i < figIntervals->size; i++) {
+    if (debug) count++;
     if (figIntervals->data[i].end - figIntervals->data[i].start >= toCheckSize) {
       err = buf.push_back({figIntervals->data[i].start - toCheck->start, figIntervals->data[i].end - toCheck->end});
       if (err) {
@@ -229,14 +238,17 @@ __device__ IntervalList checkInterval(IntervalList &buf, IntervalGpu *toCheck, c
       }
     }
   }
+  if (debug) printf("checkInterval: %d loops\n", count);
   return buf;
 }
 
-__device__ void intersect(IntervalList &buf, IntervalList &l1, const IntervalList &l2) {
+__device__ void intersect(IntervalList &buf, IntervalList &l1, const IntervalList &l2, bool debug = false) {
   buf.size = 0;
   int err = 0;
   int k1 = 0, k2 = 0;
+  int count = 0;
   while (k1 < l1.size && k2 < l2.size) {
+    if (debug) count++;
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
     const auto i = myMax(interval1.start, interval2.start);
@@ -248,6 +260,7 @@ __device__ void intersect(IntervalList &buf, IntervalList &l1, const IntervalLis
     if (interval1.end <= interval2.end) k1++;
     if (interval1.end >= interval2.end) k2++;
   }
+  if (debug) printf("intersect: %d loops\n", count);
   l1.size = 0;
   for (int i = 0; i < buf.size; i++) {
     l1.push_back(buf[i]);
@@ -266,11 +279,17 @@ __device__ IntervalList matchVector(
     IntervalList &buf2,
     IntervalList &toCheck,
     const IntervalList *vectorIntervals,
-    const IntervalList *figIntervals) {
+    const IntervalList *figIntervals,
+    bool debug = false
+) {
+  int count = 0;
   for (auto i = 0; i < vectorIntervals->size; i++) {
-    intersect(buf2, toCheck, checkInterval(buf, &vectorIntervals->data[i], figIntervals));
+    checkInterval(buf, &vectorIntervals->data[i], figIntervals, debug);
+    intersect(buf2, toCheck, buf, debug);
+    if (debug) count++;
     if (toCheck.empty()) break;
   }
+  if (debug) printf("matchVector: %d loops\n", count);
   return toCheck;
 }
 
@@ -304,20 +323,11 @@ __global__ void computeVisibilityKernel(
         const auto key = latticeVector.d_keys[i];
         const auto value = latticeVector.d_intervals[i];
         const auto res = figLattices->findWithoutAxis(pInterest + key);
-        if (res.keyIndex < 0) {
+        if (res < 0) {
           eligibles.size = 0;
           break;
         }
-        if (idx == 0) {
-          TIMER_TOC(tid_this)
-        }
-        eligibles = matchVector(buf, buf2, eligibles, value, res.intervals);
-//        eligibles.size = 0; // test no visibility
-        if (idx == 0) {
-          TIMER_TOC(tid_that)
-          printf("Thread %d key %d/%d, time so far: %f\n", idx, i, static_cast<int>(latticeVector.numKeys),
-                 cuda_timers[tid_that] / 1000000.0f - cuda_timers[tid_that-1] / 1000000.0f );
-        }
+        matchVector(buf, buf2, eligibles, value, figLattices->d_intervals[res]/*, i == 0*/);
         if (eligibles.empty()) break;
       }
       if (!eligibles.empty())
@@ -443,13 +453,14 @@ HostVisibility computeVisibility(
   std::cout << "Visibility initialized" << std::endl;
   std::cout << "Launching kernel with " << chunkAmount << " blocks and " << chunkSize << " threads per block"
             << std::endl;
-
+  trace.beginBlock("Compute visibility kernel");
   computeVisibilityKernel<<<chunkAmount, chunkSize>>>(
       axis, d_digital_dimensions, d_axises_idx,
       d_figLattices, tmpVisibility,
       d_segmentList, segmentSize
   );
   CUDA_CHECK(cudaDeviceSynchronize());
+  trace.endBlock();
 
   std::cout << "Kernel finished" << std::endl;
 
@@ -464,8 +475,9 @@ HostVisibility computeVisibility(
 
   CUDA_CHECK(cudaFree(d_digital_dimensions));
   CUDA_CHECK(cudaFree(d_axises_idx));
-  CUDA_CHECK(cudaFree(d_segmentList));
-  CUDA_CHECK(cudaFree(d_pointels));
+  // Check why these free operations cause a crash
+//  CUDA_CHECK(cudaFree(d_segmentList));
+//  CUDA_CHECK(cudaFree(d_pointels));
   CUDA_CHECK(cudaFree(d_keys));
   for (size_t i = 0; i < figLattices.numKeys; ++i) {
     CUDA_CHECK(cudaFree(hostIntervals[i].data));

@@ -41,7 +41,8 @@ struct IntervalList {
 
   __host__ __device__ IntervalList(int maxCapacity) : capacity(maxCapacity),
                                                       size(0) {
-    cudaMalloc(&data, sizeof(IntervalGpu) * capacity);
+//    cudaMalloc(&data, sizeof(IntervalGpu) * capacity);
+    data = new IntervalGpu[maxCapacity];
   }
 
 #endif
@@ -100,7 +101,7 @@ struct MyLatticeSet {
 //  __device__ ~MyLatticeSet();
 
   __device__ LatticeFoundResult find(const Vec3i &p) const;
-  __device__ LatticeFoundResult findWithoutAxis(const Vec3i &p) const;
+  __device__ int findWithoutAxis(const Vec3i &p) const;
 #endif
 };
 

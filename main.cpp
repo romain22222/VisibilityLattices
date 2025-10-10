@@ -340,25 +340,30 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
  * @return
  */
 Intervals
-checkInterval(const Interval toCheck, const Intervals &figIntervals) {
+checkInterval(const Interval toCheck, const Intervals &figIntervals, bool debug = false) {
   Intervals result;
   result.reserve(figIntervals.size());
   const auto toCheckSize = toCheck.second - toCheck.first;
+  int count = 0;
   for (auto interval: figIntervals) {
+    if (debug) count++;
     if (interval.second - interval.first >= toCheckSize) {
       result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
     }
   }
+  if (debug) printf("checkInterval: %d loops\n", count);
   return result;
 }
 
-Intervals intersect(const Intervals &l1, const Intervals &l2) {
+Intervals intersect(const Intervals &l1, const Intervals &l2, bool debug = false) {
   Intervals result;
   // check 3rd example of testIntersection to see that you need at most this amount
   result.reserve(l1.size() + l2.size() - 1);
 //  result.reserve( std::max( l1.size(), l2.size() ) );
   int k1 = 0, k2 = 0;
+  int count = 0;
   while (k1 < l1.size() && k2 < l2.size()) {
+    if (debug) count++;
     const auto interval1 = l1[k1];
     const auto interval2 = l2[k2];
     const auto i = std::max(interval1.first, interval2.first);
@@ -367,6 +372,7 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
     if (interval1.second <= interval2.second) k1++;
     if (interval1.second >= interval2.second) k2++;
   }
+  if (debug) printf("intersect: %d loops\n", count);
   return result;
 }
 
@@ -379,11 +385,15 @@ Intervals intersect(const Intervals &l1, const Intervals &l2) {
  */
 Intervals matchVector(Intervals &toCheck,
                       const Intervals &vectorIntervals,
-                      const Intervals &figIntervals) {
+                      const Intervals &figIntervals,
+                      bool debug = false) {
+  auto count = 0;
   for (const auto &vInterval: vectorIntervals) {
-    toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals));
+    toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals, debug), debug);
+    if (debug) count++;
     if (toCheck.empty()) break;
   }
+  if (debug) printf("matchVector: %d loops\n", count);
   return toCheck;
 }
 
@@ -440,8 +450,6 @@ void computeVisibilityOmp(int radius) {
           }
           if (!eligibles.empty()) {
             visibility.set(pInterest / 2, eligibles, segmentIdx);
-            std::cout << "Thread " << omp_get_thread_num() << " found visibility for segment " << segmentIdx
-                      << " at (" << tx << "," << ty << ")" << std::endl;
           }
         }
       }
