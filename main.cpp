@@ -191,7 +191,7 @@ public:
     for (auto &interval: value) {
       for (int i = interval.first / 2; i <= interval.second / 2; i++) {
         p[mainAxis] = i;
-        visibles[this->getPointIdx(p) * vectorsSize + vectorIdx] = true;
+        visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
       }
     }
   }
@@ -308,7 +308,7 @@ IntegerVectors getAllVectors(int radius) {
  */
 LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
   LatticeSet L_ab(axis);
-  L_ab.insert(emptyIE);
+  L_ab.insert(IntegerVector());
   for (Dimension k = 0; k < 3; k++) {
     const Integer n = (segment[k] >= 0) ? segment[k] : -segment[k];
     const Integer d = (segment[k] >= 0) ? 1 : -1;
@@ -329,7 +329,7 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
       L_ab.insert(kc);
     }
   }
-  if (segment != emptyIE) L_ab.insert(2 * segment);
+  if (segment != IntegerVector()) L_ab.insert(2 * segment);
   return L_ab.starOfCells();
 }
 
