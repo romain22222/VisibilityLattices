@@ -458,6 +458,68 @@ void computeVisibilityOmp(int radius) {
   std::cout << "Visibility computed" << std::endl;
 }
 
+void TESTcomputeVisibilityOmpGPU(int radius) {
+  std::cout << "Computing visibility OMP" << std::endl;
+  Dimension axis = getLargeAxis();
+  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+  std::map<Point, Intervals> figLattices;
+  for (auto p: tmpFigLattices) {
+    figLattices[p.first] = p.second.data();
+  }
+  const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
+  auto segmentList = getAllVectors(radius);
+
+  // avoid thread imbalance
+  std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
+
+  visibility.reset(axis, segmentList, pointels);
+  size_t chunkSize = 64;
+  auto chunkAmount = segmentList.size() / chunkSize +1;
+  auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
+  std::cout << "Starting // OMP" << std::endl;
+#pragma omp target teams distribute parallel for schedule(dynamic)
+  for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
+    IntegerVector segment;
+    Intervals eligibles;
+    int minTx, maxTx, minTy, maxTy;
+    for (auto segmentIdx = chunkIdx * chunkSize;
+         segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
+      segment = segmentList[segmentIdx];
+      auto tmp = getLatticeVector(segment, axis).data();
+      std::map<Point, Intervals> latticeVector;
+      for (auto p: tmp) {
+        latticeVector[p.first] = p.second.data();
+      }
+      minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
+      maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
+      minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
+      maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
+#pragma omp collapse(2)
+      for (auto tx = minTx; tx < maxTx; tx++) {
+        for (auto ty = minTy; ty < maxTy; ty++) {
+          eligibles.clear();
+          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+          const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+                                axis == 2 ? 0 : 2 * ty);
+          for (const auto &cInfo: latticeVector) {
+            const auto it = figLattices.find(pInterest + cInfo.first);
+            if (it == figLattices.end()) {
+              eligibles.clear();
+              break;
+            }
+            eligibles = matchVector(eligibles, cInfo.second, it->second);
+            if (eligibles.empty()) break;
+          }
+          if (!eligibles.empty()) {
+            visibility.set(pInterest / 2, eligibles, segmentIdx);
+          }
+        }
+      }
+    }
+  }
+  std::cout << "Visibility computed" << std::endl;
+}
+
 /**
  * Compute the figure visibility using lattices
  * @param idx
@@ -822,6 +884,12 @@ void myCallback() {
   if (ImGui::Button("Visibilities OMP")) {
     trace.beginBlock("Compute visibilities OMP");
     computeVisibilityOmp(VisibilityRadius);
+    Time = trace.endBlock();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Visibilities OMP GPU")) {
+    trace.beginBlock("Compute visibilities OMP GPU");
+    TESTcomputeVisibilityOmpGPU(VisibilityRadius);
     Time = trace.endBlock();
   }
   if (ImGui::Button("Measure Mean Distance Visibility")) {
