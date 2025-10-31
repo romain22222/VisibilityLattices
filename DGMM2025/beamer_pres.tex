@@ -100,7 +100,6 @@
     \end{flushright}
 }
 \begin{document}
-
 % Title
     \begin{frame}
         \titlepage
@@ -123,13 +122,14 @@
     \begin{frame}{Different Types of Digital Surfaces}
         \centering
         \begin{tabular}{|c||c|c|}
+            \hline
             & Smooth Surface & Piecewise-Smooth Surface \\
             \hline
-            Implicit surface &
+            \raisebox{3mm}{Implicit surface} &
             \includegraphics[width=0.25\textwidth]{pictures/smooth_smooth_f3} &
             \includegraphics[width=0.25\textwidth]{pictures/piecewise_smooth_smooth_f3} \\
             \hline
-            Digitized surface &
+            \raisebox{3mm}{Digitized surface} &
             \includegraphics[width=0.25\textwidth]{pictures/smooth_discrete_f3} &
             \includegraphics[width=0.25\textwidth]{pictures/piecewise_smooth_discrete_f3} \\
             \hline
@@ -144,24 +144,48 @@
         \centering
         \begin{columns}
             \column{0.4\textwidth}
-            \includegraphics[width=0.85\linewidth]{pictures/tie256-IIN-flat-small-zoomed}
+            \includegraphics[width=0.8\linewidth]{pictures/tie256-IIN-flat-small-zoomed}
             \column{0.4\textwidth}
-            \includegraphics[width=0.85\linewidth]{pictures/d20-H-II-small-zoomed}
+            \includegraphics[width=0.8\linewidth]{pictures/d20-H-II-small-zoomed}
         \end{columns}
-        \vspace{0.3cm}
         \begin{itemize}
-            \item Integral invariant (II) [Lachaud et al., 2017] and Voronoi [Cuel et al., 2014] estimators perform well on smooth areas,
-            but fails near saliencies.
+            \item Integral invariant (II) [1] and Voronoi Covariance Measure [2] normal estimators : \textcircled{+} smooth areas \textcircled{-} saliencies
             \item Result: normals oscillates across edges, curvature maps show artifacts.
+        \end{itemize}
+        \flushleft
+        \fontsize{5}{7}\selectfont
+        [1] Lachaud, J.O., Coeurjolly, D., Levallois, J.: Robust and convergent curvature and normal estimators with digital integral invariants, 2017
+        \newline
+        [2] Cuel, L., Lachaud, J.O., Thibert, B.: Voronoi-based geometry estimator for 3d digital surfaces, 2014
+    \end{frame}
+    \begin{frame}{Our Objective}
+        \fbox{%
+            \begin{minipage}{\linewidth}
+                Geometric analysis of digitized shapes of both smooth and piecewise-smooth surfaces.
+            \end{minipage}%
+        }
+
+        \vspace{0.5em} % some vertical spacing
+
+        \begin{itemize}
+            \item Normals \& curvatures on digitized smooth \& digitized piecewise-smooth surfaces.
+            \item Parameter-free method.
+            \item Respect saliencies and local connectivity.
+            \item Keeps a low complexity for practical use.
         \end{itemize}
     \end{frame}
     \begin{frame}{Our Objective}
+        Normals \& curvatures on digitized smooth \& digitized piecewise-smooth surfaces.
         \begin{itemize}
-            \item Develop a parameter-free method.
-            \item Respect saliencies and local connectivity.
-            \item Provide accurate normals and curvatures on both digitized smooth and digitized piecewise-smooth surfaces.
-            \item Keeps a low complexity for practical use.
+            \item Analysis of visibility [3] along surface
+            \begin{itemize}
+                \item[$\rightarrow$] Notion of Star on digitized shapes
+            \end{itemize}
         \end{itemize}
+        \vspace{0.3cm}
+        \flushleft
+        \fontsize{5}{7}\selectfont
+        [3] Chica, A.: Visibility-based feature extraction from discrete models, 2008
     \end{frame}
 
     \begin{frame}{What is the Star of a Shape?}
@@ -327,7 +351,7 @@
 
     \begin{frame}{Visibility set may be non-connex}
         \begin{itemize}
-            \item The set of points visible from a given surface point is not necessarily connected.
+            \item The set of digitized points visible from a given surface point is not necessarily connected.
             \item Breaks assumptions made by region-growing or BFS-based algorithms.
             \item Handling non-connex visibility sets requires an exact representation
             \item Need of a specific structure with specific algorithms.
@@ -365,7 +389,6 @@
 
 
     \section{Representing the star of a shape}
-
     \begin{frame}{Representing the star of a shape}
         \begin{itemize}
             \item Current Star
@@ -373,7 +396,7 @@
         \vspace{0.2cm}
         \centering
         \begin{tikzpicture}[scale=0.75]
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,1.75) grid (7.25,7.25);
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
             \filldraw[black] (1,4) circle (0.05);
             \filldraw[black] (1,5) circle (0.05);
             \filldraw[black] (2,5) circle (0.05);
@@ -384,8 +407,20 @@
             \filldraw[black] (2,2) circle (0.05);
             \filldraw[black] (1,2) circle (0.05);
             \filldraw[black] (4,2) circle (0.05);
-            \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
             \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,2,3,4,5} {
+                \node at (-1.3,\y+1) {\y};
+            }
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,2,3,4,5} {
+                \node at (\x,-0.5) {\x};
+            }
+
+
             \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
             \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
         \end{tikzpicture}
@@ -397,7 +432,7 @@
         \vspace{0.2cm}
         \centering
         \begin{tikzpicture}[scale=0.75]
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,1.75) grid (7.25,7.25);
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
             \filldraw[black] (1,4) circle (0.05);
             \filldraw[black] (1,5) circle (0.05);
             \filldraw[black] (2,5) circle (0.05);
@@ -408,8 +443,17 @@
             \filldraw[black] (2,2) circle (0.05);
             \filldraw[black] (1,2) circle (0.05);
             \filldraw[black] (4,2) circle (0.05);
-            \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
             \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,2,3,4,5} {
+                \node at (-1.3,\y+1) {\y};
+            }
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,2,3,4,5} {
+                \node at (\x,-0.5) {\x};
+            }
             \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
             \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
 
@@ -488,7 +532,8 @@
         \vspace{0.2cm}
         \centering
         \begin{tikzpicture}[scale=0.75]
-            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,1.75) grid (7.25,7.25);
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+
             \filldraw[black] (1,4) circle (0.05);
             \filldraw[black] (1,5) circle (0.05);
             \filldraw[black] (2,5) circle (0.05);
@@ -499,8 +544,365 @@
             \filldraw[black] (2,2) circle (0.05);
             \filldraw[black] (1,2) circle (0.05);
             \filldraw[black] (4,2) circle (0.05);
-            \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
             \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,2,3,4,5} {
+                \node at (-1.3,\y+1) {\y};
+            }
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,2,3,4,5} {
+                \node at (\x,-0.5) {\x};
+            }
+
+            \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
+            \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+
+            \drawBigSquare{-1}{-1};
+            \drawBigSquare{-1}{0};
+            \drawBigSquare{-1}{1};
+            \drawBigSquare{-1}{2};
+            \drawBigSquare{-1}{3};
+            \drawBigSquare{0}{-1};
+            \drawBigSquare{0}{0};
+            \drawBigSquare{0}{1};
+            \drawBigSquare{0}{2};
+            \drawBigSquare{0}{3};
+            \drawBigSquare{1}{-1};
+            \drawBigSquare{1}{0};
+            \drawBigSquare{1}{1};
+            \drawBigSquare{1}{2};
+            \drawBigSquare{1}{3};
+            \drawBigSquare{2}{-1};
+            \drawBigSquare{2}{0};
+            \drawBigSquare{2}{1};
+            \drawBigSquare{2}{2};
+            \drawBigSquare{2}{3};
+            \drawBigSquare{3}{-1};
+            \drawBigSquare{3}{0};
+
+            \drawBigVLine{0}{-1};
+            \drawBigVLine{0}{0};
+            \drawBigVLine{0}{1};
+            \drawBigVLine{0}{2};
+            \drawBigVLine{0}{3};
+            \drawBigVLine{1}{-1};
+            \drawBigVLine{1}{0};
+            \drawBigVLine{1}{2};
+            \drawBigVLine{1}{3};
+            \drawBigVLine{2}{-1};
+            \drawBigVLine{2}{0};
+            \drawBigVLine{2}{1};
+            \drawBigVLine{2}{2};
+            \drawBigVLine{2}{3};
+            \drawBigVLine{3}{-1};
+            \drawBigVLine{3}{0};
+
+            \drawBigHLine{-1}{0};
+            \drawBigHLine{-1}{2};
+            \drawBigHLine{-1}{3};
+            \drawBigHLine{0}{0};
+            \drawBigHLine{0}{2};
+            \drawBigHLine{0}{3};
+            \drawBigHLine{1}{0};
+            \drawBigHLine{1}{1};
+            \drawBigHLine{1}{2};
+            \drawBigHLine{1}{3};
+            \drawBigHLine{2}{0};
+            \drawBigHLine{2}{1};
+            \drawBigHLine{2}{2};
+            \drawBigHLine{2}{3};
+            \drawBigHLine{3}{0};
+
+            \drawPoint{1}{4};
+            \drawPoint{1}{5};
+            \drawPoint{2}{5};
+            \drawPoint{3}{5};
+            \drawPoint{3}{4};
+            \drawPoint{3}{3};
+            \drawPoint{3}{2};
+            \drawPoint{2}{2};
+            \drawPoint{1}{2};
+            \drawPoint{4}{2};
+
+
+            \drawBlackPointSquare{-1}{-1};
+            \drawBlackPointSquare{-1}{0};
+            \drawBlackPointSquare{-1}{1};
+            \drawBlackPointSquare{-1}{2};
+            \drawBlackPointSquare{-1}{3};
+            \drawBlackPointSquare{0}{-1};
+            \drawBlackPointSquare{0}{0};
+            \drawBlackPointSquare{0}{1};
+            \drawBlackPointSquare{0}{2};
+            \drawBlackPointSquare{0}{3};
+            \drawBlackPointSquare{1}{-1};
+            \drawBlackPointSquare{1}{0};
+            \drawBlackPointSquare{1}{1};
+            \drawBlackPointSquare{1}{2};
+            \drawBlackPointSquare{1}{3};
+            \drawBlackPointSquare{2}{-1};
+            \drawBlackPointSquare{2}{0};
+            \drawBlackPointSquare{2}{1};
+            \drawBlackPointSquare{2}{2};
+            \drawBlackPointSquare{2}{3};
+            \drawBlackPointSquare{3}{-1};
+            \drawBlackPointSquare{3}{0};
+
+            \drawBlackPointVLine{0}{-1};
+            \drawBlackPointVLine{0}{0};
+            \drawBlackPointVLine{0}{1};
+            \drawBlackPointVLine{0}{2};
+            \drawBlackPointVLine{0}{3};
+            \drawBlackPointVLine{1}{-1};
+            \drawBlackPointVLine{1}{0};
+            \drawBlackPointVLine{1}{2};
+            \drawBlackPointVLine{1}{3};
+            \drawBlackPointVLine{2}{-1};
+            \drawBlackPointVLine{2}{0};
+            \drawBlackPointVLine{2}{1};
+            \drawBlackPointVLine{2}{2};
+            \drawBlackPointVLine{2}{3};
+            \drawBlackPointVLine{3}{-1};
+            \drawBlackPointVLine{3}{0};
+
+            \drawBlackPointHline{-1}{0};
+            \drawBlackPointHline{-1}{2};
+            \drawBlackPointHline{-1}{3};
+            \drawBlackPointHline{0}{0};
+            \drawBlackPointHline{0}{2};
+            \drawBlackPointHline{0}{3};
+            \drawBlackPointHline{1}{0};
+            \drawBlackPointHline{1}{1};
+            \drawBlackPointHline{1}{2};
+            \drawBlackPointHline{1}{3};
+            \drawBlackPointHline{2}{0};
+            \drawBlackPointHline{2}{1};
+            \drawBlackPointHline{2}{2};
+            \drawBlackPointHline{2}{3};
+            \drawBlackPointHline{3}{0};
+
+            \drawBlackPointPoint{1}{4};
+            \drawBlackPointPoint{1}{5};
+            \drawBlackPointPoint{2}{5};
+            \drawBlackPointPoint{3}{5};
+            \drawBlackPointPoint{3}{4};
+            \drawBlackPointPoint{3}{3};
+            \drawBlackPointPoint{3}{2};
+            \drawBlackPointPoint{2}{2};
+            \drawBlackPointPoint{1}{2};
+            \drawBlackPointPoint{4}{2};
+
+
+        \end{tikzpicture}
+    \end{frame}
+    \begin{frame}{Representing the star of a shape}
+        \begin{itemize}
+            \item One cell = one coordinate
+        \end{itemize}
+        \vspace{0.2cm}
+        \centering
+        \begin{tikzpicture}[scale=0.75]
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+
+            \filldraw[black] (1,4) circle (0.05);
+            \filldraw[black] (1,5) circle (0.05);
+            \filldraw[black] (2,5) circle (0.05);
+            \filldraw[black] (3,5) circle (0.05);
+            \filldraw[black] (3,4) circle (0.05);
+            \filldraw[black] (3,3) circle (0.05);
+            \filldraw[black] (3,2) circle (0.05);
+            \filldraw[black] (2,2) circle (0.05);
+            \filldraw[black] (1,2) circle (0.05);
+            \filldraw[black] (4,2) circle (0.05);
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,0.5,...,5} {
+                \node at (-1.5,\y+1) {\y};
+            }
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,...,5} {
+                \node at (\x,-0.5) {\x};
+            }
+            \foreach \x in {0.5,1.5,...,4.5} {
+                \node at (\x,-1) {\x};
+            }
+
+            \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
+            \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+
+            \drawBigSquare{-1}{-1};
+            \drawBigSquare{-1}{0};
+            \drawBigSquare{-1}{1};
+            \drawBigSquare{-1}{2};
+            \drawBigSquare{-1}{3};
+            \drawBigSquare{0}{-1};
+            \drawBigSquare{0}{0};
+            \drawBigSquare{0}{1};
+            \drawBigSquare{0}{2};
+            \drawBigSquare{0}{3};
+            \drawBigSquare{1}{-1};
+            \drawBigSquare{1}{0};
+            \drawBigSquare{1}{1};
+            \drawBigSquare{1}{2};
+            \drawBigSquare{1}{3};
+            \drawBigSquare{2}{-1};
+            \drawBigSquare{2}{0};
+            \drawBigSquare{2}{1};
+            \drawBigSquare{2}{2};
+            \drawBigSquare{2}{3};
+            \drawBigSquare{3}{-1};
+            \drawBigSquare{3}{0};
+
+            \drawBigVLine{0}{-1};
+            \drawBigVLine{0}{0};
+            \drawBigVLine{0}{1};
+            \drawBigVLine{0}{2};
+            \drawBigVLine{0}{3};
+            \drawBigVLine{1}{-1};
+            \drawBigVLine{1}{0};
+            \drawBigVLine{1}{2};
+            \drawBigVLine{1}{3};
+            \drawBigVLine{2}{-1};
+            \drawBigVLine{2}{0};
+            \drawBigVLine{2}{1};
+            \drawBigVLine{2}{2};
+            \drawBigVLine{2}{3};
+            \drawBigVLine{3}{-1};
+            \drawBigVLine{3}{0};
+
+            \drawBigHLine{-1}{0};
+            \drawBigHLine{-1}{2};
+            \drawBigHLine{-1}{3};
+            \drawBigHLine{0}{0};
+            \drawBigHLine{0}{2};
+            \drawBigHLine{0}{3};
+            \drawBigHLine{1}{0};
+            \drawBigHLine{1}{1};
+            \drawBigHLine{1}{2};
+            \drawBigHLine{1}{3};
+            \drawBigHLine{2}{0};
+            \drawBigHLine{2}{1};
+            \drawBigHLine{2}{2};
+            \drawBigHLine{2}{3};
+            \drawBigHLine{3}{0};
+
+            \drawPoint{1}{4};
+            \drawPoint{1}{5};
+            \drawPoint{2}{5};
+            \drawPoint{3}{5};
+            \drawPoint{3}{4};
+            \drawPoint{3}{3};
+            \drawPoint{3}{2};
+            \drawPoint{2}{2};
+            \drawPoint{1}{2};
+            \drawPoint{4}{2};
+
+
+            \drawBlackPointSquare{-1}{-1};
+            \drawBlackPointSquare{-1}{0};
+            \drawBlackPointSquare{-1}{1};
+            \drawBlackPointSquare{-1}{2};
+            \drawBlackPointSquare{-1}{3};
+            \drawBlackPointSquare{0}{-1};
+            \drawBlackPointSquare{0}{0};
+            \drawBlackPointSquare{0}{1};
+            \drawBlackPointSquare{0}{2};
+            \drawBlackPointSquare{0}{3};
+            \drawBlackPointSquare{1}{-1};
+            \drawBlackPointSquare{1}{0};
+            \drawBlackPointSquare{1}{1};
+            \drawBlackPointSquare{1}{2};
+            \drawBlackPointSquare{1}{3};
+            \drawBlackPointSquare{2}{-1};
+            \drawBlackPointSquare{2}{0};
+            \drawBlackPointSquare{2}{1};
+            \drawBlackPointSquare{2}{2};
+            \drawBlackPointSquare{2}{3};
+            \drawBlackPointSquare{3}{-1};
+            \drawBlackPointSquare{3}{0};
+
+            \drawBlackPointVLine{0}{-1};
+            \drawBlackPointVLine{0}{0};
+            \drawBlackPointVLine{0}{1};
+            \drawBlackPointVLine{0}{2};
+            \drawBlackPointVLine{0}{3};
+            \drawBlackPointVLine{1}{-1};
+            \drawBlackPointVLine{1}{0};
+            \drawBlackPointVLine{1}{2};
+            \drawBlackPointVLine{1}{3};
+            \drawBlackPointVLine{2}{-1};
+            \drawBlackPointVLine{2}{0};
+            \drawBlackPointVLine{2}{1};
+            \drawBlackPointVLine{2}{2};
+            \drawBlackPointVLine{2}{3};
+            \drawBlackPointVLine{3}{-1};
+            \drawBlackPointVLine{3}{0};
+
+            \drawBlackPointHline{-1}{0};
+            \drawBlackPointHline{-1}{2};
+            \drawBlackPointHline{-1}{3};
+            \drawBlackPointHline{0}{0};
+            \drawBlackPointHline{0}{2};
+            \drawBlackPointHline{0}{3};
+            \drawBlackPointHline{1}{0};
+            \drawBlackPointHline{1}{1};
+            \drawBlackPointHline{1}{2};
+            \drawBlackPointHline{1}{3};
+            \drawBlackPointHline{2}{0};
+            \drawBlackPointHline{2}{1};
+            \drawBlackPointHline{2}{2};
+            \drawBlackPointHline{2}{3};
+            \drawBlackPointHline{3}{0};
+
+            \drawBlackPointPoint{1}{4};
+            \drawBlackPointPoint{1}{5};
+            \drawBlackPointPoint{2}{5};
+            \drawBlackPointPoint{3}{5};
+            \drawBlackPointPoint{3}{4};
+            \drawBlackPointPoint{3}{3};
+            \drawBlackPointPoint{3}{2};
+            \drawBlackPointPoint{2}{2};
+            \drawBlackPointPoint{1}{2};
+            \drawBlackPointPoint{4}{2};
+
+
+        \end{tikzpicture}
+    \end{frame}
+    \begin{frame}{Representing the star of a shape}
+        \begin{itemize}
+            \item One cell = one coordinate
+        \end{itemize}
+        \vspace{0.2cm}
+        \centering
+        \begin{tikzpicture}[scale=0.75]
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+
+            \filldraw[black] (1,4) circle (0.05);
+            \filldraw[black] (1,5) circle (0.05);
+            \filldraw[black] (2,5) circle (0.05);
+            \filldraw[black] (3,5) circle (0.05);
+            \filldraw[black] (3,4) circle (0.05);
+            \filldraw[black] (3,3) circle (0.05);
+            \filldraw[black] (3,2) circle (0.05);
+            \filldraw[black] (2,2) circle (0.05);
+            \filldraw[black] (1,2) circle (0.05);
+            \filldraw[black] (4,2) circle (0.05);
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,...,10} {
+                \node at (-1.5,\y/2+1) {\y};
+            }
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,...,10} {
+                \node at (\x/2,-0.5) {\x};
+            }
+
             \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
             \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
 
@@ -662,8 +1064,18 @@
             \filldraw[black] (2,2) circle (0.05);
             \filldraw[black] (1,2) circle (0.05);
             \filldraw[black] (4,2) circle (0.05);
-            \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
-            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,...,10} {
+                \node at (-1.5,\y/2+1) {\y};
+            }
+
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,...,10} {
+                \node at (\x/2,-0.5) {\x};
+            }
             \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
             \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
 
@@ -759,8 +1171,18 @@
             \foreach \y in {2,2.5,...,7} {
                 \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
             }
-            \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
-            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,6.5)};
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,...,10} {
+                \node at (-1.5,\y/2+1) {\y};
+            }
+
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,...,10} {
+                \node at (\x/2,-0.5) {\x};
+            }
             \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
             \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
             \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
@@ -775,9 +1197,335 @@
             \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(4.6,1.5);
         \end{tikzpicture}
     \end{frame}
+    \begin{frame}{Representing the star of a shape}
+        \begin{itemize}
+            \item 63 cells coordinates -> 11 integer intervals.
+        \end{itemize}
+        \vspace{0.2cm}
+        \centering
+        \begin{tikzpicture}[scale=0.75]
+            \foreach \y in {2,2.5,...,7} {
+                \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
+            }
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=10.75pt}] {(-1,1) -- (-1,7)};
+            \foreach \y in {0,1,...,10} {
+                \node at (-1.5,\y/2+1) {\y};
+            }
+
+
+            \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+            \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,0) -- (6,0)};
+            \foreach \x in {0,1,...,10} {
+                \node at (\x/2,-0.5) {\x};
+            }
+            \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4.5)--(3.6,4.5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4)--(1.6,4);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,4)--(3.6,4);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,3.5)--(1.6,3.5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3.5)--(3.6,3.5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3)--(3.6,3);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2.5)--(4.6,2.5);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2)--(4.6,2);
+            \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(4.6,1.5);
+
+            \node at (-4,5/2+1) {5 -> [[1,3],[5,7]]};
+        \end{tikzpicture}
+    \end{frame}
 
 
     \section{Computing the visibility}
+
+    \newcommand{\drawInterval}[4]{
+        \draw[thin,#4, arrows = {Bracket[sharp]-Bracket[sharp]}] (#1-0.1,#2)--(#3+0.1,#2);
+    }
+    \begin{frame}{Computing the visibility}
+        \begin{tabular}{c c}
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (14.25,14.25);
+                \draw[black] (0,1) -- (4,1) -- (4,0) -- (7,0) -- (7,1) -- (10,1) -- (10,2) -- (11,2) -- (11,5) -- (10,5) -- (10,6) -- (9,6) -- (9,7) -- (7,7) -- (7,9) -- (9,9) -- (9,10) -- (10,10) -- (10,11);
+                \draw[thick,dashed] (-1,0) -- (3,0) -- (3,-1) -- (8,-1) -- (8,0) -- (11,0) -- (11,1) -- (12,1) -- (12,6) -- (11,6) -- (11,7) -- (10,7) -- (10,8) -- (8,8) -- (10,8) -- (10,9) -- (11,9) -- (11,12) -- (9,12) -- (9,11) -- (8,11) -- (8,10) -- (6,10) -- (6,6) -- (8,6) -- (8,5) -- (9,5) -- (9,4) -- (10,4) -- (10,3) -- (9,3) -- (9,2) -- (6,2) -- (6,1) -- (5,1) -- (5,2) -- (-1,2) -- (-1,0);
+
+                \drawBlackPointPoint{0}{1};
+                \drawBlackPointPoint{1}{1};
+                \drawBlackPointPoint{2}{1};
+                \drawBlackPointPoint{3}{1};
+                \drawBlackPointPoint{4}{1};
+                \drawBlackPointPoint{4}{0};
+                \drawBlackPointPoint{5}{0};
+                \drawBlackPointPoint{6}{0};
+                \drawBlackPointPoint{7}{0};
+                \drawBlackPointPoint{7}{1};
+                \drawBlackPointPoint{8}{1};
+                \drawBlackPointPoint{9}{1};
+                \drawBlackPointPoint{10}{1};
+                \drawBlackPointPoint{10}{2};
+                \drawBlackPointPoint{11}{2};
+                \drawBlackPointPoint{11}{3};
+                \drawBlackPointPoint{11}{4};
+                \drawBlackPointPoint{11}{5};
+                \drawBlackPointPoint{10}{5};
+                \drawBlackPointPoint{10}{6};
+                \drawBlackPointPoint{9}{6};
+                \drawBlackPointPoint{9}{7};
+                \drawBlackPointPoint{8}{7};
+                \drawBlackPointPoint{7}{7};
+                \drawBlackPointPoint{7}{8};
+                \drawBlackPointPoint{7}{9};
+                \drawBlackPointPoint{8}{9};
+                \drawBlackPointPoint{9}{9};
+                \drawBlackPointPoint{9}{10};
+                \drawBlackPointPoint{10}{10};
+                \drawBlackPointPoint{10}{11};
+
+            \end{tikzpicture} &
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,white,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (6.25,8.25);
+            \end{tikzpicture}
+        \end{tabular}
+    \end{frame}
+    \begin{frame}{Computing the visibility}
+        \begin{tabular}{c c}
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (14.25,14.25);
+                \draw[black] (0,1) -- (4,1) -- (4,0) -- (7,0) -- (7,1) -- (10,1) -- (10,2) -- (11,2) -- (11,5) -- (10,5) -- (10,6) -- (9,6) -- (9,7) -- (7,7) -- (7,9) -- (9,9) -- (9,10) -- (10,10) -- (10,11);
+                \draw[thick,dashed] (-1,0) -- (3,0) -- (3,-1) -- (8,-1) -- (8,0) -- (11,0) -- (11,1) -- (12,1) -- (12,6) -- (11,6) -- (11,7) -- (10,7) -- (10,8) -- (8,8) -- (10,8) -- (10,9) -- (11,9) -- (11,12) -- (9,12) -- (9,11) -- (8,11) -- (8,10) -- (6,10) -- (6,6) -- (8,6) -- (8,5) -- (9,5) -- (9,4) -- (10,4) -- (10,3) -- (9,3) -- (9,2) -- (6,2) -- (6,1) -- (5,1) -- (5,2) -- (-1,2) -- (-1,0);
+
+                \drawBlackPointPoint{0}{1};
+                \drawBlackPointPoint{1}{1};
+                \drawBlackPointPoint{2}{1};
+                \drawBlackPointPoint{3}{1};
+                \drawBlackPointPoint{4}{1};
+                \drawBlackPointPoint{4}{0};
+                \drawBlackPointPoint{5}{0};
+                \drawBlackPointPoint{6}{0};
+                \drawBlackPointPoint{7}{0};
+                \drawBlackPointPoint{7}{1};
+                \drawBlackPointPoint{8}{1};
+                \drawBlackPointPoint{9}{1};
+                \drawBlackPointPoint{10}{1};
+                \drawBlackPointPoint{10}{2};
+                \drawBlackPointPoint{11}{2};
+                \drawBlackPointPoint{11}{3};
+                \drawBlackPointPoint{11}{4};
+                \drawBlackPointPoint{11}{5};
+                \drawBlackPointPoint{10}{5};
+                \drawBlackPointPoint{10}{6};
+                \drawBlackPointPoint{9}{6};
+                \drawBlackPointPoint{9}{7};
+                \drawBlackPointPoint{8}{7};
+                \drawBlackPointPoint{7}{7};
+                \drawBlackPointPoint{7}{8};
+                \drawBlackPointPoint{7}{9};
+                \drawBlackPointPoint{8}{9};
+                \drawBlackPointPoint{9}{9};
+                \drawBlackPointPoint{9}{10};
+                \drawBlackPointPoint{10}{10};
+                \drawBlackPointPoint{10}{11};
+
+                \draw[MyGreen, dashed, very thick] (7,9)--(11,3);
+                \drawPoint{7}{9};
+                \drawPoint{11}{3};
+            \end{tikzpicture} &
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,white,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (6.25,8.25);
+            \end{tikzpicture}
+        \end{tabular}
+    \end{frame}
+    \begin{frame}{Computing the visibility}
+        \begin{tabular}{c c c}
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (14.25,14.25);
+                \draw[black] (0,1) -- (4,1) -- (4,0) -- (7,0) -- (7,1) -- (10,1) -- (10,2) -- (11,2) -- (11,5) -- (10,5) -- (10,6) -- (9,6) -- (9,7) -- (7,7) -- (7,9) -- (9,9) -- (9,10) -- (10,10) -- (10,11);
+                \draw[thick,dashed] (-1,0) -- (3,0) -- (3,-1) -- (8,-1) -- (8,0) -- (11,0) -- (11,1) -- (12,1) -- (12,6) -- (11,6) -- (11,7) -- (10,7) -- (10,8) -- (8,8) -- (10,8) -- (10,9) -- (11,9) -- (11,12) -- (9,12) -- (9,11) -- (8,11) -- (8,10) -- (6,10) -- (6,6) -- (8,6) -- (8,5) -- (9,5) -- (9,4) -- (10,4) -- (10,3) -- (9,3) -- (9,2) -- (6,2) -- (6,1) -- (5,1) -- (5,2) -- (-1,2) -- (-1,0);
+
+                \drawBlackPointPoint{0}{1};
+                \drawBlackPointPoint{1}{1};
+                \drawBlackPointPoint{2}{1};
+                \drawBlackPointPoint{3}{1};
+                \drawBlackPointPoint{4}{1};
+                \drawBlackPointPoint{4}{0};
+                \drawBlackPointPoint{5}{0};
+                \drawBlackPointPoint{6}{0};
+                \drawBlackPointPoint{7}{0};
+                \drawBlackPointPoint{7}{1};
+                \drawBlackPointPoint{8}{1};
+                \drawBlackPointPoint{9}{1};
+                \drawBlackPointPoint{10}{1};
+                \drawBlackPointPoint{10}{2};
+                \drawBlackPointPoint{11}{2};
+                \drawBlackPointPoint{11}{3};
+                \drawBlackPointPoint{11}{4};
+                \drawBlackPointPoint{11}{5};
+                \drawBlackPointPoint{10}{5};
+                \drawBlackPointPoint{10}{6};
+                \drawBlackPointPoint{9}{6};
+                \drawBlackPointPoint{9}{7};
+                \drawBlackPointPoint{8}{7};
+                \drawBlackPointPoint{7}{7};
+                \drawBlackPointPoint{7}{8};
+                \drawBlackPointPoint{7}{9};
+                \drawBlackPointPoint{8}{9};
+                \drawBlackPointPoint{9}{9};
+                \drawBlackPointPoint{9}{10};
+                \drawBlackPointPoint{10}{10};
+                \drawBlackPointPoint{10}{11};
+
+                \drawInterval{3.5}{-0.5}{7.5}{blue};
+                \drawInterval{3.5}{0}{7.5}{blue};
+                \drawInterval{-0.5}{0.5}{10.5}{blue};
+                \drawInterval{-0.5}{1}{4.5}{blue};
+                \drawInterval{6.5}{1}{10.5}{blue};
+                \drawInterval{-0.5}{1.5}{4.5}{blue};
+                \drawInterval{6.5}{1.5}{11.5}{blue};
+                \drawInterval{9.5}{2}{11.5}{blue};
+                \drawInterval{9.5}{2.5}{11.5}{blue};
+                \drawInterval{10.5}{3}{11.5}{blue};
+                \drawInterval{10.5}{3.5}{11.5}{blue};
+                \drawInterval{10.5}{4}{11.5}{blue};
+                \drawInterval{9.5}{4.5}{11.5}{blue};
+                \drawInterval{9.5}{5}{11.5}{blue};
+                \drawInterval{8.5}{5.5}{11.5}{blue};
+                \drawInterval{8.5}{6}{10.5}{blue};
+                \drawInterval{6.5}{6.5}{10.5}{blue};
+                \drawInterval{6.5}{7}{9.5}{blue};
+                \drawInterval{6.5}{7.5}{9.5}{blue};
+                \drawInterval{6.5}{8}{7.5}{blue};
+                \drawInterval{6.5}{8.5}{9.5}{blue};
+                \drawInterval{6.5}{9}{9.5}{blue};
+                \drawInterval{6.5}{9.5}{10.5}{blue};
+                \drawInterval{8.5}{10}{10.5}{blue};
+                \drawInterval{8.5}{10.5}{10.5}{blue};
+                \drawInterval{9.5}{11}{10.5}{blue};
+                \drawInterval{9.5}{11.5}{10.5}{blue};
+
+            \end{tikzpicture} & \raisebox{0.3\textheight}{<--} &
+            \begin{tikzpicture}[scale=0.4]
+                \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (6.25,8.25);
+                \draw[MyGreen, dashed, very thick] (0,6)--(4,0);
+                \drawInterval{-0.5}{6.5}{0.5}{red};
+                \drawInterval{-0.5}{6}{0.5}{red};
+                \drawInterval{-0.5}{5.5}{0.5}{red};
+                \drawInterval{0.5}{5}{0.5}{red};
+                \drawInterval{0.5}{4.5}{1.5}{red};
+                \drawInterval{1.5}{4}{1.5}{red};
+                \drawInterval{1.5}{3.5}{2.5}{red};
+                \drawInterval{1.5}{3}{2.5}{red};
+                \drawInterval{1.5}{2.5}{2.5}{red};
+                \drawInterval{2.5}{2}{2.5}{red};
+                \drawInterval{2.5}{1.5}{3.5}{red};
+                \drawInterval{3.5}{1}{3.5}{red};
+                \drawInterval{3.5}{0.5}{4.5}{red};
+                \drawInterval{3.5}{0}{4.5}{red};
+                \drawInterval{3.5}{-0.5}{4.5}{red};
+                \drawBlackPointPoint{0}{6}
+                \drawBlackPointPoint{4}{0}
+            \end{tikzpicture}
+        \end{tabular}
+    \end{frame}
+    \begin{frame}{Computing the visibility}
+        \centering
+        \begin{tikzpicture}[scale=0.4]
+            \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.75,-0.75) grid (14.25,14.25);
+
+            \drawBlackPointPoint{0}{1};
+            \drawBlackPointPoint{1}{1};
+            \drawBlackPointPoint{2}{1};
+            \drawBlackPointPoint{3}{1};
+            \drawBlackPointPoint{4}{1};
+            \drawBlackPointPoint{4}{0};
+            \drawBlackPointPoint{5}{0};
+            \drawBlackPointPoint{6}{0};
+            \drawBlackPointPoint{7}{0};
+            \drawBlackPointPoint{7}{1};
+            \drawBlackPointPoint{8}{1};
+            \drawBlackPointPoint{9}{1};
+            \drawBlackPointPoint{10}{1};
+            \drawBlackPointPoint{10}{2};
+            \drawBlackPointPoint{11}{2};
+            \drawBlackPointPoint{11}{3};
+            \drawBlackPointPoint{11}{4};
+            \drawBlackPointPoint{11}{5};
+            \drawBlackPointPoint{10}{5};
+            \drawBlackPointPoint{10}{6};
+            \drawBlackPointPoint{9}{6};
+            \drawBlackPointPoint{9}{7};
+            \drawBlackPointPoint{8}{7};
+            \drawBlackPointPoint{7}{7};
+            \drawBlackPointPoint{7}{8};
+            \drawBlackPointPoint{7}{9};
+            \drawBlackPointPoint{8}{9};
+            \drawBlackPointPoint{9}{9};
+            \drawBlackPointPoint{9}{10};
+            \drawBlackPointPoint{10}{10};
+            \drawBlackPointPoint{10}{11};
+
+            \drawInterval{3.5}{-0.5}{7.5}{blue};
+            \drawInterval{3.5}{0}{7.5}{blue};
+            \drawInterval{-0.5}{0.5}{10.5}{blue};
+            \drawInterval{-0.5}{1}{4.5}{blue};
+            \drawInterval{6.5}{1}{10.5}{blue};
+            \drawInterval{-0.5}{1.5}{4.5}{blue};
+            \drawInterval{6.5}{1.5}{11.5}{blue};
+            \drawInterval{9.5}{2}{11.5}{blue};
+            \drawInterval{9.5}{2.5}{11.5}{blue};
+            \drawInterval{10.5}{3}{11.5}{blue};
+            \drawInterval{10.5}{3.5}{11.5}{blue};
+            \drawInterval{10.5}{4}{11.5}{blue};
+            \drawInterval{9.5}{4.5}{11.5}{blue};
+            \drawInterval{9.5}{5}{11.5}{blue};
+            \drawInterval{8.5}{5.5}{11.5}{blue};
+            \drawInterval{8.5}{6}{10.5}{blue};
+            \drawInterval{6.5}{6.5}{10.5}{blue};
+            \drawInterval{6.5}{7}{9.5}{blue};
+            \drawInterval{6.5}{7.5}{9.5}{blue};
+            \drawInterval{6.5}{8}{7.5}{blue};
+            \drawInterval{6.5}{8.5}{9.5}{blue};
+            \drawInterval{6.5}{9}{9.5}{blue};
+            \drawInterval{6.5}{9.5}{10.5}{blue};
+            \drawInterval{8.5}{10}{10.5}{blue};
+            \drawInterval{8.5}{10.5}{10.5}{blue};
+            \drawInterval{9.5}{11}{10.5}{blue};
+            \drawInterval{9.5}{11.5}{10.5}{blue};
+
+            \newcommand{\drawIntervalShifted}[3]{
+                \draw[thick,red, arrows = {Bracket[sharp]-Bracket[sharp]}] (#1-0.1+7,#2+3)--(#3+0.1+7,#2+3);
+            }
+            \drawIntervalShifted{-0.5}{6.5}{0.5};
+            \drawIntervalShifted{-0.5}{6}{0.5};
+            \drawIntervalShifted{-0.5}{5.5}{0.5};
+            \drawIntervalShifted{0.5}{5}{0.5};
+            \drawIntervalShifted{0.5}{4.5}{1.5};
+            \drawIntervalShifted{1.5}{4}{1.5};
+            \drawIntervalShifted{1.5}{3.5}{2.5};
+            \drawIntervalShifted{1.5}{3}{2.5};
+            \drawIntervalShifted{1.5}{2.5}{2.5};
+            \drawIntervalShifted{2.5}{2}{2.5};
+            \drawIntervalShifted{2.5}{1.5}{3.5};
+            \drawIntervalShifted{3.5}{1}{3.5};
+            \drawIntervalShifted{3.5}{0.5}{4.5};
+            \drawIntervalShifted{3.5}{0}{4.5};
+            \drawIntervalShifted{3.5}{-0.5}{4.5};
+            \drawPoint{0+7}{6+3}
+            \drawPoint{4+7}{0+3}
+
+        \end{tikzpicture}
+    \end{frame}
+    \begin{frame}{Computing the visibility}
+        \begin{itemize}
+            \item \textcolor{red}{$\times$ Pair p q -> Is $pq \in X$ -> p and q are visible}
+            \item \textcolor{green}{$\sqrt$ Visibility segment v -> At which positions p does $v \in X$ -> p and p+v are visible}
+            \begin{itemize}
+                \item[$\rightarrow$] Paradigm change
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+
+
     \begin{frame}{Computing the visibility}
         \vspace{5em}
         \centering
@@ -1314,6 +2062,7 @@
 
     \begin{frame}{Computing visibility : advantages}
         \begin{itemize}
+            \item Exact visibility computation
             \item Simple data structure (arrays of intervals)
             \item Easy to implement \& parallelize -> GPU friendly
             \item Parameter-free
@@ -1365,7 +2114,7 @@
                 \addlegendentry{Radius 30}
 
                 \addlegendimage{color=black,thick};
-                \addlegendentry{$0.01\times x\sqrt{x}$}
+                \addlegendentry{$\Theta \left(m \sqrt{m}\right)$}
 
                 \addplot+[
                 red,
@@ -1686,20 +2435,23 @@
         \centering
         \includegraphics[width=0.7\textwidth]{pictures/visibility_aware_of_features}
         \newline
-        \content{feature aware visibility}
+        \content{Topology consistent}
     \end{frame}
     \begin{frame}{Computing visibility : recap}
         \begin{itemize}
+            \item Exact visibility computation
             \item Simple data structure (arrays of intervals)
             \item Easy to implement \& parallelize -> GPU friendly
             \item Parameter-free
-            \item Sequencial complexity of $\Theta \left(x \sqrt{x}\right)$ ($x$ : number of pointels)
-            \item Is Salliency and Feature aware
+            \item Sequencial complexity of $\Theta \left(m \sqrt{m}\right)$ ($m$ : number of pointels)
+            \item Salliency aware
+            \item Topology consistent
         \end{itemize}
     \end{frame}
 
 
     \section{Normal \& curvature estimation}
+
     \begin{frame}{Covariance matrix estimation}
         \newcommand{\Kernel}[1]{\ensuremath{w_{\sigma}(#1)}}
         \begin{equation}
@@ -1749,6 +2501,7 @@
             \dpn{13}{9}{black};
         \end{tikzpicture}
     \end{frame}
+
     \begin{frame}{Normal estimation demo}
         \centering
         \begin{tikzpicture}[scale=0.5]
@@ -1818,7 +2571,32 @@
             \dpn{13}{8}{black};
             \dpn{13}{9}{black};
 
-            \dpn{7.161978151947899}{3.6128706307461473}{green} node[anchor=north west] {$c_p$};
+            \dpn{7.161978151947899}{3.6128706307461473}{MyGreen} node[anchor=north west] {$c_p$};
+
+            \newcommand{\drawArrow}[3]{
+            % Draws an arrow from point (x1,y1) to point c_p with weight w
+                \draw[red,line opacity=#3,line width=#3, arrows=-Stealth] (#1,#2)--(7.161978151947899,3.6128706307461473);
+            }
+
+            \drawArrow{2}{0}{0.10251175769346066}
+            \drawArrow{3}{0}{0.169013315406066}
+            \drawArrow{4}{0}{0.24935220877729622}
+            \drawArrow{4}{1}{0.3678794411714424}
+            \drawArrow{5}{1}{0.4856717852477124}
+            \drawArrow{5}{2}{0.6411803884299545}
+            \drawArrow{5}{3}{0.7574651283969663}
+            \drawArrow{6}{3}{0.8948393168143698}
+            \drawArrow{6}{4}{0.9459594689067654}
+            \drawArrow{8}{4}{0.9459594689067654}
+            \drawArrow{8}{5}{0.8948393168143698}
+            \drawArrow{9}{5}{0.7574651283969663}
+            \drawArrow{10}{5}{0.5737534207374327}
+            \drawArrow{11}{5}{0.3888955639892229}
+            \drawArrow{11}{6}{0.3291929878079055}
+            \drawArrow{12}{6}{0.1996656400679019}
+            \drawArrow{13}{6}{0.10836802322189582}
+            \drawArrow{13}{7}{0.08208499862389876}
+
 
         \end{tikzpicture}
     \end{frame}
@@ -1907,7 +2685,7 @@
         \end{tabular}
     \end{frame}
 
-    \begin{frame}{Curvature estimation using Corrected Normal Current (CNC) [Lachaud et al., 2022]}
+    \begin{frame}{Curvature estimation using Corrected Normal Current (CNC) [4]}
         \centering
         \hspace*{-2.3em}
         \begin{tabular}{|c||c|c|c|}
@@ -1918,9 +2696,12 @@
             \MyZoom{pictures/d20-H-CTriv-small.jpg}&
             \MyZoom{pictures/d20-H-VN-small.jpg}\\ \hline
         \end{tabular}
+        \flushleft
+        \fontsize{7}{9}\selectfont
+        [4] Lachaud, J.O., Romon, P., Thibert, B.: Corrected curvature measures. Discret. Comput. Geom. 68(2), 477524 (2022). https://doi.org/10.1007/s00454-022-00399-4
     \end{frame}
 
-    \begin{frame}{Curvature estimation using Corrected Normal Current (CNC) [Lachaud et al., 2022]}
+    \begin{frame}{Curvature estimation using Corrected Normal Current (CNC) [4]}
         \centering
         \hspace*{-2.3em}
         \begin{tabular}{|c||c|c|c|}
@@ -1931,15 +2712,19 @@
             \MyZoom{pictures/d20-G-CTriv-small.jpg}&
             \MyZoom{pictures/d20-G-VN-small.jpg}\\ \hline
         \end{tabular}
+        \flushleft
+        \fontsize{7}{9}\selectfont
+        [4] Lachaud, J.O., Romon, P., Thibert, B.: Corrected curvature measures. Discret. Comput. Geom. 68(2), 477524 (2022). https://doi.org/10.1007/s00454-022-00399-4
     \end{frame}
 
     \begin{frame}{Conclusion}
         \begin{itemize}
             \item Improved normal and curvature estimation
-            \item New efficient visibility computation method
+            \item New efficient exact visibility computation method
             \item Simple data structure
             \item Parameter-free
-            \item Salliency and Feature aware
+            \item Salliency aware
+            \item Topology consistent
         \end{itemize}
     \end{frame}
 
