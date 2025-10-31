@@ -37,6 +37,7 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage[utf8]{inputenc}
 \usepackage{settobox}
+\usepackage{amsfonts}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary {spy,arrows.meta,decorations.shapes}
 \setbeamertemplate{caption}[numbered]
@@ -107,20 +108,28 @@
 
     \begin{frame}{Normals and Curvatures on Digital Surfaces}
         \centering
-        \begin{columns}
-            \column{0.5\textwidth}
-            \includegraphics[width=\linewidth]{pictures/normal_digital_surf}
-            \column{0.5\textwidth}
-            \includegraphics[width=\linewidth]{pictures/Hcurv_digital_surface}
-        \end{columns}
+        \begin{tabular}{cc}
+            \includegraphics[width=0.45\textwidth]{pictures/normal_digital_surf}
+            &
+            \includegraphics[width=0.45\textwidth]{pictures/Hcurv_digital_surface}
+            \\
+            Normals as colormap
+            &
+            Mean Curvature
+            \\
+            (color(x) = $\frac{1}{2} \times \left(n\left(x\right)+\mathbbm{1}\right)$)
+        \end{tabular}
     \end{frame}
     \begin{frame}{Different Types of Digital Surfaces}
         \centering
-        \begin{tabular}{|c|c|}
+        \begin{tabular}{|c||c|c|}
+            & Smooth Surface & Piecewise-Smooth Surface \\
             \hline
+            Implicit surface &
             \includegraphics[width=0.25\textwidth]{pictures/smooth_smooth_f3} &
             \includegraphics[width=0.25\textwidth]{pictures/piecewise_smooth_smooth_f3} \\
             \hline
+            Digitized surface &
             \includegraphics[width=0.25\textwidth]{pictures/smooth_discrete_f3} &
             \includegraphics[width=0.25\textwidth]{pictures/piecewise_smooth_discrete_f3} \\
             \hline
@@ -129,6 +138,7 @@
             \item Smooth surfaces — continuous curvature, easy to approximate.
             \item Piecewise-smooth surfaces — sharp features, saliencies, discontinuities.
         \end{itemize}
+
     \end{frame}
     \begin{frame}{Limitations of Existing Estimators}
         \centering
@@ -352,6 +362,7 @@
             \label{fig:visibility-2d-not-connected}
         \end{figure}
     \end{frame}
+
 
     \section{Representing the star of a shape}
 
@@ -764,6 +775,7 @@
             \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(4.6,1.5);
         \end{tikzpicture}
     \end{frame}
+
 
     \section{Computing the visibility}
     \begin{frame}{Computing the visibility}
