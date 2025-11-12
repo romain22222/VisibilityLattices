@@ -462,7 +462,7 @@ void computeVisibilityOmp(int radius) {
   std::cout << "Visibility computed" << std::endl;
 }
 
-void TESTcomputeVisibilityOmpGPU(int radius) {
+void computeVisibilityOmpGPU(int radius) {
   std::cout << "Computing visibility OMP" << std::endl;
   Dimension axis = getLargeAxis();
   auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
@@ -592,6 +592,59 @@ void computeVisibility(int radius) {
   }
   durationsFile.close();
   std::cout << "Visibility computed" << std::endl;
+}
+
+// define << operator on file for visibility
+std::ostream &operator<<(std::ostream &os, const Visibility &visib) {
+  os << visib.mainAxis << std::endl;
+  os << visib.vectorsSize << std::endl;
+  os << visib.pointsSize << std::endl;
+  for (const auto &v: visib.visibles) {
+    os << v << " ";
+  }
+  os << std::endl;
+  return os;
+}
+
+void saveVisibility(const std::string &filename) {
+  std::ofstream file;
+  file.open(filename);
+  file << visibility;
+  file.close();
+}
+
+// define >> operator on file for visibility
+std::istream &operator>>(std::istream &is, Visibility &visib) {
+  Dimension mainAxis;
+  size_t vectorsSize;
+  size_t pointsSize;
+  is >> mainAxis;
+  is >> vectorsSize;
+  is >> pointsSize;
+  visib.reset(mainAxis, IntegerVectors(), std::vector<Point>());
+  visib.vectorsSize = vectorsSize;
+  visib.pointsSize = pointsSize;
+  visib.visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+  int countV = 0;
+  for (size_t i = 0; i < vectorsSize * pointsSize; i++) {
+    bool v;
+    is >> v;
+    visib.visibles[i] = v;
+    countV += v ? 1 : 0;
+  }
+  std::cout << "Visibility loaded" << std::endl;
+  std::cout << "  mainAxis = " << mainAxis << std::endl;
+  std::cout << "  vectorsSize = " << vectorsSize << std::endl;
+  std::cout << "  pointsSize = " << pointsSize << std::endl;
+  std::cout << "  number of visible entries = " << countV << std::endl;
+  return is;
+}
+
+void loadVisibility(const std::string &filename) {
+  std::ifstream file;
+  file.open(filename);
+  file >> visibility;
+  file.close();
 }
 
 void computeVisibilityWithPointShow(std::size_t idx) {
@@ -895,7 +948,7 @@ void myCallback() {
   ImGui::SameLine();
   if (ImGui::Button("Visibilities OMP GPU")) {
     trace.beginBlock("Compute visibilities OMP GPU");
-    TESTcomputeVisibilityOmpGPU(VisibilityRadius);
+    computeVisibilityOmpGPU(VisibilityRadius);
     Time = trace.endBlock();
   }
   if (ImGui::Button("Measure Mean Distance Visibility")) {
@@ -1011,6 +1064,177 @@ void TMP(std::string filename) {
   polyscope::show();
 }
 
+int gpuRun(int argc, char* argv[]) {
+  noInterface = false;
+
+  // command line inteface options
+  CLI::App app{"A tool to check visibility using lattices."};
+  std::string filename = "../volumes/bunny34.vol";
+  int thresholdMin = 0;
+  int thresholdMax = 255;
+  std::string polynomial;
+  int minAABB = -10;
+  int maxAABB = 10;
+  bool listP = false;
+  bool computeCurvaturesFlag = false;
+  bool computeNormalsFlag = false;
+  double sigmaTmp = -1.0;
+  std::string saveVisibilityFilename;
+  app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
+  // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
+  app.add_option("-p,--polynomial", polynomial,
+                 "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
+  app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
+  app.add_option("-m,--thresholdMin", thresholdMin,
+                 "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
+  app.add_option("-M,--thresholdMax", thresholdMax,
+                 "the maximal threshold M (included) for a voxel to belong to the digital shape.");
+  app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
+  app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
+  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+  app.add_flag("-l", listP, "lists the known named polynomials.");
+  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
+  app.add_flag("--gpuRun", noInterface, "only work as the job asked for gpuRun function");
+
+  app.add_flag("--computeNormals", "compute visibility normals after visibility computation");
+  app.add_flag("--computeCurvatures", computeCurvaturesFlag, "compute curvatures after visibility normals computation");
+  app.add_option("--save", saveVisibilityFilename, "a filename to save the computed visibility");
+
+
+  CLI11_PARSE(app, argc, argv)
+  if (listP) {
+    listPolynomials();
+    return 0;
+  }
+
+  if (computeCurvaturesFlag && !computeNormalsFlag) {
+    std::cerr << "Error: to compute curvatures, normals must be computed first." << std::endl;
+    return 1;
+  }
+
+  auto params = SH3::defaultParameters()
+                | SHG3::defaultParameters()
+                | SHG3::parametersGeometryEstimation();
+  params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
+  params("surfaceTraversal", "default");
+  bool is_polynomial = !polynomial.empty();
+  if (is_polynomial) {
+    trace.beginBlock("Build polynomial surface");
+    params("polynomial", polynomial);
+    params("gridstep", gridstep);
+    params("minAABB", minAABB);
+    params("maxAABB", maxAABB);
+    params("offset", 1.0);
+    params("closed", 1);
+    implicit_shape = SH3::makeImplicitShape3D(params);
+    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+    K = SH3::getKSpace(params);
+    binary_image = SH3::makeBinaryImage(digitized_shape,
+                                        SH3::Domain(K.lowerBound(),
+                                                    K.upperBound()),
+                                        params);
+    trace.endBlock();
+  } else {
+    trace.beginBlock("Reading image vol file");
+    params("thresholdMin", thresholdMin);
+    params("thresholdMax", thresholdMax);
+    binary_image = SH3::makeBinaryImage(filename, params);
+    K = SH3::getKSpace(binary_image, params);
+    trace.endBlock();
+  }
+
+  std::vector<std::vector<std::size_t>> primal_faces;
+  std::vector<RealPoint> primal_positions;
+
+
+  trace.beginBlock("Computing digital points and primal surface");
+  // Build digital surface
+  digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
+  primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
+  surfels = SH3::getSurfelRange(digital_surface, params);
+  // Need to convert the faces
+  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+    primal_faces.push_back(primal_surface->incidentVertices(face));
+  // Embed with gridstep.
+  for (auto v = 0; v < primal_surface->nbVertices(); v++)
+    primal_surface->position(v) *= gridstep;
+  primal_positions = primal_surface->positions();
+  digitizePointels(primal_positions, pointels);
+  digital_dimensions = getFigSizes();
+  trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
+  trace.endBlock();
+
+  if (computeNormalsFlag) {
+    // Initialize normals with trivial normals
+    trace.beginBlock("Compute trivial normals");
+    auto pTC = new TangencyComputer<KSpace>(K);
+    pTC->init(pointels.cbegin(), pointels.cend(), true);
+    int t_ring = int(round(params["t-ring"].as<double>()));
+    auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
+    primal_surface->faceNormals() = surfel_trivial_normals;
+    for (auto i = 1; i < t_ring + 3; i++) {
+      primal_surface->computeVertexNormalsFromFaceNormals();
+      primal_surface->computeFaceNormalsFromVertexNormals();
+      surfel_trivial_normals = primal_surface->faceNormals();
+    }
+    trivial_normals = primal_surface->vertexNormals();
+    trivial_normals.resize(pointels.size());
+    for (auto &n: trivial_normals) n = RealVector::zero;
+    for (auto k = 0; k < surfels.size(); k++) {
+      const auto &surf = surfels[k];
+      const auto cells0 = SH3::getPrimalVertices(K, surf);
+      for (const auto &c0: cells0) {
+        const auto p = K.uCoords(c0);
+        const auto idx = pTC->index(p);
+        trivial_normals[idx] += surfel_trivial_normals[k];
+      }
+    }
+    for (auto &n: trivial_normals) n /= n.norm();
+    primal_surface->vertexNormals() = trivial_normals;
+    trace.endBlock();
+
+    if (computeCurvaturesFlag) {
+      trace.beginBlock("Initialize CNC for curvature computation");
+      pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+      trace.endBlock();
+    }
+  }
+
+
+  if (sigmaTmp != -1.0) {
+    sigma = sigmaTmp;
+  } else {
+    sigma = 5 * pow(gridstep, -0.5);
+  }
+  minus2SigmaSquare = -2 * sigma * sigma;
+  std::cout << "sigma = " << sigma << std::endl;
+
+
+  // Ready to choose program
+
+  trace.beginBlock("Compute visibilities OMP GPU");
+  computeVisibilityOmpGPU(VisibilityRadius);
+  Time = trace.endBlock();
+  if (computeNormalsFlag) {
+    trace.beginBlock("Compute visibilities Normals");
+    computeVisibilityNormals();
+    reorientVisibilityNormals();
+    Time = trace.endBlock();
+  }
+  if (computeCurvaturesFlag) {
+    trace.beginBlock("Compute visibilities Curvatures");
+    computeCurvatures();
+    Time = trace.endBlock();
+  }
+  if (!saveVisibilityFilename.empty()) {
+    trace.beginBlock("Save visibility");
+    saveVisibility(saveVisibilityFilename);
+    trace.endBlock();
+  }
+  std::cout << "GPU run completed successfully." << std::endl;
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   // command line inteface options
   CLI::App app{"A tool to check visibility using lattices."};
@@ -1021,6 +1245,8 @@ int main(int argc, char *argv[]) {
   int minAABB = -10;
   int maxAABB = 10;
   bool listP = false;
+  bool gpuRunFlag = false;
+  std::string visibilityFile;
   app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
   // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
   app.add_option("-p,--polynomial", polynomial,
@@ -1038,10 +1264,24 @@ int main(int argc, char *argv[]) {
   app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
   double sigmaTmp = -1.0;
   app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
+  app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
+  app.add_option("--load", visibilityFile, "a filename to load a precomputed visibility");
+
+  bool ignore = false;
+  std::string _;
+
+  // gpuRun only
+  app.add_flag("--computeNormals", ignore, "compute visibility normals after visibility computation");
+  app.add_flag("--computeCurvatures", ignore, "compute curvatures after visibility normals computation");
+  app.add_option("--save", _, "a filename to save the computed visibility");
+
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
 
+  if (gpuRunFlag) {
+    return gpuRun(argc, argv);
+  }
 
   // React to some options.
   if (listP) {
@@ -1161,6 +1401,12 @@ int main(int argc, char *argv[]) {
 
 
   pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+
+  if (!visibilityFile.empty()) {
+    trace.beginBlock("Load visibility");
+    loadVisibility(visibilityFile);
+    trace.endBlock();
+  }
   // Initialize polyscope
   if (noInterface) {
     std::cout << "sigma = " << sigma << std::endl;
