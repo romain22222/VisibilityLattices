@@ -21,7 +21,9 @@
 #include "gpu/Vec3i.cu"
 
 #ifdef USE_CUDA_VISIBILITY
+
 #include "./gpu/middleware.h"
+
 #endif
 
 using namespace DGtal;
@@ -131,6 +133,7 @@ public:
   }
 
 #ifdef USE_CUDA_VISIBILITY
+
   Visibility(const HostVisibility hostVisibility) {
     std::cout << "Reading visibility from GPU" << std::endl;
     mainAxis = hostVisibility.mainAxis;
@@ -158,6 +161,7 @@ public:
       vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
     }
   }
+
 #endif
 
   size_t getVectorIdx(const IntegerVector &v) const {
@@ -413,7 +417,7 @@ void computeVisibilityOmp(int radius) {
 
   visibility.reset(axis, segmentList, pointels);
   size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize +1;
+  auto chunkAmount = segmentList.size() / chunkSize + 1;
   auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // OMP" << std::endl;
 #pragma omp parallel for schedule(dynamic)
@@ -474,7 +478,7 @@ void TESTcomputeVisibilityOmpGPU(int radius) {
 
   visibility.reset(axis, segmentList, pointels);
   size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize +1;
+  auto chunkAmount = segmentList.size() / chunkSize + 1;
   auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
   std::cout << "Starting // OMP" << std::endl;
 #pragma omp target teams distribute parallel for schedule(dynamic)
@@ -838,6 +842,7 @@ void computeL2looErrors() {
 }
 
 #ifdef USE_CUDA_VISIBILITY
+
 void computeVisibilityCuda(int radius) {
   std::cout << "Computing visibility CUDA" << std::endl;
   visibility = Visibility(computeVisibilityGpu(radius, digital_dimensions, pointels));
@@ -849,6 +854,7 @@ void computeVisibilityCudaCPU(int radius) {
   visibility = Visibility(computeVisibilityGpuCPU(radius, digital_dimensions, pointels));
   std::cout << "Visibility computed" << std::endl;
 }
+
 #endif
 
 void myCallback() {
@@ -959,6 +965,51 @@ void testIntersection() {
   std::cout << std::endl;
 }
 
+void TMP(std::string filename) {
+  auto params = SH3::defaultParameters()
+                | SHG3::defaultParameters()
+                | SHG3::parametersGeometryEstimation();
+  const double h = 0.25;
+  CountedPtr<SH3::BinaryImage> binary_image;
+  SH3::KSpace K;
+//  if (filename == "") {
+//    params("polynomial", "goursat")("gridstep", h);
+//    auto implicit_shape = SH3::makeImplicitShape3D(params);
+//    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+//    binary_image = SH3::makeBinaryImage(digitized_shape, params);
+//    K = SH3::getKSpace(params);
+//  } else {
+    int thresholdMin = 0;
+    int thresholdMax = 255;
+    params("thresholdMin", thresholdMin);
+    params("thresholdMax", thresholdMax);
+
+    binary_image = SH3::makeBinaryImage(filename, params);
+
+    K = SH3::getKSpace(binary_image, params);
+//  }
+  auto embedder = SH3::getCellEmbedder(K);
+  auto surface = SH3::makeLightDigitalSurface(binary_image, K, params);
+  SH3::Cell2Index c2i;
+  auto pointels = SH3::getPointelRange(c2i, surface);
+  auto primal_surface = SH3::makePrimalSurfaceMesh(surface);
+  SH3::RealPoints pos(pointels.size());
+  std::transform(pointels.cbegin(), pointels.cend(), pos.begin(),
+                 [&](const SH3::Cell &c) { return h * embedder(c); });
+//  auto ppos     = SHG3::getPositions( implicit_shape, pos, params );
+  // init primal_faces
+  std::vector<std::vector<std::size_t>> primal_faces;
+  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+    primal_faces.push_back(primal_surface->incidentVertices(face));
+
+  polyscope::init();
+  psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
+                                                pos,
+                                                primal_faces);
+  psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
+  psPrimalMesh->setEdgeWidth(1.5);
+  polyscope::show();
+}
 
 int main(int argc, char *argv[]) {
   // command line inteface options
@@ -991,11 +1042,18 @@ int main(int argc, char *argv[]) {
   // Parse command line options. Exit on error.
   CLI11_PARSE(app, argc, argv)
 
+
   // React to some options.
   if (listP) {
     listPolynomials();
     return 0;
   }
+//  if (polynomial != "") {
+//    TMP("");
+//  } else {
+//    TMP(filename);
+//  }
+//  return 0;
   // Use options
   auto params = SH3::defaultParameters()
                 | SHG3::defaultParameters()
@@ -1092,12 +1150,12 @@ int main(int argc, char *argv[]) {
 
   primal_surface->vertexNormals() = trivial_normals;
 
-  if (sigmaTmp != -1.0 ) {
+  if (sigmaTmp != -1.0) {
     sigma = sigmaTmp;
   } else {
-    sigma = 5*pow(gridstep,-0.5);
+    sigma = 5 * pow(gridstep, -0.5);
   }
-  minus2SigmaSquare = -2*sigma*sigma;
+  minus2SigmaSquare = -2 * sigma * sigma;
 
   std::cout << "sigma = " << sigma << std::endl;
 
