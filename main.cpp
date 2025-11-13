@@ -599,6 +599,17 @@ std::ostream &operator<<(std::ostream &os, const Visibility &visib) {
   os << visib.mainAxis << std::endl;
   os << visib.vectorsSize << std::endl;
   os << visib.pointsSize << std::endl;
+
+  for (const auto &v: visib.vectorIdxs) {
+    os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
+  }
+  os << std::endl;
+
+  for (const auto &v: visib.pointIdxs) {
+    os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
+  }
+  os << std::endl;
+
   for (const auto &v: visib.visibles) {
     os << v << " ";
   }
@@ -608,6 +619,27 @@ std::ostream &operator<<(std::ostream &os, const Visibility &visib) {
 
 void saveVisibility(const std::string &filename) {
   std::ofstream file;
+  /*// print first infos of each variable to test
+  for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
+    auto it = visibility.vectorIdxs.begin();
+    std::advance(it, i);
+    trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+                 << ") has idx " << it->second << std::endl;
+  }
+  for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
+      auto it = visibility.pointIdxs.begin();
+      std::advance(it, i);
+      trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+                   << ") has idx " << it->second << std::endl;
+  }
+  int start = 0;
+  while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
+  trace.info() << "First visible at index " << start << std::endl;
+  for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
+      trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
+  }
+  trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
+*/
   file.open(filename);
   file << visibility;
   file.close();
@@ -621,22 +653,45 @@ std::istream &operator>>(std::istream &is, Visibility &visib) {
   is >> mainAxis;
   is >> vectorsSize;
   is >> pointsSize;
-  visib.reset(mainAxis, IntegerVectors(), std::vector<Point>());
   visib.vectorsSize = vectorsSize;
   visib.pointsSize = pointsSize;
+
+  IntegerVectors vs(vectorsSize);
+  std::vector<size_t> vectorIdxs(vectorsSize);
+  std::vector<Point> ps(pointsSize);
+  std::vector<size_t> pointIdxs(pointsSize);
+
+  for (size_t i = 0; i < vectorsSize; i++) {
+    IntegerVector v;
+    int x, y, z;
+    size_t idx;
+    is >> x >> y >> z >> idx;
+    vs[i] = IntegerVector(x, y, z);
+    vectorIdxs[i] = idx;
+  }
+  for (size_t i = 0; i < pointsSize; i++) {
+    Point p;
+    int x, y, z;
+    size_t idx;
+    is >> x >> y >> z >> idx;
+    ps[i] = Point(x, y, z);
+    pointIdxs[i] = idx;
+  }
+
+  visib.reset(mainAxis, vs, ps);
+  for (size_t i = 0; i < vectorsSize; i++) {
+    visib.vectorIdxs[vs[i]] = vectorIdxs[i];
+  }
+  for (size_t i = 0; i < pointsSize; i++) {
+    visib.pointIdxs[ps[i]] = pointIdxs[i];
+  }
+
   visib.visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-  int countV = 0;
   for (size_t i = 0; i < vectorsSize * pointsSize; i++) {
     bool v;
     is >> v;
     visib.visibles[i] = v;
-    countV += v ? 1 : 0;
   }
-  std::cout << "Visibility loaded" << std::endl;
-  std::cout << "  mainAxis = " << mainAxis << std::endl;
-  std::cout << "  vectorsSize = " << vectorsSize << std::endl;
-  std::cout << "  pointsSize = " << pointsSize << std::endl;
-  std::cout << "  number of visible entries = " << countV << std::endl;
   return is;
 }
 
@@ -644,6 +699,28 @@ void loadVisibility(const std::string &filename) {
   std::ifstream file;
   file.open(filename);
   file >> visibility;
+/*
+  // print first infos of each variable to test
+  for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
+    auto it = visibility.vectorIdxs.begin();
+    std::advance(it, i);
+    trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+                 << ") has idx " << it->second << std::endl;
+  }
+  for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
+    auto it = visibility.pointIdxs.begin();
+    std::advance(it, i);
+    trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+                 << ") has idx " << it->second << std::endl;
+  }
+  int start = 0;
+  while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
+  trace.info() << "First visible at index " << start << std::endl;
+  for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
+    trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
+  }
+  trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
+  */
   file.close();
 }
 
@@ -911,6 +988,8 @@ void computeVisibilityCudaCPU(int radius) {
 #endif
 
 void myCallback() {
+  char *inputVisibilityFilename = new char[256]("visibility.vis");
+  std::string visibilityFilename;
   // Select a vertex with the mouse
   if (polyscope::haveSelection()) {
     auto selection = polyscope::getSelection();
@@ -993,6 +1072,16 @@ void myCallback() {
     Time = trace.endBlock();
   }
 #endif
+  ImGui::InputText("Visibility file", inputVisibilityFilename, 256);
+  if (ImGui::Button("Save Visibility")) {
+    visibilityFilename = std::string(inputVisibilityFilename);
+    saveVisibility(visibilityFilename);
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Load Visibility")) {
+    visibilityFilename = std::string(inputVisibilityFilename);
+    loadVisibility(visibilityFilename);
+  }
   ImGui::SameLine();
   ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
@@ -1032,14 +1121,14 @@ void TMP(std::string filename) {
 //    binary_image = SH3::makeBinaryImage(digitized_shape, params);
 //    K = SH3::getKSpace(params);
 //  } else {
-    int thresholdMin = 0;
-    int thresholdMax = 255;
-    params("thresholdMin", thresholdMin);
-    params("thresholdMax", thresholdMax);
+  int thresholdMin = 0;
+  int thresholdMax = 255;
+  params("thresholdMin", thresholdMin);
+  params("thresholdMax", thresholdMax);
 
-    binary_image = SH3::makeBinaryImage(filename, params);
+  binary_image = SH3::makeBinaryImage(filename, params);
 
-    K = SH3::getKSpace(binary_image, params);
+  K = SH3::getKSpace(binary_image, params);
 //  }
   auto embedder = SH3::getCellEmbedder(K);
   auto surface = SH3::makeLightDigitalSurface(binary_image, K, params);
@@ -1064,7 +1153,7 @@ void TMP(std::string filename) {
   polyscope::show();
 }
 
-int gpuRun(int argc, char* argv[]) {
+int gpuRun(int argc, char *argv[]) {
   noInterface = false;
 
   // command line inteface options
@@ -1080,6 +1169,7 @@ int gpuRun(int argc, char* argv[]) {
   bool computeNormalsFlag = false;
   double sigmaTmp = -1.0;
   std::string saveVisibilityFilename;
+  std::string visibComputeMethod = "OMP_GPU";
   app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
   // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
   app.add_option("-p,--polynomial", polynomial,
@@ -1096,10 +1186,11 @@ int gpuRun(int argc, char* argv[]) {
   app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
   app.add_flag("--gpuRun", noInterface, "only work as the job asked for gpuRun function");
 
-  app.add_flag("--computeNormals", "compute visibility normals after visibility computation");
+  app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
   app.add_flag("--computeCurvatures", computeCurvaturesFlag, "compute curvatures after visibility normals computation");
   app.add_option("--save", saveVisibilityFilename, "a filename to save the computed visibility");
-
+  app.add_option("--visibComputeMethod", visibComputeMethod,
+                 "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 
   CLI11_PARSE(app, argc, argv)
   if (listP) {
@@ -1212,14 +1303,34 @@ int gpuRun(int argc, char* argv[]) {
 
   // Ready to choose program
 
-  trace.beginBlock("Compute visibilities OMP GPU");
-  computeVisibilityOmpGPU(VisibilityRadius);
+  trace.beginBlock("Compute visibilities");
+  if (visibComputeMethod == "CPU") {
+    computeVisibility(VisibilityRadius);
+  } else if (visibComputeMethod == "OMP") {
+    computeVisibilityOmp(VisibilityRadius);
+  } else if (visibComputeMethod == "OMP_GPU") {
+    computeVisibilityOmpGPU(VisibilityRadius);
+  } else if (visibComputeMethod == "GPU") {
+#ifdef USE_CUDA_VISIBILITY
+    computeVisibilityCuda(VisibilityRadius);
+#else
+    std::cerr << "Error: CUDA visibility computation not available. Recompile with CUDA support." << std::endl;
+    return 1;
+#endif
+  } else {
+    std::cerr << "Error: unknown visibility computation method '" << visibComputeMethod << "'." << std::endl;
+    return 1;
+  }
   Time = trace.endBlock();
+  computeMeanDistanceVisibility();
   if (computeNormalsFlag) {
     trace.beginBlock("Compute visibilities Normals");
     computeVisibilityNormals();
     reorientVisibilityNormals();
     Time = trace.endBlock();
+    if (is_polynomial) {
+      computeL2looErrors();
+    }
   }
   if (computeCurvaturesFlag) {
     trace.beginBlock("Compute visibilities Curvatures");
@@ -1246,7 +1357,6 @@ int main(int argc, char *argv[]) {
   int maxAABB = 10;
   bool listP = false;
   bool gpuRunFlag = false;
-  std::string visibilityFile;
   app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
   // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
   app.add_option("-p,--polynomial", polynomial,
@@ -1265,15 +1375,16 @@ int main(int argc, char *argv[]) {
   double sigmaTmp = -1.0;
   app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
   app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
-  app.add_option("--load", visibilityFile, "a filename to load a precomputed visibility");
 
   bool ignore = false;
   std::string _;
 
   // gpuRun only
-  app.add_flag("--computeNormals", ignore, "compute visibility normals after visibility computation");
-  app.add_flag("--computeCurvatures", ignore, "compute curvatures after visibility normals computation");
-  app.add_option("--save", _, "a filename to save the computed visibility");
+  app.add_flag("--computeNormals", ignore, "gpuRun only : compute visibility normals after visibility computation");
+  app.add_flag("--computeCurvatures", ignore, "gpuRun only : compute curvatures after visibility normals computation");
+  app.add_option("--save", _, "gpuRun only : a filename to save the computed visibility");
+  app.add_option("--visibComputeMethod", _,
+                 "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 
   // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
   // Parse command line options. Exit on error.
@@ -1402,11 +1513,6 @@ int main(int argc, char *argv[]) {
 
   pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
 
-  if (!visibilityFile.empty()) {
-    trace.beginBlock("Load visibility");
-    loadVisibility(visibilityFile);
-    trace.endBlock();
-  }
   // Initialize polyscope
   if (noInterface) {
     std::cout << "sigma = " << sigma << std::endl;
