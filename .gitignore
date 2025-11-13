@@ -9,3 +9,6 @@ cmake-build-*
 /build
 /DGMM2025_arXiv.zip
 /DGMM2025_arXiv/**
+/DGMM2025/beamer_aux
+/DGMM2025/beamer_out
+**/visibility.vis
