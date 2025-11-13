@@ -16,42 +16,42 @@ public:
   CUDA_HOSTDEV Vec3i(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {}
 
   CUDA_HOSTDEV Vec3i operator+(const Vec3i &other) const {
-    return {x + other.x, y + other.y, z + other.z};
+	  return {x + other.x, y + other.y, z + other.z};
   }
 
   CUDA_HOSTDEV Vec3i operator-(const Vec3i &other) const {
-    return {x - other.x, y - other.y, z - other.z};
+	  return {x - other.x, y - other.y, z - other.z};
   }
 
   CUDA_HOSTDEV Vec3i operator*(int val) const {
-    return {x * val, y * val, z * val};
+	  return {x * val, y * val, z * val};
   }
 
   CUDA_HOSTDEV Vec3i operator/(int val) const {
-    return {x / val, y / val, z / val};
+	  return {x / val, y / val, z / val};
   }
 
   CUDA_HOSTDEV bool operator==(const Vec3i &other) const {
-    return x == other.x && y == other.y && z == other.z;
+	  return x == other.x && y == other.y && z == other.z;
   }
 
   CUDA_HOSTDEV bool operator!=(const Vec3i &other) const {
-    return !(*this == other);
+	  return !(*this == other);
   }
 
   CUDA_HOSTDEV int &operator[](int index) {
-    return (index == 0) ? x : (index == 1) ? y : z;
+	  return (index == 0) ? x : (index == 1) ? y : z;
   }
 
   CUDA_HOSTDEV const int &operator[](int index) const {
-    return (index == 0) ? x : (index == 1) ? y : z;
+	  return (index == 0) ? x : (index == 1) ? y : z;
   }
 
   CUDA_HOSTDEV Vec3i &operator+=(const Vec3i &other) {
-    x += other.x;
-    y += other.y;
-    z += other.z;
-    return *this;
+	  x += other.x;
+	  y += other.y;
+	  z += other.z;
+	  return *this;
   }
 };
 

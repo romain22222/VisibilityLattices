@@ -8,9 +8,13 @@
 #include "Vec3i.cu"
 
 int myMaxCPU(int a, int b);
+
 int myMinCPU(int a, int b);
+
 bool isPointLowerThanCPU(const Vec3i &p1, const Vec3i &p2);
+
 inline int gcdCPU(int a, int b);
+
 inline int gcd3CPU(int a, int b, int c);
 
 struct IntervalGpuCPU {
@@ -64,7 +68,7 @@ struct GpuVisibilityCPU {
 
 struct LatticeFoundResultCPU {
   int keyIndex{};
-  IntervalListCPU* intervals;
+  IntervalListCPU *intervals;
 };
 
 struct MyLatticeSetCPU {
@@ -78,7 +82,7 @@ struct MyLatticeSetCPU {
 
   MyLatticeSetCPU() = default;
 
-  MyLatticeSetCPU(int axis, std::vector<Vec3i> &keys, std::vector<IntervalListCPU*> &allIntervals);
+  MyLatticeSetCPU(int axis, std::vector<Vec3i> &keys, std::vector<IntervalListCPU *> &allIntervals);
 
   MyLatticeSetCPU(const Vec3i segment, int axis);
 
@@ -107,11 +111,11 @@ struct HostVisibilityCPU {
 };
 
 HostVisibilityCPU computeVisibilityCPU(
-    int chunkAmount, int chunkSize,
-    int axis, const int *digital_dimensions, const int *axises_idx,
-    const MyLatticeSetCPU &figLattices,
-    Vec3i *segmentList, int segmentSize,
-    Vec3i *pointels, int pointelsSize
+	int chunkAmount, int chunkSize,
+	int axis, const int *digital_dimensions, const int *axises_idx,
+	const MyLatticeSetCPU &figLattices,
+	Vec3i *segmentList, int segmentSize,
+	Vec3i *pointels, int pointelsSize
 );
 
 #endif //VISIBILITYLATTICES_TESTGPUCPU_H

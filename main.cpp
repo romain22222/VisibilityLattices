@@ -102,11 +102,11 @@ const auto emptyIE = IntegerVector();
  * @return
  */
 bool isPointLowerThan(const Point &p1, const Point &p2) {
-  return p1[0] < p2[0] || (p1[0] == p2[0] && p1[1] < p2[1]) || (p1[0] == p2[0] && p1[1] == p2[1] && p1[2] < p2[2]);
+	return p1[0] < p2[0] || (p1[0] == p2[0] && p1[1] < p2[1]) || (p1[0] == p2[0] && p1[1] == p2[1] && p1[2] < p2[2]);
 }
 
 Point vec3iToPointVector(const Vec3i &vector) {
-  return Point(vector.x, vector.y, vector.z);
+	return Point(vector.x, vector.y, vector.z);
 }
 
 class Visibility {
@@ -121,102 +121,102 @@ public:
   Visibility() = default;
 
   Visibility(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) : mainAxis(mainAxis) {
-    vectorsSize = vectors.size();
-    pointsSize = points.size();
-    visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-    for (size_t i = 0; i < pointsSize; i++) {
-      pointIdxs[points[i]] = i;
-    }
-    for (size_t i = 0; i < vectorsSize; i++) {
-      vectorIdxs[vectors[i]] = i;
-    }
+	  vectorsSize = vectors.size();
+	  pointsSize = points.size();
+	  visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+	  for (size_t i = 0; i < pointsSize; i++) {
+		  pointIdxs[points[i]] = i;
+	  }
+	  for (size_t i = 0; i < vectorsSize; i++) {
+		  vectorIdxs[vectors[i]] = i;
+	  }
   }
 
 #ifdef USE_CUDA_VISIBILITY
 
   Visibility(const HostVisibility hostVisibility) {
-    std::cout << "Reading visibility from GPU" << std::endl;
-    mainAxis = hostVisibility.mainAxis;
-    vectorsSize = hostVisibility.vectorsSize;
-    pointsSize = hostVisibility.pointsSize;
-    visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
-    for (size_t i = 0; i < pointsSize; i++) {
-      pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
-    }
-    for (size_t i = 0; i < vectorsSize; i++) {
-      vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
-    }
+	  std::cout << "Reading visibility from GPU" << std::endl;
+	  mainAxis = hostVisibility.mainAxis;
+	  vectorsSize = hostVisibility.vectorsSize;
+	  pointsSize = hostVisibility.pointsSize;
+	  visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+	  for (size_t i = 0; i < pointsSize; i++) {
+		  pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+	  }
+	  for (size_t i = 0; i < vectorsSize; i++) {
+		  vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+	  }
   }
 
   Visibility(const HostVisibilityCPU hostVisibility) {
-    std::cout << "Reading visibility from GPU" << std::endl;
-    mainAxis = hostVisibility.mainAxis;
-    vectorsSize = hostVisibility.vectorsSize;
-    pointsSize = hostVisibility.pointsSize;
-    visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
-    for (size_t i = 0; i < pointsSize; i++) {
-      pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
-    }
-    for (size_t i = 0; i < vectorsSize; i++) {
-      vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
-    }
+	  std::cout << "Reading visibility from GPU" << std::endl;
+	  mainAxis = hostVisibility.mainAxis;
+	  vectorsSize = hostVisibility.vectorsSize;
+	  pointsSize = hostVisibility.pointsSize;
+	  visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+	  for (size_t i = 0; i < pointsSize; i++) {
+		  pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+	  }
+	  for (size_t i = 0; i < vectorsSize; i++) {
+		  vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+	  }
   }
 
 #endif
 
   size_t getVectorIdx(const IntegerVector &v) const {
-    auto it = vectorIdxs.find(v);
-    if (it != vectorIdxs.end()) return it->second;
-    return vectorsSize;
+	  auto it = vectorIdxs.find(v);
+	  if (it != vectorIdxs.end()) return it->second;
+	  return vectorsSize;
   }
 
   size_t getPointIdx(const IntegerVector &p) const {
-    auto it = pointIdxs.find(p);
-    if (it != pointIdxs.end()) return it->second;
-    return pointsSize;
+	  auto it = pointIdxs.find(p);
+	  if (it != pointIdxs.end()) return it->second;
+	  return pointsSize;
   }
 
   bool isVisible(const Point &p1, const Point &p2) const {
-    if (p1 == p2) return true;
-    // Reorder points so that v is in the upper half plane
-    if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
-    IntegerVector v = p2 - p1;
-    v = v / ic.gcd(v[0], ic.gcd(v[1], v[2]));
-    auto vIdx = this->getVectorIdx(v);
-    if (vIdx == vectorsSize) return false; // vector not computed
-    for (IntegerVector p = p1; p != p2; p += v) {
-      if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
-    }
-    return true;
+	  if (p1 == p2) return true;
+	  // Reorder points so that v is in the upper half plane
+	  if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
+	  IntegerVector v = p2 - p1;
+	  v = v / ic.gcd(v[0], ic.gcd(v[1], v[2]));
+	  auto vIdx = this->getVectorIdx(v);
+	  if (vIdx == vectorsSize) return false; // vector not computed
+	  for (IntegerVector p = p1; p != p2; p += v) {
+		  if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
+	  }
+	  return true;
   }
 
   void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
-    auto p = offset;
-    for (auto &interval: value) {
-      for (int i = interval.first / 2; i <= interval.second / 2; i++) {
-        p[mainAxis] = i;
-        visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
-      }
-    }
+	  auto p = offset;
+	  for (auto &interval: value) {
+		  for (int i = interval.first / 2; i <= interval.second / 2; i++) {
+			  p[mainAxis] = i;
+			  visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
+		  }
+	  }
   }
 
   bool empty() const {
-    return std::all_of(visibles.cbegin(), visibles.cend(), [](bool v) { return !v; });
+	  return std::all_of(visibles.cbegin(), visibles.cend(), [](bool v) { return !v; });
   }
 
   void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
-    this->mainAxis = mainAxis;
-    vectorsSize = vectors.size();
-    pointsSize = points.size();
-    visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-    pointIdxs.clear();
-    vectorIdxs.clear();
-    for (size_t i = 0; i < pointsSize; i++) {
-      pointIdxs[points[i]] = i;
-    }
-    for (size_t i = 0; i < vectorsSize; i++) {
-      vectorIdxs[vectors[i]] = i;
-    }
+	  this->mainAxis = mainAxis;
+	  vectorsSize = vectors.size();
+	  pointsSize = points.size();
+	  visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+	  pointIdxs.clear();
+	  vectorIdxs.clear();
+	  for (size_t i = 0; i < pointsSize; i++) {
+		  pointIdxs[points[i]] = i;
+	  }
+	  for (size_t i = 0; i < vectorsSize; i++) {
+		  vectorIdxs[vectors[i]] = i;
+	  }
   }
 
 };
@@ -224,27 +224,35 @@ public:
 Visibility visibility = Visibility();
 
 void embedPointels(const std::vector<Point> &vq, std::vector<RealPoint> &vp) {
-  vp.clear();
-  vp.reserve(vq.size());
-  for (const auto &i: vq)
-    vp.emplace_back(gridstep * (i[0] - 0.5),
-                    gridstep * (i[1] - 0.5),
-                    gridstep * (i[2] - 0.5));
+	vp.clear();
+	vp.reserve(vq.size());
+	for (const auto &i: vq)
+		vp.emplace_back(gridstep * (i[0] - 0.5),
+		                gridstep * (i[1] - 0.5),
+		                gridstep * (i[2] - 0.5));
 }
 
 void digitizePointels(const std::vector<RealPoint> &vp, std::vector<Point> &vq) {
-  vq.clear();
-  vq.reserve(vp.size());
-  for (const auto &i: vp)
-    vq.emplace_back(round(i[0] / gridstep + 0.5),
-                    round(i[1] / gridstep + 0.5),
-                    round(i[2] / gridstep + 0.5));
+	vq.clear();
+	vq.reserve(vp.size());
+	for (const auto &i: vp)
+		vq.emplace_back(round(i[0] / gridstep + 0.5),
+		                round(i[1] / gridstep + 0.5),
+		                round(i[2] / gridstep + 0.5));
 }
 
 void listPolynomials() {
-  auto L = SH3::getPolynomialList();
-  for (const auto &p: L)
-    trace.info() << p.first << " = " << p.second << std::endl;
+	auto L = SH3::getPolynomialList();
+	for (const auto &p: L)
+		trace.info() << p.first << " = " << p.second << std::endl;
+}
+
+bool isAClassicPolynomial(std::string p) {
+	auto L = SH3::getPolynomialList();
+	for (const auto &poly: L) {
+		if (poly.first == p) return true;
+	}
+	return false;
 }
 
 /**
@@ -252,11 +260,11 @@ void listPolynomials() {
  * @return
  */
 Dimension getLargeAxis() {
-  auto axis = 0;
-  for (auto i = 1; i < digital_dimensions.size() / 3; i++) {
-    if (digital_dimensions[i] > digital_dimensions[axis]) axis = i;
-  }
-  return axis;
+	auto axis = 0;
+	for (auto i = 1; i < digital_dimensions.size() / 3; i++) {
+		if (digital_dimensions[i] > digital_dimensions[axis]) axis = i;
+	}
+	return axis;
 }
 
 /**
@@ -264,18 +272,18 @@ Dimension getLargeAxis() {
  * @return
  */
 std::vector<int> getFigSizes() {
-  auto d = pointels[0].dimension;
-  std::vector<int> sizes = std::vector<int>(3 * d, 0);
-  for (auto p: pointels) {
-    for (auto i = 0; i < d; i++) {
-      sizes[i + d] = std::min(sizes[i + d], p[i]);
-      sizes[i + 2 * d] = std::max(sizes[i + 2 * d], p[i]);
-    }
-  }
-  for (auto i = 0; i < d; i++) {
-    sizes[i] = sizes[i + 2 * d] - sizes[i + d] + 1;
-  }
-  return sizes;
+	auto d = pointels[0].dimension;
+	std::vector<int> sizes = std::vector<int>(3 * d, 0);
+	for (auto p: pointels) {
+		for (auto i = 0; i < d; i++) {
+			sizes[i + d] = std::min(sizes[i + d], p[i]);
+			sizes[i + 2 * d] = std::max(sizes[i + 2 * d], p[i]);
+		}
+	}
+	for (auto i = 0; i < d; i++) {
+		sizes[i] = sizes[i + 2 * d] - sizes[i + d] + 1;
+	}
+	return sizes;
 }
 
 /**
@@ -285,23 +293,23 @@ std::vector<int> getFigSizes() {
  * @return
  */
 IntegerVectors getAllVectors(int radius) {
-  IntegerVectors vectors;
-  for (auto x = radius; x >= 1; x--) {
-    for (auto y = radius; y >= -radius; y--) {
-      for (auto z = radius; z >= -radius; z--) {
-        if (ic.gcd(ic.gcd(x, y), z) != 1) continue;
-        vectors.emplace_back(x, y, z);
-      }
-    }
-  }
-  for (auto y = radius; y >= 1; y--) {
-    for (auto z = radius; z >= -radius; z--) {
-      if (ic.gcd(y, z) != 1) continue;
-      vectors.emplace_back(0, y, z);
-    }
-  }
-  vectors.emplace_back(0, 0, 1);
-  return vectors;
+	IntegerVectors vectors;
+	for (auto x = radius; x >= 1; x--) {
+		for (auto y = radius; y >= -radius; y--) {
+			for (auto z = radius; z >= -radius; z--) {
+				if (ic.gcd(ic.gcd(x, y), z) != 1) continue;
+				vectors.emplace_back(x, y, z);
+			}
+		}
+	}
+	for (auto y = radius; y >= 1; y--) {
+		for (auto z = radius; z >= -radius; z--) {
+			if (ic.gcd(y, z) != 1) continue;
+			vectors.emplace_back(0, y, z);
+		}
+	}
+	vectors.emplace_back(0, 0, 1);
+	return vectors;
 }
 
 /**
@@ -311,30 +319,30 @@ IntegerVectors getAllVectors(int radius) {
  * @return
  */
 LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
-  LatticeSet L_ab(axis);
-  L_ab.insert(IntegerVector());
-  for (Dimension k = 0; k < 3; k++) {
-    const Integer n = (segment[k] >= 0) ? segment[k] : -segment[k];
-    const Integer d = (segment[k] >= 0) ? 1 : -1;
-    if (n == 0) continue;
-    Point kc;
-    for (Integer i = 1; i < n; i++) {
-      for (Dimension j = 0; j < 3; j++) {
-        if (j == k) kc[k] = 2 * (d * i);
-        else {
-          const auto v = segment[j];
-          const auto q = (v * i) / n;
-          const auto r = (v * i) % n; // might be negative
-          kc[j] = 2 * q;
-          if (r < 0) kc[j] -= 1;
-          else if (r > 0) kc[j] += 1;
-        }
-      }
-      L_ab.insert(kc);
-    }
-  }
-  if (segment != IntegerVector()) L_ab.insert(2 * segment);
-  return L_ab.starOfCells();
+	LatticeSet L_ab(axis);
+	L_ab.insert(IntegerVector());
+	for (Dimension k = 0; k < 3; k++) {
+		const Integer n = (segment[k] >= 0) ? segment[k] : -segment[k];
+		const Integer d = (segment[k] >= 0) ? 1 : -1;
+		if (n == 0) continue;
+		Point kc;
+		for (Integer i = 1; i < n; i++) {
+			for (Dimension j = 0; j < 3; j++) {
+				if (j == k) kc[k] = 2 * (d * i);
+				else {
+					const auto v = segment[j];
+					const auto q = (v * i) / n;
+					const auto r = (v * i) % n; // might be negative
+					kc[j] = 2 * q;
+					if (r < 0) kc[j] -= 1;
+					else if (r > 0) kc[j] += 1;
+				}
+			}
+			L_ab.insert(kc);
+		}
+	}
+	if (segment != IntegerVector()) L_ab.insert(2 * segment);
+	return L_ab.starOfCells();
 }
 
 /**
@@ -345,39 +353,39 @@ LatticeSet getLatticeVector(const IntegerVector &segment, Dimension axis) {
  */
 Intervals
 checkInterval(const Interval toCheck, const Intervals &figIntervals, bool debug = false) {
-  Intervals result;
-  result.reserve(figIntervals.size());
-  const auto toCheckSize = toCheck.second - toCheck.first;
-  int count = 0;
-  for (auto interval: figIntervals) {
-    if (debug) count++;
-    if (interval.second - interval.first >= toCheckSize) {
-      result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
-    }
-  }
-  if (debug) printf("checkInterval: %d loops\n", count);
-  return result;
+	Intervals result;
+	result.reserve(figIntervals.size());
+	const auto toCheckSize = toCheck.second - toCheck.first;
+	int count = 0;
+	for (auto interval: figIntervals) {
+		if (debug) count++;
+		if (interval.second - interval.first >= toCheckSize) {
+			result.emplace_back(interval.first - toCheck.first, interval.second - toCheck.second);
+		}
+	}
+	if (debug) printf("checkInterval: %d loops\n", count);
+	return result;
 }
 
 Intervals intersect(const Intervals &l1, const Intervals &l2, bool debug = false) {
-  Intervals result;
-  // check 3rd example of testIntersection to see that you need at most this amount
-  result.reserve(l1.size() + l2.size() - 1);
-//  result.reserve( std::max( l1.size(), l2.size() ) );
-  int k1 = 0, k2 = 0;
-  int count = 0;
-  while (k1 < l1.size() && k2 < l2.size()) {
-    if (debug) count++;
-    const auto interval1 = l1[k1];
-    const auto interval2 = l2[k2];
-    const auto i = std::max(interval1.first, interval2.first);
-    const auto j = std::min(interval1.second, interval2.second);
-    if (i <= j) result.emplace_back(i, j);
-    if (interval1.second <= interval2.second) k1++;
-    if (interval1.second >= interval2.second) k2++;
-  }
-  if (debug) printf("intersect: %d loops\n", count);
-  return result;
+	Intervals result;
+	// check 3rd example of testIntersection to see that you need at most this amount
+	result.reserve(l1.size() + l2.size() - 1);
+//	result.reserve( std::max( l1.size(), l2.size() ) );
+	int k1 = 0, k2 = 0;
+	int count = 0;
+	while (k1 < l1.size() && k2 < l2.size()) {
+		if (debug) count++;
+		const auto interval1 = l1[k1];
+		const auto interval2 = l2[k2];
+		const auto i = std::max(interval1.first, interval2.first);
+		const auto j = std::min(interval1.second, interval2.second);
+		if (i <= j) result.emplace_back(i, j);
+		if (interval1.second <= interval2.second) k1++;
+		if (interval1.second >= interval2.second) k2++;
+	}
+	if (debug) printf("intersect: %d loops\n", count);
+	return result;
 }
 
 /**
@@ -391,137 +399,137 @@ Intervals matchVector(Intervals &toCheck,
                       const Intervals &vectorIntervals,
                       const Intervals &figIntervals,
                       bool debug = false) {
-  auto count = 0;
-  for (const auto &vInterval: vectorIntervals) {
-    toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals, debug), debug);
-    if (debug) count++;
-    if (toCheck.empty()) break;
-  }
-  if (debug) printf("matchVector: %d loops\n", count);
-  return toCheck;
+	auto count = 0;
+	for (const auto &vInterval: vectorIntervals) {
+		toCheck = intersect(toCheck, checkInterval(vInterval, figIntervals, debug), debug);
+		if (debug) count++;
+		if (toCheck.empty()) break;
+	}
+	if (debug) printf("matchVector: %d loops\n", count);
+	return toCheck;
 }
 
 void computeVisibilityOmp(int radius) {
-  std::cout << "Computing visibility OMP" << std::endl;
-  Dimension axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
-  std::map<Point, Intervals> figLattices;
-  for (auto p: tmpFigLattices) {
-    figLattices[p.first] = p.second.data();
-  }
-  const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
-  auto segmentList = getAllVectors(radius);
+	std::cout << "Computing visibility OMP" << std::endl;
+	Dimension axis = getLargeAxis();
+	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	std::map<Point, Intervals> figLattices;
+	for (auto p: tmpFigLattices) {
+		figLattices[p.first] = p.second.data();
+	}
+	const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
+	auto segmentList = getAllVectors(radius);
 
-  // avoid thread imbalance
-  std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
+	// avoid thread imbalance
+	std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-  visibility.reset(axis, segmentList, pointels);
-  size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize + 1;
-  auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
-  std::cout << "Starting // OMP" << std::endl;
+	visibility.reset(axis, segmentList, pointels);
+	size_t chunkSize = 64;
+	auto chunkAmount = segmentList.size() / chunkSize + 1;
+	auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
+	std::cout << "Starting // OMP" << std::endl;
 #pragma omp parallel for schedule(dynamic)
-  for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
-    IntegerVector segment;
-    Intervals eligibles;
-    int minTx, maxTx, minTy, maxTy;
-    for (auto segmentIdx = chunkIdx * chunkSize;
-         segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
-      segment = segmentList[segmentIdx];
-      auto tmp = getLatticeVector(segment, axis).data();
-      std::map<Point, Intervals> latticeVector;
-      for (auto p: tmp) {
-        latticeVector[p.first] = p.second.data();
-      }
-      minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
-      maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
-      minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
-      maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
-      for (auto tx = minTx; tx < maxTx; tx++) {
-        for (auto ty = minTy; ty < maxTy; ty++) {
-          eligibles.clear();
-          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-          const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-                                axis == 2 ? 0 : 2 * ty);
-          for (const auto &cInfo: latticeVector) {
-            const auto it = figLattices.find(pInterest + cInfo.first);
-            if (it == figLattices.end()) {
-              eligibles.clear();
-              break;
-            }
-            eligibles = matchVector(eligibles, cInfo.second, it->second);
-            if (eligibles.empty()) break;
-          }
-          if (!eligibles.empty()) {
-            visibility.set(pInterest / 2, eligibles, segmentIdx);
-          }
-        }
-      }
-    }
-  }
-  std::cout << "Visibility computed" << std::endl;
+	for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
+		IntegerVector segment;
+		Intervals eligibles;
+		int minTx, maxTx, minTy, maxTy;
+		for (auto segmentIdx = chunkIdx * chunkSize;
+		     segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
+			segment = segmentList[segmentIdx];
+			auto tmp = getLatticeVector(segment, axis).data();
+			std::map<Point, Intervals> latticeVector;
+			for (auto p: tmp) {
+				latticeVector[p.first] = p.second.data();
+			}
+			minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
+			maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
+			minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
+			maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
+			for (auto tx = minTx; tx < maxTx; tx++) {
+				for (auto ty = minTy; ty < maxTy; ty++) {
+					eligibles.clear();
+					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : 2 * ty);
+					for (const auto &cInfo: latticeVector) {
+						const auto it = figLattices.find(pInterest + cInfo.first);
+						if (it == figLattices.end()) {
+							eligibles.clear();
+							break;
+						}
+						eligibles = matchVector(eligibles, cInfo.second, it->second);
+						if (eligibles.empty()) break;
+					}
+					if (!eligibles.empty()) {
+						visibility.set(pInterest / 2, eligibles, segmentIdx);
+					}
+				}
+			}
+		}
+	}
+	std::cout << "Visibility computed" << std::endl;
 }
 
 void computeVisibilityOmpGPU(int radius) {
-  std::cout << "Computing visibility OMP" << std::endl;
-  Dimension axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
-  std::map<Point, Intervals> figLattices;
-  for (auto p: tmpFigLattices) {
-    figLattices[p.first] = p.second.data();
-  }
-  const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
-  auto segmentList = getAllVectors(radius);
+	std::cout << "Computing visibility OMP" << std::endl;
+	Dimension axis = getLargeAxis();
+	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	std::map<Point, Intervals> figLattices;
+	for (auto p: tmpFigLattices) {
+		figLattices[p.first] = p.second.data();
+	}
+	const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
+	auto segmentList = getAllVectors(radius);
 
-  // avoid thread imbalance
-  std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
+	// avoid thread imbalance
+	std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-  visibility.reset(axis, segmentList, pointels);
-  size_t chunkSize = 64;
-  auto chunkAmount = segmentList.size() / chunkSize + 1;
-  auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
-  std::cout << "Starting // OMP" << std::endl;
+	visibility.reset(axis, segmentList, pointels);
+	size_t chunkSize = 64;
+	auto chunkAmount = segmentList.size() / chunkSize + 1;
+	auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
+	std::cout << "Starting // OMP" << std::endl;
 #pragma omp target teams distribute parallel for schedule(dynamic)
-  for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
-    IntegerVector segment;
-    Intervals eligibles;
-    int minTx, maxTx, minTy, maxTy;
-    for (auto segmentIdx = chunkIdx * chunkSize;
-         segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
-      segment = segmentList[segmentIdx];
-      auto tmp = getLatticeVector(segment, axis).data();
-      std::map<Point, Intervals> latticeVector;
-      for (auto p: tmp) {
-        latticeVector[p.first] = p.second.data();
-      }
-      minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
-      maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
-      minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
-      maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
+	for (auto chunkIdx = 0; chunkIdx < chunkAmount - isSegmentListMultChunkSize; chunkIdx++) {
+		IntegerVector segment;
+		Intervals eligibles;
+		int minTx, maxTx, minTy, maxTy;
+		for (auto segmentIdx = chunkIdx * chunkSize;
+		     segmentIdx < std::min((chunkIdx + 1) * chunkSize, segmentList.size()); segmentIdx++) {
+			segment = segmentList[segmentIdx];
+			auto tmp = getLatticeVector(segment, axis).data();
+			std::map<Point, Intervals> latticeVector;
+			for (auto p: tmp) {
+				latticeVector[p.first] = p.second.data();
+			}
+			minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
+			maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
+			minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
+			maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
 #pragma omp collapse(2)
-      for (auto tx = minTx; tx < maxTx; tx++) {
-        for (auto ty = minTy; ty < maxTy; ty++) {
-          eligibles.clear();
-          eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-          const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-                                axis == 2 ? 0 : 2 * ty);
-          for (const auto &cInfo: latticeVector) {
-            const auto it = figLattices.find(pInterest + cInfo.first);
-            if (it == figLattices.end()) {
-              eligibles.clear();
-              break;
-            }
-            eligibles = matchVector(eligibles, cInfo.second, it->second);
-            if (eligibles.empty()) break;
-          }
-          if (!eligibles.empty()) {
-            visibility.set(pInterest / 2, eligibles, segmentIdx);
-          }
-        }
-      }
-    }
-  }
-  std::cout << "Visibility computed" << std::endl;
+			for (auto tx = minTx; tx < maxTx; tx++) {
+				for (auto ty = minTy; ty < maxTy; ty++) {
+					eligibles.clear();
+					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : 2 * ty);
+					for (const auto &cInfo: latticeVector) {
+						const auto it = figLattices.find(pInterest + cInfo.first);
+						if (it == figLattices.end()) {
+							eligibles.clear();
+							break;
+						}
+						eligibles = matchVector(eligibles, cInfo.second, it->second);
+						if (eligibles.empty()) break;
+					}
+					if (!eligibles.empty()) {
+						visibility.set(pInterest / 2, eligibles, segmentIdx);
+					}
+				}
+			}
+		}
+	}
+	std::cout << "Visibility computed" << std::endl;
 }
 
 /**
@@ -530,1009 +538,1013 @@ void computeVisibilityOmpGPU(int radius) {
  * @return
  */
 void computeVisibility(int radius) {
-  std::cout << "Computing visibility" << std::endl;
-  Dimension axis = getLargeAxis();
-  auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
-  std::map<Point, Intervals> figLattices;
-  for (auto p: tmpFigLattices) {
-    figLattices[p.first] = p.second.data();
-  }
-  const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
-  IntegerVector segment;
-  Intervals eligibles;
-  auto segmentList = getAllVectors(radius);
-  visibility.reset(axis, segmentList, pointels);
-  int minTx, maxTx, minTy, maxTy;
-  std::vector<long> durations = std::vector<long>(segmentList.size() / 100, 0);
-  std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-  // Enumerate all pairs of vectorIdx, vector
-  for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
-    if (segmentIdx % 100 == 0) start = std::chrono::high_resolution_clock::now();
-    segment = segmentList[segmentIdx];
-    auto tmp = getLatticeVector(segment, axis).data();
-    std::map<Point, Intervals> latticeVector;
-    for (auto p: tmp) {
-      latticeVector[p.first] = p.second.data();
-    }
-    minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
-    maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
-    minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
-    maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
-    for (auto tx = minTx; tx < maxTx; tx++) {
-      for (auto ty = minTy; ty < maxTy; ty++) {
-        eligibles.clear();
-        eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-        const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-                              axis == 2 ? 0 : 2 * ty);
-        for (const auto &cInfo: latticeVector) {
-          // time this call
-          time_t t1 = clock();
-          eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
-          time_t t2 = clock();
-          std::cout << "Matching vector at (" << tx << "," << ty << ")"
-                    << " for segment " << segment[0] << "," << segment[1] << "," << segment[2]
-                    << " took " << double(t2 - t1) / CLOCKS_PER_SEC << " seconds." << std::endl;
-          if (eligibles.empty()) break;
-        }
-        if (!eligibles.empty()) {
-          visibility.set(pInterest / 2, eligibles, segmentIdx);
-        }
-      }
-    }
-    if (segmentIdx % 100 == 99) {
-      end = std::chrono::high_resolution_clock::now();
-      durations[segmentIdx / 100] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    }
-  }
-  std::ofstream durationsFile;
-  durationsFile.open("durations.csv");
-  durationsFile << "idx,duration" << std::endl;
-  for (auto idx = 0; idx < durations.size(); idx++) {
-    durationsFile << idx << "," << durations[idx] << std::endl;
-  }
-  durationsFile.close();
-  std::cout << "Visibility computed" << std::endl;
+	std::cout << "Computing visibility" << std::endl;
+	Dimension axis = getLargeAxis();
+	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	std::map<Point, Intervals> figLattices;
+	for (auto p: tmpFigLattices) {
+		figLattices[p.first] = p.second.data();
+	}
+	const auto axises_idx = std::vector<Dimension>{axis, axis == 0 ? 1U : 0U, axis == 2 ? 1U : 2U};
+	IntegerVector segment;
+	Intervals eligibles;
+	auto segmentList = getAllVectors(radius);
+	visibility.reset(axis, segmentList, pointels);
+	int minTx, maxTx, minTy, maxTy;
+	std::vector<long> durations = std::vector<long>(segmentList.size() / 100, 0);
+	std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+	// Enumerate all pairs of vectorIdx, vector
+	for (auto segmentIdx = 0; segmentIdx < segmentList.size(); segmentIdx++) {
+		if (segmentIdx % 100 == 0) start = std::chrono::high_resolution_clock::now();
+		segment = segmentList[segmentIdx];
+		auto tmp = getLatticeVector(segment, axis).data();
+		std::map<Point, Intervals> latticeVector;
+		for (auto p: tmp) {
+			latticeVector[p.first] = p.second.data();
+		}
+		minTx = digital_dimensions[axises_idx[1] + 3] - std::min(0, segment[axises_idx[1]]);
+		maxTx = digital_dimensions[axises_idx[1] + 6] + 1 - std::max(0, segment[axises_idx[1]]);
+		minTy = digital_dimensions[axises_idx[2] + 3] - std::min(0, segment[axises_idx[2]]);
+		maxTy = digital_dimensions[axises_idx[2] + 6] + 1 - std::max(0, segment[axises_idx[2]]);
+		for (auto tx = minTx; tx < maxTx; tx++) {
+			for (auto ty = minTy; ty < maxTy; ty++) {
+				eligibles.clear();
+				eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
+				const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+				                      axis == 2 ? 0 : 2 * ty);
+				for (const auto &cInfo: latticeVector) {
+					// time this call
+					time_t t1 = clock();
+					eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
+					time_t t2 = clock();
+					std::cout << "Matching vector at (" << tx << "," << ty << ")"
+					          << " for segment " << segment[0] << "," << segment[1] << "," << segment[2]
+					          << " took " << double(t2 - t1) / CLOCKS_PER_SEC << " seconds." << std::endl;
+					if (eligibles.empty()) break;
+				}
+				if (!eligibles.empty()) {
+					visibility.set(pInterest / 2, eligibles, segmentIdx);
+				}
+			}
+		}
+		if (segmentIdx % 100 == 99) {
+			end = std::chrono::high_resolution_clock::now();
+			durations[segmentIdx / 100] = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		}
+	}
+	std::ofstream durationsFile;
+	durationsFile.open("durations.csv");
+	durationsFile << "idx,duration" << std::endl;
+	for (auto idx = 0; idx < durations.size(); idx++) {
+		durationsFile << idx << "," << durations[idx] << std::endl;
+	}
+	durationsFile.close();
+	std::cout << "Visibility computed" << std::endl;
 }
 
 // define << operator on file for visibility
 std::ostream &operator<<(std::ostream &os, const Visibility &visib) {
-  os << visib.mainAxis << std::endl;
-  os << visib.vectorsSize << std::endl;
-  os << visib.pointsSize << std::endl;
+	os << visib.mainAxis << std::endl;
+	os << visib.vectorsSize << std::endl;
+	os << visib.pointsSize << std::endl;
 
-  for (const auto &v: visib.vectorIdxs) {
-    os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
-  }
-  os << std::endl;
+	for (const auto &v: visib.vectorIdxs) {
+		os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
+	}
+	os << std::endl;
 
-  for (const auto &v: visib.pointIdxs) {
-    os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
-  }
-  os << std::endl;
+	for (const auto &v: visib.pointIdxs) {
+		os << v.first[0] << " " << v.first[1] << " " << v.first[2] << " " << v.second << " ";
+	}
+	os << std::endl;
 
-  for (const auto &v: visib.visibles) {
-    os << v << " ";
-  }
-  os << std::endl;
-  return os;
+	for (const auto &v: visib.visibles) {
+		os << v << " ";
+	}
+	os << std::endl;
+	return os;
 }
 
 void saveVisibility(const std::string &filename) {
-  std::ofstream file;
-  /*// print first infos of each variable to test
-  for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
-    auto it = visibility.vectorIdxs.begin();
-    std::advance(it, i);
-    trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-                 << ") has idx " << it->second << std::endl;
-  }
-  for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
-      auto it = visibility.pointIdxs.begin();
-      std::advance(it, i);
-      trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-                   << ") has idx " << it->second << std::endl;
-  }
-  int start = 0;
-  while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
-  trace.info() << "First visible at index " << start << std::endl;
-  for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
-      trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
-  }
-  trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
-*/
-  file.open(filename);
-  file << visibility;
-  file.close();
+	std::ofstream file;
+	/*// print first infos of each variable to test
+	for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
+		auto it = visibility.vectorIdxs.begin();
+		std::advance(it, i);
+		trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+								 << ") has idx " << it->second << std::endl;
+	}
+	for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
+			auto it = visibility.pointIdxs.begin();
+			std::advance(it, i);
+			trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+									 << ") has idx " << it->second << std::endl;
+	}
+	int start = 0;
+	while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
+	trace.info() << "First visible at index " << start << std::endl;
+	for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
+			trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
+	}
+	trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
+  */
+	file.open(filename);
+	file << visibility;
+	file.close();
 }
 
 // define >> operator on file for visibility
 std::istream &operator>>(std::istream &is, Visibility &visib) {
-  Dimension mainAxis;
-  size_t vectorsSize;
-  size_t pointsSize;
-  is >> mainAxis;
-  is >> vectorsSize;
-  is >> pointsSize;
-  visib.vectorsSize = vectorsSize;
-  visib.pointsSize = pointsSize;
+	Dimension mainAxis;
+	size_t vectorsSize;
+	size_t pointsSize;
+	is >> mainAxis;
+	is >> vectorsSize;
+	is >> pointsSize;
+	visib.vectorsSize = vectorsSize;
+	visib.pointsSize = pointsSize;
 
-  IntegerVectors vs(vectorsSize);
-  std::vector<size_t> vectorIdxs(vectorsSize);
-  std::vector<Point> ps(pointsSize);
-  std::vector<size_t> pointIdxs(pointsSize);
+	IntegerVectors vs(vectorsSize);
+	std::vector<size_t> vectorIdxs(vectorsSize);
+	std::vector<Point> ps(pointsSize);
+	std::vector<size_t> pointIdxs(pointsSize);
 
-  for (size_t i = 0; i < vectorsSize; i++) {
-    IntegerVector v;
-    int x, y, z;
-    size_t idx;
-    is >> x >> y >> z >> idx;
-    vs[i] = IntegerVector(x, y, z);
-    vectorIdxs[i] = idx;
-  }
-  for (size_t i = 0; i < pointsSize; i++) {
-    Point p;
-    int x, y, z;
-    size_t idx;
-    is >> x >> y >> z >> idx;
-    ps[i] = Point(x, y, z);
-    pointIdxs[i] = idx;
-  }
+	for (size_t i = 0; i < vectorsSize; i++) {
+		IntegerVector v;
+		int x, y, z;
+		size_t idx;
+		is >> x >> y >> z >> idx;
+		vs[i] = IntegerVector(x, y, z);
+		vectorIdxs[i] = idx;
+	}
+	for (size_t i = 0; i < pointsSize; i++) {
+		Point p;
+		int x, y, z;
+		size_t idx;
+		is >> x >> y >> z >> idx;
+		ps[i] = Point(x, y, z);
+		pointIdxs[i] = idx;
+	}
 
-  visib.reset(mainAxis, vs, ps);
-  for (size_t i = 0; i < vectorsSize; i++) {
-    visib.vectorIdxs[vs[i]] = vectorIdxs[i];
-  }
-  for (size_t i = 0; i < pointsSize; i++) {
-    visib.pointIdxs[ps[i]] = pointIdxs[i];
-  }
+	visib.reset(mainAxis, vs, ps);
+	for (size_t i = 0; i < vectorsSize; i++) {
+		visib.vectorIdxs[vs[i]] = vectorIdxs[i];
+	}
+	for (size_t i = 0; i < pointsSize; i++) {
+		visib.pointIdxs[ps[i]] = pointIdxs[i];
+	}
 
-  visib.visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-  for (size_t i = 0; i < vectorsSize * pointsSize; i++) {
-    bool v;
-    is >> v;
-    visib.visibles[i] = v;
-  }
-  return is;
+	visib.visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+	for (size_t i = 0; i < vectorsSize * pointsSize; i++) {
+		bool v;
+		is >> v;
+		visib.visibles[i] = v;
+	}
+	return is;
 }
 
 void loadVisibility(const std::string &filename) {
-  std::ifstream file;
-  file.open(filename);
-  file >> visibility;
+	std::ifstream file;
+	file.open(filename);
+	file >> visibility;
 /*
-  // print first infos of each variable to test
-  for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
-    auto it = visibility.vectorIdxs.begin();
-    std::advance(it, i);
-    trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-                 << ") has idx " << it->second << std::endl;
-  }
-  for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
-    auto it = visibility.pointIdxs.begin();
-    std::advance(it, i);
-    trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-                 << ") has idx " << it->second << std::endl;
-  }
-  int start = 0;
-  while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
-  trace.info() << "First visible at index " << start << std::endl;
-  for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
-    trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
-  }
-  trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
-  */
-  file.close();
+	// print first infos of each variable to test
+	for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
+		auto it = visibility.vectorIdxs.begin();
+		std::advance(it, i);
+		trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+								 << ") has idx " << it->second << std::endl;
+	}
+	for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
+		auto it = visibility.pointIdxs.begin();
+		std::advance(it, i);
+		trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+								 << ") has idx " << it->second << std::endl;
+	}
+	int start = 0;
+	while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
+	trace.info() << "First visible at index " << start << std::endl;
+	for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
+		trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
+	}
+	trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
+	*/
+	file.close();
 }
 
 void computeVisibilityWithPointShow(std::size_t idx) {
-  auto segmentRadius = VisibilityRadius;
-  auto sphereRadius = VisibilityRadius;
-  if (visibility.empty()) computeVisibility(segmentRadius);
-  std::vector<Point> points;
-  auto kdTree = LinearKDTree<Point, 3>(pointels);
-  for (auto point_idx: kdTree.pointsInBall(pointels[idx], sphereRadius)) {
-    auto tmp = kdTree.position(point_idx);
-    if (visibility.isVisible(pointels[idx], tmp) && tmp != pointels[idx]) {
-      points.push_back(tmp);
-    }
-  }
-  std::vector<RealPoint> rpoints;
-  embedPointels(points, rpoints);
+	auto segmentRadius = VisibilityRadius;
+	auto sphereRadius = VisibilityRadius;
+	if (visibility.empty()) computeVisibility(segmentRadius);
+	std::vector<Point> points;
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (auto point_idx: kdTree.pointsInBall(pointels[idx], sphereRadius)) {
+		auto tmp = kdTree.position(point_idx);
+		if (visibility.isVisible(pointels[idx], tmp) && tmp != pointels[idx]) {
+			points.push_back(tmp);
+		}
+	}
+	std::vector<RealPoint> rpoints;
+	embedPointels(points, rpoints);
 
-  std::vector<RealPoint> rpointStart;
-  embedPointels({pointels[idx]}, rpointStart);
-  psVisibility = polyscope::registerPointCloud("Visibility", rpoints);
-  psVisibility->setPointRadius(0.25 * gridstep, false);
-  psVisibilityStart = polyscope::registerPointCloud("Start", rpointStart);
-  psVisibilityStart->setPointRadius(0.3 * gridstep, false);
+	std::vector<RealPoint> rpointStart;
+	embedPointels({pointels[idx]}, rpointStart);
+	psVisibility = polyscope::registerPointCloud("Visibility", rpoints);
+	psVisibility->setPointRadius(0.25 * gridstep, false);
+	psVisibilityStart = polyscope::registerPointCloud("Start", rpointStart);
+	psVisibilityStart->setPointRadius(0.3 * gridstep, false);
 }
 
 void checkParallelism() {
-  // Check parallelism
-  std::array<int, 512> counter{};
-  std::array<int, 512> cnt_max{};
-  counter.fill(0);
-  cnt_max.fill(0);
+	// Check parallelism
+	std::array<int, 512> counter{};
+	std::array<int, 512> cnt_max{};
+	counter.fill(0);
+	cnt_max.fill(0);
 #pragma omp parallel
-  {
-    auto n = omp_get_thread_num();
-    auto m = omp_get_num_threads();
-    counter[n] = n;
-    cnt_max[n] = m;
-  }
-  bool ok = true;
-  for (auto n = 0; n < cnt_max[0]; n++)
-    if (counter[n] != n || cnt_max[n] != cnt_max[0])
-      ok = false;
-  trace.info() << "OMP parallelism " << (ok ? "(  OK  )" : "(ERROR)")
-               << " #threads=" << cnt_max[0] << std::endl;
-  OMP_max_nb_threads = cnt_max[0];
+	{
+		auto n = omp_get_thread_num();
+		auto m = omp_get_num_threads();
+		counter[n] = n;
+		cnt_max[n] = m;
+	}
+	bool ok = true;
+	for (auto n = 0; n < cnt_max[0]; n++)
+		if (counter[n] != n || cnt_max[n] != cnt_max[0])
+			ok = false;
+	trace.info() << "OMP parallelism " << (ok ? "(	OK	)" : "(ERROR)")
+	             << " #threads=" << cnt_max[0] << std::endl;
+	OMP_max_nb_threads = cnt_max[0];
 }
 
 std::vector<size_t> pickSet(size_t N, size_t k, std::mt19937 &gen) {
-  std::uniform_int_distribution<size_t> dis(1, N);
-  std::vector<size_t> elems;
+	std::uniform_int_distribution<size_t> dis(1, N);
+	std::vector<size_t> elems;
 
-  while (elems.size() < k) {
-    elems.push_back(dis(gen));
-  }
+	while (elems.size() < k) {
+		elems.push_back(dis(gen));
+	}
 
-  return elems;
+	return elems;
 }
 
 void computeMeanDistanceVisibility() {
-  // Print the gridstep
-  std::cout << "Gridstep = " << gridstep << std::endl;
+	// Print the gridstep
+	std::cout << "Gridstep = " << gridstep << std::endl;
 
-  // Print measure radius
-  std::cout << "Visibility radius = " << VisibilityRadius << std::endl;
+	// Print measure radius
+	std::cout << "Visibility radius = " << VisibilityRadius << std::endl;
 
-  // Print the mean distance between any two visible points
-  double meanDistance = 0;
-  int nbVisiblePairs = 0;
+	// Print the mean distance between any two visible points
+	double meanDistance = 0;
+	int nbVisiblePairs = 0;
 
-  // pick 100 random pointels
+	// pick 100 random pointels
 
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::mt19937 gen(seed);
-  auto pointelsSample = pickSet(pointels.size(), pointels.size(), gen);
-  auto kdTree = LinearKDTree<Point, 3>(pointels);
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::mt19937 gen(seed);
+	auto pointelsSample = pickSet(pointels.size(), pointels.size(), gen);
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
 
-  for (auto i: pointelsSample) {
-    for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
-      auto tmp = kdTree.position(point_idx);
-      if (isPointLowerThan(pointels[i], tmp) && visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
-        meanDistance += (tmp - pointels[i]).norm();
-        nbVisiblePairs++;
-      }
-    }
-  }
-  std::cout << "Mean distance between visible points = " << meanDistance / nbVisiblePairs << std::endl;
+	for (auto i: pointelsSample) {
+		for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
+			auto tmp = kdTree.position(point_idx);
+			if (isPointLowerThan(pointels[i], tmp) && visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
+				meanDistance += (tmp - pointels[i]).norm();
+				nbVisiblePairs++;
+			}
+		}
+	}
+	std::cout << "Mean distance between visible points = " << meanDistance / nbVisiblePairs << std::endl;
 }
 
 void computeVisibilityDirectionToSharpFeatures() {
-  visibility_sharps.resize(pointels.size());
-  auto kdTree = LinearKDTree<Point, 3>(pointels);
-  for (int i = 0; i < pointels.size(); ++i) {
-    RealVector tmpSum(0, 0, 0);
-    size_t count = 0;
-    for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
-      auto tmp = kdTree.position(point_idx);
-      if (visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
-        tmpSum += tmp - pointels[i];
-        count++;
-      }
-    }
-    visibility_sharps[i] = -tmpSum / count;
-  }
-  if (!noInterface) {
-    psPrimalMesh->addVertexVectorQuantity("Pointel visibility sharp direction", visibility_sharps);
-  }
+	visibility_sharps.resize(pointels.size());
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (int i = 0; i < pointels.size(); ++i) {
+		RealVector tmpSum(0, 0, 0);
+		size_t count = 0;
+		for (auto point_idx: kdTree.pointsInBall(pointels[i], VisibilityRadius)) {
+			auto tmp = kdTree.position(point_idx);
+			if (visibility.isVisible(pointels[i], tmp) && tmp != pointels[i]) {
+				tmpSum += tmp - pointels[i];
+				count++;
+			}
+		}
+		visibility_sharps[i] = -tmpSum / count;
+	}
+	if (!noInterface) {
+		psPrimalMesh->addVertexVectorQuantity("Pointel visibility sharp direction", visibility_sharps);
+	}
 }
 
 double sigma = -1;
 double minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
-  return exp(d2 / minus2SigmaSquare);
+	return exp(d2 / minus2SigmaSquare);
 }
 
 void computeVisibilityNormals() {
-  visibility_normals.clear();
-  visibility_normals.reserve(pointels.size());
-  auto kdTree = LinearKDTree<Point, 3>(pointels);
-  for (const auto &pointel: pointels) {
-    std::vector<Point> visibles;
-    RealPoint centroid(0, 0, 0);
-    double total_w = 0.0;
-    for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
-      auto tmp = kdTree.position(point_idx);
-      if (visibility.isVisible(pointel, tmp)) { //  && tmp != pointel) {
-        visibles.push_back(tmp);
-//        centroid += tmp;
-        const double w = wSig((pointel - tmp).squaredNorm());
-        centroid += w * tmp;
-        total_w += w;
-      }
-    }
-    centroid /= total_w; // (double) visibles.size();
-    Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
-    for (const auto &pt: visibles) {
-      auto diff = pt - centroid;
-      for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-//          cov(i, j) += diff[i] * diff[j];
-          cov(i, j) += diff[i] * diff[j] * wSig((pt - pointel).squaredNorm());
-        }
-      }
-    }
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov / (double) visibles.size());
-    auto normalE = solver.eigenvectors().col(0);
-    visibility_normals.emplace_back(normalE.x(), normalE.y(), normalE.z());
-  }
-  if (!noInterface) {
-    psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
-  }
+	visibility_normals.clear();
+	visibility_normals.reserve(pointels.size());
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (const auto &pointel: pointels) {
+		std::vector<Point> visibles;
+		RealPoint centroid(0, 0, 0);
+		double total_w = 0.0;
+		for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
+			auto tmp = kdTree.position(point_idx);
+			if (visibility.isVisible(pointel, tmp)) { //	&& tmp != pointel) {
+				visibles.push_back(tmp);
+//				centroid += tmp;
+				const double w = wSig((pointel - tmp).squaredNorm());
+				centroid += w * tmp;
+				total_w += w;
+			}
+		}
+		centroid /= total_w; // (double) visibles.size();
+		Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
+		for (const auto &pt: visibles) {
+			auto diff = pt - centroid;
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+//					cov(i, j) += diff[i] * diff[j];
+					cov(i, j) += diff[i] * diff[j] * wSig((pt - pointel).squaredNorm());
+				}
+			}
+		}
+		Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov / (double) visibles.size());
+		auto normalE = solver.eigenvectors().col(0);
+		visibility_normals.emplace_back(normalE.x(), normalE.y(), normalE.z());
+	}
+	if (!noInterface) {
+		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
+	}
 }
 
 RealVector getTrivNormal(size_t idx) {
-  return primal_surface->vertexNormal(idx);
+	return primal_surface->vertexNormal(idx);
 }
 
 void reorientVisibilityNormals() {
-  if (visibility_normals.empty()) {
-    computeVisibilityNormals();
-  }
-//  if (visibility_sharps.empty()) {
-//    computeVisibilityDirectionToSharpFeatures();
-//  }
-  for (int i = 0; i < visibility_normals.size(); ++i) {
-    const auto triv_normal = getTrivNormal(i);
-    if (visibility_normals[i].dot(triv_normal) < 0)
-      visibility_normals[i] = -visibility_normals[i];
-  }
-  if (!noInterface) {
-    psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
-    psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
-    psPrimalMesh->addFaceVectorQuantity("Face trivial normal", primal_surface->faceNormals());
-  }
+	if (visibility_normals.empty()) {
+		computeVisibilityNormals();
+	}
+//	if (visibility_sharps.empty()) {
+//		computeVisibilityDirectionToSharpFeatures();
+//	}
+	for (int i = 0; i < visibility_normals.size(); ++i) {
+		const auto triv_normal = getTrivNormal(i);
+		if (visibility_normals[i].dot(triv_normal) < 0)
+			visibility_normals[i] = -visibility_normals[i];
+	}
+	if (!noInterface) {
+		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
+		psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
+		psPrimalMesh->addFaceVectorQuantity("Face trivial normal", primal_surface->faceNormals());
+	}
 }
 
 void computeCurvatures() {
-  primal_surface->setVertexNormals(visibility_normals.cbegin(), visibility_normals.cend());
-  primal_surface->computeFaceNormalsFromVertexNormals();
+	primal_surface->setVertexNormals(visibility_normals.cbegin(), visibility_normals.cend());
+	primal_surface->computeFaceNormalsFromVertexNormals();
 
-  mu0 = pCNC->computeMu0();
-  mu1 = pCNC->computeMu1();
-  mu2 = pCNC->computeMu2();
-  muXY = pCNC->computeMuXY();
+	mu0 = pCNC->computeMu0();
+	mu1 = pCNC->computeMu1();
+	mu2 = pCNC->computeMu2();
+	muXY = pCNC->computeMuXY();
 
-  H.resize(primal_surface->nbFaces());
-  G.resize(primal_surface->nbFaces());
-  K1.resize(primal_surface->nbFaces());
-  K2.resize(primal_surface->nbFaces());
-  D1.resize(primal_surface->nbFaces());
-  D2.resize(primal_surface->nbFaces());
-  // estimates mean (H) and Gaussian (G) curvatures by measure normalization.
-  for (auto f = 0; f < primal_surface->nbFaces(); ++f) {
-    const auto b = primal_surface->faceCentroid(f);
-    const auto wfaces = primal_surface->computeFacesInclusionsInBall(VisibilityRadius, f, b);
-    const auto area = mu0.faceMeasure(wfaces);
-    H[f] = pCNC->meanCurvature(area, mu1.faceMeasure(wfaces));
-    G[f] = pCNC->GaussianCurvature(area, mu2.faceMeasure(wfaces));
-    const auto N = primal_surface->faceNormals()[f];
-    const auto M = muXY.faceMeasure(wfaces);
-    std::tie(K1[f], K2[f], D1[f], D2[f])
-        = pCNC->principalCurvatures(area, M, N);
-  }
+	H.resize(primal_surface->nbFaces());
+	G.resize(primal_surface->nbFaces());
+	K1.resize(primal_surface->nbFaces());
+	K2.resize(primal_surface->nbFaces());
+	D1.resize(primal_surface->nbFaces());
+	D2.resize(primal_surface->nbFaces());
+	// estimates mean (H) and Gaussian (G) curvatures by measure normalization.
+	for (auto f = 0; f < primal_surface->nbFaces(); ++f) {
+		const auto b = primal_surface->faceCentroid(f);
+		const auto wfaces = primal_surface->computeFacesInclusionsInBall(VisibilityRadius, f, b);
+		const auto area = mu0.faceMeasure(wfaces);
+		H[f] = pCNC->meanCurvature(area, mu1.faceMeasure(wfaces));
+		G[f] = pCNC->GaussianCurvature(area, mu2.faceMeasure(wfaces));
+		const auto N = primal_surface->faceNormals()[f];
+		const auto M = muXY.faceMeasure(wfaces);
+		std::tie(K1[f], K2[f], D1[f], D2[f])
+			= pCNC->principalCurvatures(area, M, N);
+	}
 }
 
 void doRedisplayCurvatures() {
-  psPrimalMesh->addFaceScalarQuantity("H (mean curvature)", H)
-      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
-  psPrimalMesh->addFaceScalarQuantity("G (Gaussian curvature)", G)
-      ->setMapRange({-0.5 * MaxCurv * MaxCurv, 0.5 * MaxCurv * MaxCurv})->setColorMap("coolwarm");
-  psPrimalMesh->addFaceScalarQuantity("K1 (1st princ. curvature)", K1)
-      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
-  psPrimalMesh->addFaceScalarQuantity("K2 (2nd princ. curvature)", K2)
-      ->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
-  psPrimalMesh->addFaceVectorQuantity("D1 (1st princ. direction)", D1);
-  psPrimalMesh->addFaceVectorQuantity("D2 (2nd princ. direction)", D2);
+	psPrimalMesh->addFaceScalarQuantity("H (mean curvature)", H)
+		->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+	psPrimalMesh->addFaceScalarQuantity("G (Gaussian curvature)", G)
+		->setMapRange({-0.5 * MaxCurv * MaxCurv, 0.5 * MaxCurv * MaxCurv})->setColorMap("coolwarm");
+	psPrimalMesh->addFaceScalarQuantity("K1 (1st princ. curvature)", K1)
+		->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+	psPrimalMesh->addFaceScalarQuantity("K2 (2nd princ. curvature)", K2)
+		->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+	psPrimalMesh->addFaceVectorQuantity("D1 (1st princ. direction)", D1);
+	psPrimalMesh->addFaceVectorQuantity("D2 (2nd princ. direction)", D2);
 }
 
 void doRedisplayNormalAsColors() {
-  normalVisibilityColors.clear();
-  normalIIColors.clear();
-  normalVisibilityColors.reserve(visibility_normals.size());
-  normalIIColors.reserve(visibility_normals.size());
-  for (const auto &n: visibility_normals) {
-    normalVisibilityColors.push_back(0.5f * (n + 1.0f));
-  }
-  for (const auto &n: ii_normals) {
-    normalIIColors.push_back(0.5f * (n + 1.0f));
-  }
+	normalVisibilityColors.clear();
+	normalIIColors.clear();
+	normalVisibilityColors.reserve(visibility_normals.size());
+	normalIIColors.reserve(visibility_normals.size());
+	for (const auto &n: visibility_normals) {
+		normalVisibilityColors.push_back(0.5f * (n + 1.0f));
+	}
+	for (const auto &n: ii_normals) {
+		normalIIColors.push_back(0.5f * (n + 1.0f));
+	}
 
-  psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
-  psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
+	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
+	psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
 }
 
 void computeL2looErrors() {
-//  std::cout << "Computing L2 and Loo errors" << std::endl;
-  std::vector<double> angle_dev(visibility_normals.size());
-  std::vector<double> dummy(visibility_normals.size(), 0.0);
-  for (int i = 0; i < visibility_normals.size(); ++i) {
-    const auto sp = visibility_normals[i].dot(true_normals[i]);
-    const auto fxp = std::min(1.0, std::max(-1.0, sp));
-    angle_dev[i] = acos(fxp);
-  }
-  if (!noInterface)
-    psPrimalMesh->addVertexScalarQuantity("Angle deviation", angle_dev)->setMapRange({0.0, 0.1})->setColorMap("reds");
-  std::cout << "L2 error: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-  std::cout << "Loo error: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+//	std::cout << "Computing L2 and Loo errors" << std::endl;
+	std::vector<double> angle_dev(visibility_normals.size());
+	std::vector<double> dummy(visibility_normals.size(), 0.0);
+	for (int i = 0; i < visibility_normals.size(); ++i) {
+		const auto sp = visibility_normals[i].dot(true_normals[i]);
+		const auto fxp = std::min(1.0, std::max(-1.0, sp));
+		angle_dev[i] = acos(fxp);
+	}
+	if (!noInterface)
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
+			"reds");
+	std::cout << "L2 error: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
 
 #ifdef USE_CUDA_VISIBILITY
 
 void computeVisibilityCuda(int radius) {
-  std::cout << "Computing visibility CUDA" << std::endl;
-  visibility = Visibility(computeVisibilityGpu(radius, digital_dimensions, pointels));
-  std::cout << "Visibility computed" << std::endl;
+	std::cout << "Computing visibility CUDA" << std::endl;
+	visibility = Visibility(computeVisibilityGpu(radius, digital_dimensions, pointels));
+	std::cout << "Visibility computed" << std::endl;
 }
 
 void computeVisibilityCudaCPU(int radius) {
-  std::cout << "Computing visibility CUDA" << std::endl;
-  visibility = Visibility(computeVisibilityGpuCPU(radius, digital_dimensions, pointels));
-  std::cout << "Visibility computed" << std::endl;
+	std::cout << "Computing visibility CUDA" << std::endl;
+	visibility = Visibility(computeVisibilityGpuCPU(radius, digital_dimensions, pointels));
+	std::cout << "Visibility computed" << std::endl;
 }
 
 #endif
 
 void myCallback() {
-  char *inputVisibilityFilename = new char[256]("visibility.vis");
-  std::string visibilityFilename;
-  // Select a vertex with the mouse
-  if (polyscope::haveSelection()) {
-    auto selection = polyscope::getSelection();
-    auto selectedSurface = static_cast<polyscope::SurfaceMesh *>(selection.structure);
-    auto idx = selection.localIndex;
+	char *inputVisibilityFilename = new char[256]("visibility.vis");
+	std::string visibilityFilename;
+	// Select a vertex with the mouse
+	if (polyscope::haveSelection()) {
+		auto selection = polyscope::getSelection();
+		auto selectedSurface = static_cast<polyscope::SurfaceMesh *>(selection.structure);
+		auto idx = selection.localIndex;
 
-    // Only authorize selection on the input surface and the reconstruction
-    auto surf = polyscope::getSurfaceMesh("Primal surface");
-    const auto nv = selectedSurface->nVertices();
-    // Validate that it its a face index
-    if (selectedSurface == surf && idx < nv) {
-      pointel_idx = idx;
-      selected_point = pointels[pointel_idx];
-      std::ostringstream otext;
-      otext << "Selected pointel = " << pointel_idx
-            << " pos=" << selected_point;
-      ImGui::Text("%s", otext.str().c_str());
-    }
-  }
-  ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
-  if (ImGui::Button("Visibility")) {
-    computeVisibilityWithPointShow(pointel_idx);
-  }
-  if (ImGui::Button("Visibilities")) {
-    trace.beginBlock("Compute visibilities");
-    computeVisibility(VisibilityRadius);
-    Time = trace.endBlock();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Visibilities OMP")) {
-    trace.beginBlock("Compute visibilities OMP");
-    computeVisibilityOmp(VisibilityRadius);
-    Time = trace.endBlock();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Visibilities OMP GPU")) {
-    trace.beginBlock("Compute visibilities OMP GPU");
-    computeVisibilityOmpGPU(VisibilityRadius);
-    Time = trace.endBlock();
-  }
-  if (ImGui::Button("Measure Mean Distance Visibility")) {
-    computeMeanDistanceVisibility();
-  }
-  if (ImGui::Button("Check OMP"))
-    checkParallelism();
-  if (ImGui::Button("Compute direction to sharp features")) {
-    trace.beginBlock("Compute visibilities Direction To Sharp Features");
-    computeVisibilityDirectionToSharpFeatures();
-    Time = trace.endBlock();
-  }
-  if (ImGui::Button("Compute Normals")) {
-    trace.beginBlock("Compute visibilities Normals");
-    computeVisibilityNormals();
-    reorientVisibilityNormals();
-    Time = trace.endBlock();
-    doRedisplayNormalAsColors();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Compute normal errors")) {
-    trace.beginBlock("Compute visibilities Normals Errors");
-    computeL2looErrors();
-    Time = trace.endBlock();
-  }
-  if (ImGui::Button("Compute Curvatures")) {
-    trace.beginBlock("Compute visibilities Curvatures");
-    computeCurvatures();
-    Time = trace.endBlock();
-    doRedisplayCurvatures();
-  }
+		// Only authorize selection on the input surface and the reconstruction
+		auto surf = polyscope::getSurfaceMesh("Primal surface");
+		const auto nv = selectedSurface->nVertices();
+		// Validate that it its a face index
+		if (selectedSurface == surf && idx < nv) {
+			pointel_idx = idx;
+			selected_point = pointels[pointel_idx];
+			std::ostringstream otext;
+			otext << "Selected pointel = " << pointel_idx
+			      << " pos=" << selected_point;
+			ImGui::Text("%s", otext.str().c_str());
+		}
+	}
+	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
+	if (ImGui::Button("Visibility")) {
+		computeVisibilityWithPointShow(pointel_idx);
+	}
+	if (ImGui::Button("Visibilities")) {
+		trace.beginBlock("Compute visibilities");
+		computeVisibility(VisibilityRadius);
+		Time = trace.endBlock();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Visibilities OMP")) {
+		trace.beginBlock("Compute visibilities OMP");
+		computeVisibilityOmp(VisibilityRadius);
+		Time = trace.endBlock();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Visibilities OMP GPU")) {
+		trace.beginBlock("Compute visibilities OMP GPU");
+		computeVisibilityOmpGPU(VisibilityRadius);
+		Time = trace.endBlock();
+	}
+	if (ImGui::Button("Measure Mean Distance Visibility")) {
+		computeMeanDistanceVisibility();
+	}
+	if (ImGui::Button("Check OMP"))
+		checkParallelism();
+	if (ImGui::Button("Compute direction to sharp features")) {
+		trace.beginBlock("Compute visibilities Direction To Sharp Features");
+		computeVisibilityDirectionToSharpFeatures();
+		Time = trace.endBlock();
+	}
+	if (ImGui::Button("Compute Normals")) {
+		trace.beginBlock("Compute visibilities Normals");
+		computeVisibilityNormals();
+		reorientVisibilityNormals();
+		Time = trace.endBlock();
+		doRedisplayNormalAsColors();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Compute normal errors")) {
+		trace.beginBlock("Compute visibilities Normals Errors");
+		computeL2looErrors();
+		Time = trace.endBlock();
+	}
+	if (ImGui::Button("Compute Curvatures")) {
+		trace.beginBlock("Compute visibilities Curvatures");
+		computeCurvatures();
+		Time = trace.endBlock();
+		doRedisplayCurvatures();
+	}
 #ifdef USE_CUDA_VISIBILITY
-  if (ImGui::Button("Compute CUDA visibilities")) {
-    trace.beginBlock("Compute visibilities CUDA");
-    computeVisibilityCuda(VisibilityRadius);
-    Time = trace.endBlock();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Compute CUDA CPU vers. visibilities")) {
-    trace.beginBlock("Compute visibilities CUDA CPU Vers.");
-    computeVisibilityCudaCPU(VisibilityRadius);
-    Time = trace.endBlock();
-  }
+	if (ImGui::Button("Compute CUDA visibilities")) {
+		trace.beginBlock("Compute visibilities CUDA");
+		computeVisibilityCuda(VisibilityRadius);
+		Time = trace.endBlock();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Compute CUDA CPU vers. visibilities")) {
+		trace.beginBlock("Compute visibilities CUDA CPU Vers.");
+		computeVisibilityCudaCPU(VisibilityRadius);
+		Time = trace.endBlock();
+	}
 #endif
-  ImGui::InputText("Visibility file", inputVisibilityFilename, 256);
-  if (ImGui::Button("Save Visibility")) {
-    visibilityFilename = std::string(inputVisibilityFilename);
-    saveVisibility(visibilityFilename);
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Load Visibility")) {
-    visibilityFilename = std::string(inputVisibilityFilename);
-    loadVisibility(visibilityFilename);
-  }
-  ImGui::SameLine();
-  ImGui::Text("nb threads = %d", OMP_max_nb_threads);
+	ImGui::InputText("Visibility file", inputVisibilityFilename, 256);
+	if (ImGui::Button("Save Visibility")) {
+		visibilityFilename = std::string(inputVisibilityFilename);
+		saveVisibility(visibilityFilename);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Visibility")) {
+		visibilityFilename = std::string(inputVisibilityFilename);
+		loadVisibility(visibilityFilename);
+	}
+	ImGui::SameLine();
+	ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 }
 
 void testIntersection() {
-  // 1|2 4|5 7|9
-  for (auto v: intersect(Intervals({Interval(0, 9)}), Intervals({Interval(1, 2), Interval(4, 5), Interval(7, 10)}))) {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
+	// 1|2 4|5 7|9
+	for (auto v: intersect(Intervals({Interval(0, 9)}), Intervals({Interval(1, 2), Interval(4, 5), Interval(7, 10)}))) {
+		std::cout << v << " ";
+	}
+	std::cout << std::endl;
 
-  // 2|3 5|6 8|10
-  for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10)}), Intervals({Interval(2, 6), Interval(8, 12)}))) {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
+	// 2|3 5|6 8|10
+	for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10)}),
+	                       Intervals({Interval(2, 6), Interval(8, 12)}))) {
+		std::cout << v << " ";
+	}
+	std::cout << std::endl;
 
-  // 1|3 6|7 9|10 12|12 14|15
-  for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10), Interval(12, 15)}),
-                         Intervals({Interval(1, 3), Interval(6, 7), Interval(9, 12), Interval(14, 15)}))) {
-    std::cout << v << " ";
-  }
-  std::cout << std::endl;
+	// 1|3 6|7 9|10 12|12 14|15
+	for (auto v: intersect(Intervals({Interval(0, 3), Interval(5, 10), Interval(12, 15)}),
+	                       Intervals({Interval(1, 3), Interval(6, 7), Interval(9, 12), Interval(14, 15)}))) {
+		std::cout << v << " ";
+	}
+	std::cout << std::endl;
 }
 
 void TMP(std::string filename) {
-  auto params = SH3::defaultParameters()
-                | SHG3::defaultParameters()
-                | SHG3::parametersGeometryEstimation();
-  const double h = 0.25;
-  CountedPtr<SH3::BinaryImage> binary_image;
-  SH3::KSpace K;
-//  if (filename == "") {
-//    params("polynomial", "goursat")("gridstep", h);
-//    auto implicit_shape = SH3::makeImplicitShape3D(params);
-//    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-//    binary_image = SH3::makeBinaryImage(digitized_shape, params);
-//    K = SH3::getKSpace(params);
-//  } else {
-  int thresholdMin = 0;
-  int thresholdMax = 255;
-  params("thresholdMin", thresholdMin);
-  params("thresholdMax", thresholdMax);
+	auto params = SH3::defaultParameters()
+	              | SHG3::defaultParameters()
+	              | SHG3::parametersGeometryEstimation();
+	const double h = 0.25;
+	CountedPtr<SH3::BinaryImage> binary_image;
+	SH3::KSpace K;
+//	if (filename == "") {
+//		params("polynomial", "goursat")("gridstep", h);
+//		auto implicit_shape = SH3::makeImplicitShape3D(params);
+//		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+//		binary_image = SH3::makeBinaryImage(digitized_shape, params);
+//		K = SH3::getKSpace(params);
+//	} else {
+	int thresholdMin = 0;
+	int thresholdMax = 255;
+	params("thresholdMin", thresholdMin);
+	params("thresholdMax", thresholdMax);
 
-  binary_image = SH3::makeBinaryImage(filename, params);
+	binary_image = SH3::makeBinaryImage(filename, params);
 
-  K = SH3::getKSpace(binary_image, params);
-//  }
-  auto embedder = SH3::getCellEmbedder(K);
-  auto surface = SH3::makeLightDigitalSurface(binary_image, K, params);
-  SH3::Cell2Index c2i;
-  auto pointels = SH3::getPointelRange(c2i, surface);
-  auto primal_surface = SH3::makePrimalSurfaceMesh(surface);
-  SH3::RealPoints pos(pointels.size());
-  std::transform(pointels.cbegin(), pointels.cend(), pos.begin(),
-                 [&](const SH3::Cell &c) { return h * embedder(c); });
-//  auto ppos     = SHG3::getPositions( implicit_shape, pos, params );
-  // init primal_faces
-  std::vector<std::vector<std::size_t>> primal_faces;
-  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
-    primal_faces.push_back(primal_surface->incidentVertices(face));
+	K = SH3::getKSpace(binary_image, params);
+//	}
+	auto embedder = SH3::getCellEmbedder(K);
+	auto surface = SH3::makeLightDigitalSurface(binary_image, K, params);
+	SH3::Cell2Index c2i;
+	auto pointels = SH3::getPointelRange(c2i, surface);
+	auto primal_surface = SH3::makePrimalSurfaceMesh(surface);
+	SH3::RealPoints pos(pointels.size());
+	std::transform(pointels.cbegin(), pointels.cend(), pos.begin(),
+	               [&](const SH3::Cell &c) { return h * embedder(c); });
+//	auto ppos		 = SHG3::getPositions( implicit_shape, pos, params );
+	// init primal_faces
+	std::vector<std::vector<std::size_t>> primal_faces;
+	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+		primal_faces.push_back(primal_surface->incidentVertices(face));
 
-  polyscope::init();
-  psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
-                                                pos,
-                                                primal_faces);
-  psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
-  psPrimalMesh->setEdgeWidth(1.5);
-  polyscope::show();
+	polyscope::init();
+	psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
+	                                              pos,
+	                                              primal_faces);
+	psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
+	psPrimalMesh->setEdgeWidth(1.5);
+	polyscope::show();
 }
 
 int gpuRun(int argc, char *argv[]) {
-  noInterface = false;
+	noInterface = false;
 
-  // command line inteface options
-  CLI::App app{"A tool to check visibility using lattices."};
-  std::string filename = "../volumes/bunny34.vol";
-  int thresholdMin = 0;
-  int thresholdMax = 255;
-  std::string polynomial;
-  int minAABB = -10;
-  int maxAABB = 10;
-  bool listP = false;
-  bool computeCurvaturesFlag = false;
-  bool computeNormalsFlag = false;
-  double sigmaTmp = -1.0;
-  std::string saveVisibilityFilename;
-  std::string visibComputeMethod = "OMP_GPU";
-  app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
-  // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
-  app.add_option("-p,--polynomial", polynomial,
-                 "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
-  app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
-  app.add_option("-m,--thresholdMin", thresholdMin,
-                 "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
-  app.add_option("-M,--thresholdMax", thresholdMax,
-                 "the maximal threshold M (included) for a voxel to belong to the digital shape.");
-  app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
-  app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
-  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
-  app.add_flag("-l", listP, "lists the known named polynomials.");
-  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
-  app.add_flag("--gpuRun", noInterface, "only work as the job asked for gpuRun function");
+	// command line inteface options
+	CLI::App app{"A tool to check visibility using lattices."};
+	std::string filename = "../volumes/bunny34.vol";
+	int thresholdMin = 0;
+	int thresholdMax = 255;
+	std::string polynomial;
+	int minAABB = -10;
+	int maxAABB = 10;
+	bool listP = false;
+	bool computeCurvaturesFlag = false;
+	bool computeNormalsFlag = false;
+	double sigmaTmp = -1.0;
+	std::string saveVisibilityFilename;
+	std::string visibComputeMethod = "OMP_GPU";
+	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
+	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
+	app.add_option("-p,--polynomial", polynomial,
+	               "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
+	app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
+	app.add_option("-m,--thresholdMin", thresholdMin,
+	               "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
+	app.add_option("-M,--thresholdMax", thresholdMax,
+	               "the maximal threshold M (included) for a voxel to belong to the digital shape.");
+	app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
+	app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
+	app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+	app.add_flag("-l", listP, "lists the known named polynomials.");
+	app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
+	app.add_flag("--gpuRun", noInterface, "only work as the job asked for gpuRun function");
 
-  app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
-  app.add_flag("--computeCurvatures", computeCurvaturesFlag, "compute curvatures after visibility normals computation");
-  app.add_option("--save", saveVisibilityFilename, "a filename to save the computed visibility");
-  app.add_option("--visibComputeMethod", visibComputeMethod,
-                 "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
+	app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
+	app.add_flag("--computeCurvatures", computeCurvaturesFlag,
+	             "compute curvatures after visibility normals computation");
+	app.add_option("--save", saveVisibilityFilename, "a filename to save the computed visibility");
+	app.add_option("--visibComputeMethod", visibComputeMethod,
+	               "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 
-  CLI11_PARSE(app, argc, argv)
-  if (listP) {
-    listPolynomials();
-    return 0;
-  }
+	CLI11_PARSE(app, argc, argv)
+	if (listP) {
+		listPolynomials();
+		return 0;
+	}
 
-  if (computeCurvaturesFlag && !computeNormalsFlag) {
-    std::cerr << "Error: to compute curvatures, normals must be computed first." << std::endl;
-    return 1;
-  }
+	if (computeCurvaturesFlag && !computeNormalsFlag) {
+		std::cerr << "Error: to compute curvatures, normals must be computed first." << std::endl;
+		return 1;
+	}
 
-  auto params = SH3::defaultParameters()
-                | SHG3::defaultParameters()
-                | SHG3::parametersGeometryEstimation();
-  params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
-  params("surfaceTraversal", "default");
-  bool is_polynomial = !polynomial.empty();
-  if (is_polynomial) {
-    trace.beginBlock("Build polynomial surface");
-    params("polynomial", polynomial);
-    params("gridstep", gridstep);
-    params("minAABB", minAABB);
-    params("maxAABB", maxAABB);
-    params("offset", 1.0);
-    params("closed", 1);
-    implicit_shape = SH3::makeImplicitShape3D(params);
-    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-    K = SH3::getKSpace(params);
-    binary_image = SH3::makeBinaryImage(digitized_shape,
-                                        SH3::Domain(K.lowerBound(),
-                                                    K.upperBound()),
-                                        params);
-    trace.endBlock();
-  } else {
-    trace.beginBlock("Reading image vol file");
-    params("thresholdMin", thresholdMin);
-    params("thresholdMax", thresholdMax);
-    binary_image = SH3::makeBinaryImage(filename, params);
-    K = SH3::getKSpace(binary_image, params);
-    trace.endBlock();
-  }
+	auto params = SH3::defaultParameters()
+	              | SHG3::defaultParameters()
+	              | SHG3::parametersGeometryEstimation();
+	params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
+	params("surfaceTraversal", "default");
+	bool is_polynomial = !polynomial.empty();
+	if (is_polynomial) {
+		trace.beginBlock("Build polynomial surface");
+		params("polynomial", polynomial);
+		params("gridstep", gridstep);
+		params("minAABB", minAABB);
+		params("maxAABB", maxAABB);
+		params("offset", 1.0);
+		params("closed", 1);
+		implicit_shape = SH3::makeImplicitShape3D(params);
+		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+		K = SH3::getKSpace(params);
+		binary_image = SH3::makeBinaryImage(digitized_shape,
+		                                    SH3::Domain(K.lowerBound(),
+		                                                K.upperBound()),
+		                                    params);
+		trace.endBlock();
+	} else {
+		trace.beginBlock("Reading image vol file");
+		params("thresholdMin", thresholdMin);
+		params("thresholdMax", thresholdMax);
+		binary_image = SH3::makeBinaryImage(filename, params);
+		K = SH3::getKSpace(binary_image, params);
+		trace.endBlock();
+	}
 
-  std::vector<std::vector<std::size_t>> primal_faces;
-  std::vector<RealPoint> primal_positions;
-
-
-  trace.beginBlock("Computing digital points and primal surface");
-  // Build digital surface
-  digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
-  primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
-  surfels = SH3::getSurfelRange(digital_surface, params);
-  // Need to convert the faces
-  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
-    primal_faces.push_back(primal_surface->incidentVertices(face));
-  // Embed with gridstep.
-  for (auto v = 0; v < primal_surface->nbVertices(); v++)
-    primal_surface->position(v) *= gridstep;
-  primal_positions = primal_surface->positions();
-  digitizePointels(primal_positions, pointels);
-  digital_dimensions = getFigSizes();
-  trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
-  trace.endBlock();
-
-  if (computeNormalsFlag) {
-    // Initialize normals with trivial normals
-    trace.beginBlock("Compute trivial normals");
-    auto pTC = new TangencyComputer<KSpace>(K);
-    pTC->init(pointels.cbegin(), pointels.cend(), true);
-    int t_ring = int(round(params["t-ring"].as<double>()));
-    auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
-    primal_surface->faceNormals() = surfel_trivial_normals;
-    for (auto i = 1; i < t_ring + 3; i++) {
-      primal_surface->computeVertexNormalsFromFaceNormals();
-      primal_surface->computeFaceNormalsFromVertexNormals();
-      surfel_trivial_normals = primal_surface->faceNormals();
-    }
-    trivial_normals = primal_surface->vertexNormals();
-    trivial_normals.resize(pointels.size());
-    for (auto &n: trivial_normals) n = RealVector::zero;
-    for (auto k = 0; k < surfels.size(); k++) {
-      const auto &surf = surfels[k];
-      const auto cells0 = SH3::getPrimalVertices(K, surf);
-      for (const auto &c0: cells0) {
-        const auto p = K.uCoords(c0);
-        const auto idx = pTC->index(p);
-        trivial_normals[idx] += surfel_trivial_normals[k];
-      }
-    }
-    for (auto &n: trivial_normals) n /= n.norm();
-    primal_surface->vertexNormals() = trivial_normals;
-    trace.endBlock();
-
-    if (computeCurvaturesFlag) {
-      trace.beginBlock("Initialize CNC for curvature computation");
-      pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
-      trace.endBlock();
-    }
-  }
+	std::vector<std::vector<std::size_t>> primal_faces;
+	std::vector<RealPoint> primal_positions;
 
 
-  if (sigmaTmp != -1.0) {
-    sigma = sigmaTmp;
-  } else {
-    sigma = 5 * pow(gridstep, -0.5);
-  }
-  minus2SigmaSquare = -2 * sigma * sigma;
-  std::cout << "sigma = " << sigma << std::endl;
+	trace.beginBlock("Computing digital points and primal surface");
+	// Build digital surface
+	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
+	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
+	surfels = SH3::getSurfelRange(digital_surface, params);
+	// Need to convert the faces
+	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+		primal_faces.push_back(primal_surface->incidentVertices(face));
+	// Embed with gridstep.
+	for (auto v = 0; v < primal_surface->nbVertices(); v++)
+		primal_surface->position(v) *= gridstep;
+	primal_positions = primal_surface->positions();
+	digitizePointels(primal_positions, pointels);
+	digital_dimensions = getFigSizes();
+	trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
+	trace.endBlock();
+
+	if (computeNormalsFlag) {
+		// Initialize normals with trivial normals
+		trace.beginBlock("Compute trivial normals");
+		auto pTC = new TangencyComputer<KSpace>(K);
+		pTC->init(pointels.cbegin(), pointels.cend(), true);
+		int t_ring = int(round(params["t-ring"].as<double>()));
+		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
+		primal_surface->faceNormals() = surfel_trivial_normals;
+		for (auto i = 1; i < t_ring + 3; i++) {
+			primal_surface->computeVertexNormalsFromFaceNormals();
+			primal_surface->computeFaceNormalsFromVertexNormals();
+			surfel_trivial_normals = primal_surface->faceNormals();
+		}
+		trivial_normals = primal_surface->vertexNormals();
+		trivial_normals.resize(pointels.size());
+		for (auto &n: trivial_normals) n = RealVector::zero;
+		for (auto k = 0; k < surfels.size(); k++) {
+			const auto &surf = surfels[k];
+			const auto cells0 = SH3::getPrimalVertices(K, surf);
+			for (const auto &c0: cells0) {
+				const auto p = K.uCoords(c0);
+				const auto idx = pTC->index(p);
+				trivial_normals[idx] += surfel_trivial_normals[k];
+			}
+		}
+		for (auto &n: trivial_normals) n /= n.norm();
+		primal_surface->vertexNormals() = trivial_normals;
+		trace.endBlock();
+
+		if (computeCurvaturesFlag) {
+			trace.beginBlock("Initialize CNC for curvature computation");
+			pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+			trace.endBlock();
+		}
+	}
 
 
-  // Ready to choose program
+	if (sigmaTmp != -1.0) {
+		sigma = sigmaTmp;
+	} else {
+		sigma = 5 * pow(gridstep, -0.5);
+	}
+	minus2SigmaSquare = -2 * sigma * sigma;
+	std::cout << "sigma = " << sigma << std::endl;
 
-  trace.beginBlock("Compute visibilities");
-  if (visibComputeMethod == "CPU") {
-    computeVisibility(VisibilityRadius);
-  } else if (visibComputeMethod == "OMP") {
-    computeVisibilityOmp(VisibilityRadius);
-  } else if (visibComputeMethod == "OMP_GPU") {
-    computeVisibilityOmpGPU(VisibilityRadius);
-  } else if (visibComputeMethod == "GPU") {
+
+	// Ready to choose program
+
+	trace.beginBlock("Compute visibilities");
+	if (visibComputeMethod == "CPU") {
+		computeVisibility(VisibilityRadius);
+	} else if (visibComputeMethod == "OMP") {
+		computeVisibilityOmp(VisibilityRadius);
+	} else if (visibComputeMethod == "OMP_GPU") {
+		computeVisibilityOmpGPU(VisibilityRadius);
+	} else if (visibComputeMethod == "GPU") {
 #ifdef USE_CUDA_VISIBILITY
-    computeVisibilityCuda(VisibilityRadius);
+		computeVisibilityCuda(VisibilityRadius);
 #else
-    std::cerr << "Error: CUDA visibility computation not available. Recompile with CUDA support." << std::endl;
-    return 1;
+		std::cerr << "Error: CUDA visibility computation not available. Recompile with CUDA support." << std::endl;
+		return 1;
 #endif
-  } else {
-    std::cerr << "Error: unknown visibility computation method '" << visibComputeMethod << "'." << std::endl;
-    return 1;
-  }
-  Time = trace.endBlock();
-  computeMeanDistanceVisibility();
-  if (computeNormalsFlag) {
-    trace.beginBlock("Compute visibilities Normals");
-    computeVisibilityNormals();
-    reorientVisibilityNormals();
-    Time = trace.endBlock();
-    if (is_polynomial) {
-      computeL2looErrors();
-    }
-  }
-  if (computeCurvaturesFlag) {
-    trace.beginBlock("Compute visibilities Curvatures");
-    computeCurvatures();
-    Time = trace.endBlock();
-  }
-  if (!saveVisibilityFilename.empty()) {
-    trace.beginBlock("Save visibility");
-    saveVisibility(saveVisibilityFilename);
-    trace.endBlock();
-  }
-  std::cout << "GPU run completed successfully." << std::endl;
-  return 0;
+	} else {
+		std::cerr << "Error: unknown visibility computation method '" << visibComputeMethod << "'." << std::endl;
+		return 1;
+	}
+	Time = trace.endBlock();
+	computeMeanDistanceVisibility();
+	if (computeNormalsFlag) {
+		trace.beginBlock("Compute visibilities Normals");
+		computeVisibilityNormals();
+		reorientVisibilityNormals();
+		Time = trace.endBlock();
+		if (is_polynomial) {
+			computeL2looErrors();
+		}
+	}
+	if (computeCurvaturesFlag) {
+		trace.beginBlock("Compute visibilities Curvatures");
+		computeCurvatures();
+		Time = trace.endBlock();
+	}
+	if (!saveVisibilityFilename.empty()) {
+		trace.beginBlock("Save visibility");
+		saveVisibility(saveVisibilityFilename);
+		trace.endBlock();
+	}
+	std::cout << "GPU run completed successfully." << std::endl;
+	return 0;
 }
 
 int main(int argc, char *argv[]) {
-  // command line inteface options
-  CLI::App app{"A tool to check visibility using lattices."};
-  std::string filename = "../volumes/bunny34.vol";
-  int thresholdMin = 0;
-  int thresholdMax = 255;
-  std::string polynomial;
-  int minAABB = -10;
-  int maxAABB = 10;
-  bool listP = false;
-  bool gpuRunFlag = false;
-  app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
-  // app.add_option("-o,--output", outputfilename, "the output OBJ filename");
-  app.add_option("-p,--polynomial", polynomial,
-                 "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
-  app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
-  app.add_option("-m,--thresholdMin", thresholdMin,
-                 "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
-  app.add_option("-M,--thresholdMax", thresholdMax,
-                 "the maximal threshold M (included) for a voxel to belong to the digital shape.");
-  app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
-  app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
-  app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
-  app.add_flag("-l", listP, "lists the known named polynomials.");
-  app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
-  app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
-  double sigmaTmp = -1.0;
-  app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
-  app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
+	// command line inteface options
+	CLI::App app{"A tool to check visibility using lattices."};
+	std::string filename = "../volumes/bunny34.vol";
+	int thresholdMin = 0;
+	int thresholdMax = 255;
+	std::string polynomial;
+	int minAABB = -10;
+	int maxAABB = 10;
+	bool listP = false;
+	bool gpuRunFlag = false;
+	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
+	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
+	app.add_option("-p,--polynomial", polynomial,
+	               "a polynomial like \"x^2+y^2+2*z^2-x*y*z+z^3-100\" or a named polynomial (see -l flag)");
+	app.add_option("-g,--gridstep", gridstep, "the digitization gridstep");
+	app.add_option("-m,--thresholdMin", thresholdMin,
+	               "the minimal threshold m (excluded) for a voxel to belong to the digital shape.");
+	app.add_option("-M,--thresholdMax", thresholdMax,
+	               "the maximal threshold M (included) for a voxel to belong to the digital shape.");
+	app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
+	app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
+	app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+	app.add_flag("-l", listP, "lists the known named polynomials.");
+	app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
+	app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
+	double sigmaTmp = -1.0;
+	app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
+	app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
 
-  bool ignore = false;
-  std::string _;
+	bool ignore = false;
+	std::string _;
 
-  // gpuRun only
-  app.add_flag("--computeNormals", ignore, "gpuRun only : compute visibility normals after visibility computation");
-  app.add_flag("--computeCurvatures", ignore, "gpuRun only : compute curvatures after visibility normals computation");
-  app.add_option("--save", _, "gpuRun only : a filename to save the computed visibility");
-  app.add_option("--visibComputeMethod", _,
-                 "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
+	// gpuRun only
+	app.add_flag("--computeNormals", ignore, "gpuRun only : compute visibility normals after visibility computation");
+	app.add_flag("--computeCurvatures", ignore,
+	             "gpuRun only : compute curvatures after visibility normals computation");
+	app.add_option("--save", _, "gpuRun only : a filename to save the computed visibility");
+	app.add_option("--visibComputeMethod", _,
+	               "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 
-  // -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
-  // Parse command line options. Exit on error.
-  CLI11_PARSE(app, argc, argv)
+	// -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
+	// Parse command line options. Exit on error.
+	CLI11_PARSE(app, argc, argv)
 
-  if (gpuRunFlag) {
-    return gpuRun(argc, argv);
-  }
+	if (gpuRunFlag) {
+		return gpuRun(argc, argv);
+	}
 
-  // React to some options.
-  if (listP) {
-    listPolynomials();
-    return 0;
-  }
-//  if (polynomial != "") {
-//    TMP("");
-//  } else {
-//    TMP(filename);
-//  }
-//  return 0;
-  // Use options
-  auto params = SH3::defaultParameters()
-                | SHG3::defaultParameters()
-                | SHG3::parametersGeometryEstimation();
-  params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
-  params("surfaceTraversal", "default");
-  bool is_polynomial = !polynomial.empty();
-  if (is_polynomial) {
-    trace.beginBlock("Build polynomial surface");
-    params("polynomial", polynomial);
-    params("gridstep", gridstep);
-    params("minAABB", minAABB);
-    params("maxAABB", maxAABB);
-    params("offset", 1.0);
-    params("closed", 1);
-    implicit_shape = SH3::makeImplicitShape3D(params);
-    auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-    K = SH3::getKSpace(params);
-    binary_image = SH3::makeBinaryImage(digitized_shape,
-                                        SH3::Domain(K.lowerBound(),
-                                                    K.upperBound()),
-                                        params);
-    trace.endBlock();
-  } else {
-    trace.beginBlock("Reading image vol file");
-    params("thresholdMin", thresholdMin);
-    params("thresholdMax", thresholdMax);
-    binary_image = SH3::makeBinaryImage(filename, params);
-    K = SH3::getKSpace(binary_image, params);
-    trace.endBlock();
-  }
+	// React to some options.
+	if (listP) {
+		listPolynomials();
+		return 0;
+	}
+//	if (polynomial != "") {
+//		TMP("");
+//	} else {
+//		TMP(filename);
+//	}
+//	return 0;
+	// Use options
+	auto params = SH3::defaultParameters()
+	              | SHG3::defaultParameters()
+	              | SHG3::parametersGeometryEstimation();
+	params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
+	params("surfaceTraversal", "default");
+	bool is_polynomial = !polynomial.empty();
+	if (is_polynomial) {
+		trace.beginBlock("Build polynomial surface");
+		params("polynomial", polynomial);
+		params("gridstep", gridstep);
+		params("minAABB", minAABB);
+		params("maxAABB", maxAABB);
+		params("offset", 1.0);
+		params("closed", 1);
+		implicit_shape = SH3::makeImplicitShape3D(params);
+		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+		K = SH3::getKSpace(params);
+		binary_image = SH3::makeBinaryImage(digitized_shape,
+		                                    SH3::Domain(K.lowerBound(),
+		                                                K.upperBound()),
+		                                    params);
+		trace.endBlock();
+	} else {
+		trace.beginBlock("Reading image vol file");
+		params("thresholdMin", thresholdMin);
+		params("thresholdMax", thresholdMax);
+		binary_image = SH3::makeBinaryImage(filename, params);
+		K = SH3::getKSpace(binary_image, params);
+		trace.endBlock();
+	}
 
-  std::vector<std::vector<std::size_t>> primal_faces;
-  std::vector<RealPoint> primal_positions;
-
-
-  trace.beginBlock("Computing digital points and primal surface");
-  // Build digital surface
-  digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
-  primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
-  surfels = SH3::getSurfelRange(digital_surface, params);
-  if (is_polynomial) {
-    surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
-  }
-  // Need to convert the faces
-  for (auto face = 0; face < primal_surface->nbFaces(); ++face)
-    primal_faces.push_back(primal_surface->incidentVertices(face));
-  // Embed with gridstep.
-  for (auto v = 0; v < primal_surface->nbVertices(); v++)
-    primal_surface->position(v) *= gridstep;
-  primal_positions = primal_surface->positions();
-  digitizePointels(primal_positions, pointels);
-  digital_dimensions = getFigSizes();
-  trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
-  trace.endBlock();
-
-  // Compute trivial normals
-
-  auto pTC = new TangencyComputer<KSpace>(K);
-  pTC->init(pointels.cbegin(), pointels.cend(), true);
-  int t_ring = int(round(params["t-ring"].as<double>()));
-  auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
-  primal_surface->faceNormals() = surfel_trivial_normals;
-  params("r-radius", iiRadius);
-  surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
-  for (auto i = 1; i < t_ring + 3; i++) {
-    primal_surface->computeVertexNormalsFromFaceNormals();
-    primal_surface->computeFaceNormalsFromVertexNormals();
-    surfel_trivial_normals = primal_surface->faceNormals();
-  }
-  trivial_normals = primal_surface->vertexNormals();
-  trivial_normals.resize(pointels.size());
-  ii_normals.resize(pointels.size());
-  true_normals.resize(pointels.size());
-  for (auto &n: trivial_normals) n = RealVector::zero;
-  for (auto &n: ii_normals) n = RealVector::zero;
-  for (auto &n: true_normals) n = RealVector::zero;
-  for (auto k = 0; k < surfels.size(); k++) {
-    const auto &surf = surfels[k];
-    const auto cells0 = SH3::getPrimalVertices(K, surf);
-    for (const auto &c0: cells0) {
-      const auto p = K.uCoords(c0);
-      const auto idx = pTC->index(p);
-      trivial_normals[idx] += surfel_trivial_normals[k];
-      ii_normals[idx] += surfel_ii_normals[k];
-      if (is_polynomial) {
-        true_normals[idx] += surfel_true_normals[k];
-      }
-    }
-  }
-  for (auto &n: trivial_normals) n /= n.norm();
-  for (auto &n: ii_normals) n /= n.norm();
-  for (auto &n: true_normals) n /= n.norm();
-
-  primal_surface->vertexNormals() = trivial_normals;
-
-  if (sigmaTmp != -1.0) {
-    sigma = sigmaTmp;
-  } else {
-    sigma = 5 * pow(gridstep, -0.5);
-  }
-  minus2SigmaSquare = -2 * sigma * sigma;
-
-  std::cout << "sigma = " << sigma << std::endl;
+	std::vector<std::vector<std::size_t>> primal_faces;
+	std::vector<RealPoint> primal_positions;
 
 
-  pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+	trace.beginBlock("Computing digital points and primal surface");
+	// Build digital surface
+	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
+	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
+	surfels = SH3::getSurfelRange(digital_surface, params);
+	if (is_polynomial) {
+		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+	}
+	// Need to convert the faces
+	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
+		primal_faces.push_back(primal_surface->incidentVertices(face));
+	// Embed with gridstep.
+	for (auto v = 0; v < primal_surface->nbVertices(); v++)
+		primal_surface->position(v) *= gridstep;
+	primal_positions = primal_surface->positions();
+	digitizePointels(primal_positions, pointels);
+	digital_dimensions = getFigSizes();
+	trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
+	trace.endBlock();
 
-  // Initialize polyscope
-  if (noInterface) {
-    std::cout << "sigma = " << sigma << std::endl;
-    checkParallelism();
-    trace.beginBlock("Compute visibilities");
-    computeVisibilityOmp(VisibilityRadius);
-    Time = trace.endBlock();
-//    trace.beginBlock("Compute mean distance visibility");
-//    computeMeanDistanceVisibility();
-//    Time = trace.endBlock();
-  } else {
-    polyscope::init();
-    psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
-                                                  primal_positions,
-                                                  primal_faces);
-    psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
-    psPrimalMesh->setEdgeWidth(1.5);
-    polyscope::state::userCallback = myCallback;
-    polyscope::show();
-  }
-  return EXIT_SUCCESS;
+	// Compute trivial normals
+
+	auto pTC = new TangencyComputer<KSpace>(K);
+	pTC->init(pointels.cbegin(), pointels.cend(), true);
+	int t_ring = int(round(params["t-ring"].as<double>()));
+	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
+	primal_surface->faceNormals() = surfel_trivial_normals;
+	params("r-radius", iiRadius);
+	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+	for (auto i = 1; i < t_ring + 3; i++) {
+		primal_surface->computeVertexNormalsFromFaceNormals();
+		primal_surface->computeFaceNormalsFromVertexNormals();
+		surfel_trivial_normals = primal_surface->faceNormals();
+	}
+	trivial_normals = primal_surface->vertexNormals();
+	trivial_normals.resize(pointels.size());
+	ii_normals.resize(pointels.size());
+	true_normals.resize(pointels.size());
+	for (auto &n: trivial_normals) n = RealVector::zero;
+	for (auto &n: ii_normals) n = RealVector::zero;
+	for (auto &n: true_normals) n = RealVector::zero;
+	for (auto k = 0; k < surfels.size(); k++) {
+		const auto &surf = surfels[k];
+		const auto cells0 = SH3::getPrimalVertices(K, surf);
+		for (const auto &c0: cells0) {
+			const auto p = K.uCoords(c0);
+			const auto idx = pTC->index(p);
+			trivial_normals[idx] += surfel_trivial_normals[k];
+			ii_normals[idx] += surfel_ii_normals[k];
+			if (is_polynomial) {
+				true_normals[idx] += surfel_true_normals[k];
+			}
+		}
+	}
+	for (auto &n: trivial_normals) n /= n.norm();
+	for (auto &n: ii_normals) n /= n.norm();
+	for (auto &n: true_normals) n /= n.norm();
+
+	primal_surface->vertexNormals() = trivial_normals;
+
+	if (sigmaTmp != -1.0) {
+		sigma = sigmaTmp;
+	} else {
+		sigma = 5 * pow(gridstep, -0.5);
+	}
+	minus2SigmaSquare = -2 * sigma * sigma;
+
+	std::cout << "sigma = " << sigma << std::endl;
+
+
+	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+
+	// Initialize polyscope
+	if (noInterface) {
+		std::cout << "sigma = " << sigma << std::endl;
+		checkParallelism();
+		trace.beginBlock("Compute visibilities");
+		computeVisibilityOmp(VisibilityRadius);
+		Time = trace.endBlock();
+//		trace.beginBlock("Compute mean distance visibility");
+//		computeMeanDistanceVisibility();
+//		Time = trace.endBlock();
+	} else {
+		polyscope::init();
+		psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
+		                                              primal_positions,
+		                                              primal_faces);
+		psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
+		psPrimalMesh->setEdgeWidth(1.5);
+		polyscope::state::userCallback = myCallback;
+		polyscope::show();
+	}
+	return EXIT_SUCCESS;
 
 }

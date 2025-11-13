@@ -14,4 +14,5 @@ HostVisibility computeVisibilityGpu(int radius, std::vector<int> &digital_dimens
 
 HostVisibilityCPU computeVisibilityGpuCPU(int radius, std::vector<int> &digital_dimensions,
                                           std::vector<DGtal::Z3i::Point> &pointels);
+
 #endif //VISIBILITYLATTICES_MIDDLEWARE_H

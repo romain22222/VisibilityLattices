@@ -21,7 +21,7 @@ typedef typename Convexity::LatticeSet LatticeSet;
 IntegerComputer<Integer> icgpu;
 
 Vec3i pointVectorToVec3i(const Point &vector) {
-  return {vector[0], vector[1], vector[2]};
+	return {vector[0], vector[1], vector[2]};
 }
 
 /**
@@ -29,11 +29,11 @@ Vec3i pointVectorToVec3i(const Point &vector) {
  * @return
  */
 int getLargeAxis(std::vector<int> &digital_dimensions) {
-  auto axis = 0;
-  for (auto i = 1; i < digital_dimensions.size() / 3; i++) {
-    if (digital_dimensions[i] > digital_dimensions[axis]) axis = i;
-  }
-  return axis;
+	auto axis = 0;
+	for (auto i = 1; i < digital_dimensions.size() / 3; i++) {
+		if (digital_dimensions[i] > digital_dimensions[axis]) axis = i;
+	}
+	return axis;
 }
 
 /**
@@ -43,134 +43,135 @@ int getLargeAxis(std::vector<int> &digital_dimensions) {
  * @return
  */
 Vec3is getAllVectorsVec3i(int radius) {
-  Vec3is vectors;
-  for (auto x = radius; x >= 1; x--) {
-    for (auto y = radius; y >= -radius; y--) {
-      for (auto z = radius; z >= -radius; z--) {
-        if (icgpu.gcd(icgpu.gcd(x, y), z) != 1) continue;
-        vectors.emplace_back(x, y, z);
-      }
-    }
-  }
-  for (auto y = radius; y >= 1; y--) {
-    for (auto z = radius; z >= -radius; z--) {
-      if (icgpu.gcd(y, z) != 1) continue;
-      vectors.emplace_back(0, y, z);
-    }
-  }
-  vectors.emplace_back(0, 0, 1);
-  return vectors;
+	Vec3is vectors;
+	for (auto x = radius; x >= 1; x--) {
+		for (auto y = radius; y >= -radius; y--) {
+			for (auto z = radius; z >= -radius; z--) {
+				if (icgpu.gcd(icgpu.gcd(x, y), z) != 1) continue;
+				vectors.emplace_back(x, y, z);
+			}
+		}
+	}
+	for (auto y = radius; y >= 1; y--) {
+		for (auto z = radius; z >= -radius; z--) {
+			if (icgpu.gcd(y, z) != 1) continue;
+			vectors.emplace_back(0, y, z);
+		}
+	}
+	vectors.emplace_back(0, 0, 1);
+	return vectors;
 }
 
 MyLatticeSetCPU makeLatticeSetCPU(LatticeSet &latticeSet) {
-  Vec3is points;
-  std::vector<IntervalListCPU *> allIntervals;
+	Vec3is points;
+	std::vector<IntervalListCPU *> allIntervals;
 
-  for (auto [key, intervals]: latticeSet.data()) {
-    points.push_back(pointVectorToVec3i(key));
-    const auto &ivs = intervals.data();
-    IntervalListCPU* intervalList = new IntervalListCPU();
-    intervalList->data = new IntervalGpuCPU[ivs.size()];
-    intervalList->capacity = ivs.size();
-    intervalList->size = ivs.size();
-    for (size_t i = 0; i < ivs.size(); ++i) {
-      intervalList->data[i] = {ivs[i].first, ivs[i].second};
-    }
-    allIntervals.push_back(intervalList);
-  }
+	for (auto [key, intervals]: latticeSet.data()) {
+		points.push_back(pointVectorToVec3i(key));
+		const auto &ivs = intervals.data();
+		IntervalListCPU *intervalList = new IntervalListCPU();
+		intervalList->data = new IntervalGpuCPU[ivs.size()];
+		intervalList->capacity = ivs.size();
+		intervalList->size = ivs.size();
+		for (size_t i = 0; i < ivs.size(); ++i) {
+			intervalList->data[i] = {ivs[i].first, ivs[i].second};
+		}
+		allIntervals.push_back(intervalList);
+	}
 
-  MyLatticeSetCPU result(latticeSet.axis(), points, allIntervals);
-  return result;
+	MyLatticeSetCPU result(latticeSet.axis(), points, allIntervals);
+	return result;
 }
+
 MyLatticeSet makeLatticeSet(LatticeSet &latticeSet) {
-  Vec3is points;
-  std::vector<IntervalList*> allIntervals;
+	Vec3is points;
+	std::vector<IntervalList *> allIntervals;
 
-  for (auto [key, intervals]: latticeSet.data()) {
-    points.push_back(pointVectorToVec3i(key));
-    const auto &ivs = intervals.data();
-    IntervalList* intervalList = new IntervalList();
-    intervalList->data = new IntervalGpu[ivs.size()];
-    intervalList->capacity = ivs.size();
-    intervalList->size = ivs.size();
-    for (size_t i = 0; i < ivs.size(); ++i) {
-      intervalList->data[i] = {ivs[i].first, ivs[i].second};
-    }
-    allIntervals.push_back(intervalList);
-  }
+	for (auto [key, intervals]: latticeSet.data()) {
+		points.push_back(pointVectorToVec3i(key));
+		const auto &ivs = intervals.data();
+		IntervalList *intervalList = new IntervalList();
+		intervalList->data = new IntervalGpu[ivs.size()];
+		intervalList->capacity = ivs.size();
+		intervalList->size = ivs.size();
+		for (size_t i = 0; i < ivs.size(); ++i) {
+			intervalList->data[i] = {ivs[i].first, ivs[i].second};
+		}
+		allIntervals.push_back(intervalList);
+	}
 
-  MyLatticeSet result(latticeSet.axis(), points, allIntervals);
-  return result;
+	MyLatticeSet result(latticeSet.axis(), points, allIntervals);
+	return result;
 }
 
 HostVisibility computeVisibilityGpu(int radius, std::vector<int> &digital_dimensions,
-                                 std::vector<Point> &pointels) {
-  std::cout << "Computing visibility GPU" << std::endl;
-  auto axis = getLargeAxis(digital_dimensions);
-  auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
-  std::cout << "Lattice set computed" << std::endl;
-  auto figLattices = makeLatticeSet(tmpL);
+                                    std::vector<Point> &pointels) {
+	std::cout << "Computing visibility GPU" << std::endl;
+	auto axis = getLargeAxis(digital_dimensions);
+	auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
+	std::cout << "Lattice set computed" << std::endl;
+	auto figLattices = makeLatticeSet(tmpL);
 
 //  const auto axises_idx = std::vector < int > {axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
-  int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
-  auto segmentList = getAllVectorsVec3i(radius);
+	int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
+	auto segmentList = getAllVectorsVec3i(radius);
 
-  std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
+	std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
 
-  auto *pointelsData = new Vec3i[pointels.size()];
-  for (size_t i = 0; i < pointels.size(); ++i) {
-    pointelsData[i] = pointVectorToVec3i(pointels[i]);
-  }
+	auto *pointelsData = new Vec3i[pointels.size()];
+	for (size_t i = 0; i < pointels.size(); ++i) {
+		pointelsData[i] = pointVectorToVec3i(pointels[i]);
+	}
 
-  std::cout << "Pointels digitized" << std::endl;
+	std::cout << "Pointels digitized" << std::endl;
 
-  HostVisibility visibility = computeVisibility(
+	HostVisibility visibility = computeVisibility(
 //  HostVisibilityCPU visibility = computeVisibilityCPU(
-      (segmentList.size() + 255) / 256, 256,
+		(segmentList.size() + 255) / 256, 256,
 //      segmentList.size(), 1,
 //      1, 1,
-      axis, digital_dimensions.data(), axises_idx,
-      figLattices,
-      segmentList.data(), segmentList.size(),
-      pointelsData, pointels.size());
+		axis, digital_dimensions.data(), axises_idx,
+		figLattices,
+		segmentList.data(), segmentList.size(),
+		pointelsData, pointels.size());
 
-  delete[] axises_idx;
-  std::cout << "Visibility computed" << std::endl;
-  return visibility;
+	delete[] axises_idx;
+	std::cout << "Visibility computed" << std::endl;
+	return visibility;
 }
 
 HostVisibilityCPU computeVisibilityGpuCPU(int radius, std::vector<int> &digital_dimensions,
-                                    std::vector<Point> &pointels) {
-  std::cout << "Computing visibility from CPU GPU style" << std::endl;
-  auto axis = getLargeAxis(digital_dimensions);
-  auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
-  std::cout << "Lattice set computed" << std::endl;
-  auto figLattices = makeLatticeSetCPU(tmpL);
+                                          std::vector<Point> &pointels) {
+	std::cout << "Computing visibility from CPU GPU style" << std::endl;
+	auto axis = getLargeAxis(digital_dimensions);
+	auto tmpL = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints();
+	std::cout << "Lattice set computed" << std::endl;
+	auto figLattices = makeLatticeSetCPU(tmpL);
 
 //  const auto axises_idx = std::vector < int > {axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
-  int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
-  auto segmentList = getAllVectorsVec3i(radius);
+	int *axises_idx = new int[3]{axis, axis == 0 ? 1 : 0, axis == 2 ? 1 : 2};
+	auto segmentList = getAllVectorsVec3i(radius);
 
-  std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
+	std::cout << "Segment list computed with " << segmentList.size() << " segments" << std::endl;
 
-  auto *pointelsData = new Vec3i[pointels.size()];
-  for (size_t i = 0; i < pointels.size(); ++i) {
-    pointelsData[i] = pointVectorToVec3i(pointels[i]);
-  }
+	auto *pointelsData = new Vec3i[pointels.size()];
+	for (size_t i = 0; i < pointels.size(); ++i) {
+		pointelsData[i] = pointVectorToVec3i(pointels[i]);
+	}
 
-  std::cout << "Pointels digitized" << std::endl;
+	std::cout << "Pointels digitized" << std::endl;
 
 //  HostVisibility visibility = computeVisibility(
-  HostVisibilityCPU visibility = computeVisibilityCPU(
-      (segmentList.size() + 255) / 256, 256,
+	HostVisibilityCPU visibility = computeVisibilityCPU(
+		(segmentList.size() + 255) / 256, 256,
 //      segmentList.size(), 1,
 //      1, 1,
-      axis, digital_dimensions.data(), axises_idx,
-      figLattices,
-      segmentList.data(), segmentList.size(),
-      pointelsData, pointels.size());
+		axis, digital_dimensions.data(), axises_idx,
+		figLattices,
+		segmentList.data(), segmentList.size(),
+		pointelsData, pointels.size());
 
-  delete[] axises_idx;
-  std::cout << "Visibility computed" << std::endl;
-  return visibility;
+	delete[] axises_idx;
+	std::cout << "Visibility computed" << std::endl;
+	return visibility;
 }
