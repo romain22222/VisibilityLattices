@@ -9,6 +9,8 @@ set(SOURCES
         gpu/Vec3i.cu
         gpu/testgpucpu.cpp
         gpu/testgpucpu.h
+        src/polyhedra.cpp
+        src/polyhedra.h
 )
 
 # If you want to use CUDA, uncomment the following lines

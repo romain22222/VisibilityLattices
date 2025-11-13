@@ -6,6 +6,13 @@
 #include <polyscope/point_cloud.h>
 #include <polyscope/pick.h>
 #include <polyscope/surface_mesh.h>
+
+// For dgtal libraries, store NDEBUG in another macro, then undef it during inclusion
+#ifndef NDEBUG
+#define NDEBUG
+#define DGtal_NDEBUG
+#endif
+
 #include <DGtal/arithmetic/IntegerComputer.h>
 #include <DGtal/base/Common.h>
 #include <DGtal/geometry/meshes/CorrectedNormalCurrentComputer.h>
@@ -14,11 +21,18 @@
 #include <DGtal/helpers/StdDefs.h>
 #include <DGtal/helpers/Shortcuts.h>
 #include <DGtal/helpers/ShortcutsGeometry.h>
-#include "additionnalClasses/LinearKDTree.h"
 #include "DGtal/io/viewers/PolyscopeViewer.h"
+#include "additionnalClasses/LinearKDTree.h"
+
+#ifdef DGtal_NDEBUG
+#undef NDEBUG
+#undef DGtal_NDEBUG
+#endif
+
 #include "CLI11.hpp"
 #include "omp.h"
 #include "gpu/Vec3i.cu"
+#include "src/polyhedra.h"
 
 #ifdef USE_CUDA_VISIBILITY
 
@@ -245,14 +259,6 @@ void listPolynomials() {
 	auto L = SH3::getPolynomialList();
 	for (const auto &p: L)
 		trace.info() << p.first << " = " << p.second << std::endl;
-}
-
-bool isAClassicPolynomial(std::string p) {
-	auto L = SH3::getPolynomialList();
-	for (const auto &poly: L) {
-		if (poly.first == p) return true;
-	}
-	return false;
 }
 
 /**
@@ -574,12 +580,7 @@ void computeVisibility(int radius) {
 				                      axis == 2 ? 0 : 2 * ty);
 				for (const auto &cInfo: latticeVector) {
 					// time this call
-					time_t t1 = clock();
 					eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
-					time_t t2 = clock();
-					std::cout << "Matching vector at (" << tx << "," << ty << ")"
-					          << " for segment " << segment[0] << "," << segment[1] << "," << segment[2]
-					          << " took " << double(t2 - t1) / CLOCKS_PER_SEC << " seconds." << std::endl;
 					if (eligibles.empty()) break;
 				}
 				if (!eligibles.empty()) {
@@ -1426,19 +1427,27 @@ int main(int argc, char *argv[]) {
 	bool is_polynomial = !polynomial.empty();
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
-		params("polynomial", polynomial);
-		params("gridstep", gridstep);
-		params("minAABB", minAABB);
-		params("maxAABB", maxAABB);
-		params("offset", 1.0);
-		params("closed", 1);
-		implicit_shape = SH3::makeImplicitShape3D(params);
-		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-		K = SH3::getKSpace(params);
-		binary_image = SH3::makeBinaryImage(digitized_shape,
-		                                    SH3::Domain(K.lowerBound(),
-		                                                K.upperBound()),
-		                                    params);
+		if (!Polyhedra::isPolyhedron(polynomial)) {
+			params("polynomial", polynomial);
+			params("gridstep", gridstep);
+			params("minAABB", minAABB);
+			params("maxAABB", maxAABB);
+			params("offset", 1.0);
+			params("closed", 1);
+			implicit_shape = SH3::makeImplicitShape3D(params);
+			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+			K = SH3::getKSpace(params);
+			binary_image = SH3::makeBinaryImage(digitized_shape,
+			                                    SH3::Domain(K.lowerBound(),
+			                                                K.upperBound()),
+			                                    params);
+		} else {
+			std::cout << "Using polyhedron: " << polynomial << std::endl;
+			binary_image = Polyhedra::makeBinaryPolyhedron(polynomial, gridstep, minAABB, maxAABB);
+			std::cout << "Digitization done." << std::endl;
+			K = SH3::getKSpace(binary_image, params);
+			std::cout << "KSpace done." << std::endl;
+		}
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
@@ -1458,7 +1467,7 @@ int main(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
-	if (is_polynomial) {
+	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
 	}
 	// Need to convert the faces
@@ -1481,7 +1490,7 @@ int main(int argc, char *argv[]) {
 	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 	primal_surface->faceNormals() = surfel_trivial_normals;
 	params("r-radius", iiRadius);
-	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+//	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 	for (auto i = 1; i < t_ring + 3; i++) {
 		primal_surface->computeVertexNormalsFromFaceNormals();
 		primal_surface->computeFaceNormalsFromVertexNormals();
@@ -1489,10 +1498,10 @@ int main(int argc, char *argv[]) {
 	}
 	trivial_normals = primal_surface->vertexNormals();
 	trivial_normals.resize(pointels.size());
-	ii_normals.resize(pointels.size());
+//	ii_normals.resize(pointels.size());
 	true_normals.resize(pointels.size());
 	for (auto &n: trivial_normals) n = RealVector::zero;
-	for (auto &n: ii_normals) n = RealVector::zero;
+//	for (auto &n: ii_normals) n = RealVector::zero;
 	for (auto &n: true_normals) n = RealVector::zero;
 	for (auto k = 0; k < surfels.size(); k++) {
 		const auto &surf = surfels[k];
@@ -1501,14 +1510,14 @@ int main(int argc, char *argv[]) {
 			const auto p = K.uCoords(c0);
 			const auto idx = pTC->index(p);
 			trivial_normals[idx] += surfel_trivial_normals[k];
-			ii_normals[idx] += surfel_ii_normals[k];
-			if (is_polynomial) {
+//			ii_normals[idx] += surfel_ii_normals[k];
+			if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 				true_normals[idx] += surfel_true_normals[k];
 			}
 		}
 	}
 	for (auto &n: trivial_normals) n /= n.norm();
-	for (auto &n: ii_normals) n /= n.norm();
+//	for (auto &n: ii_normals) n /= n.norm();
 	for (auto &n: true_normals) n /= n.norm();
 
 	primal_surface->vertexNormals() = trivial_normals;
