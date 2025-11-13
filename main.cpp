@@ -111,113 +111,113 @@ Point vec3iToPointVector(const Vec3i &vector) {
 
 class Visibility {
 public:
-  Dimension mainAxis{};
-  std::vector<bool> visibles;
-  size_t vectorsSize{};
-  size_t pointsSize{};
-  std::map<Point, size_t> pointIdxs;
-  std::map<IntegerVector, size_t> vectorIdxs;
+	Dimension mainAxis{};
+	std::vector<bool> visibles;
+	size_t vectorsSize{};
+	size_t pointsSize{};
+	std::map<Point, size_t> pointIdxs;
+	std::map<IntegerVector, size_t> vectorIdxs;
 
-  Visibility() = default;
+	Visibility() = default;
 
-  Visibility(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) : mainAxis(mainAxis) {
-	  vectorsSize = vectors.size();
-	  pointsSize = points.size();
-	  visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-	  for (size_t i = 0; i < pointsSize; i++) {
-		  pointIdxs[points[i]] = i;
-	  }
-	  for (size_t i = 0; i < vectorsSize; i++) {
-		  vectorIdxs[vectors[i]] = i;
-	  }
-  }
+	Visibility(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) : mainAxis(mainAxis) {
+		vectorsSize = vectors.size();
+		pointsSize = points.size();
+		visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+		for (size_t i = 0; i < pointsSize; i++) {
+			pointIdxs[points[i]] = i;
+		}
+		for (size_t i = 0; i < vectorsSize; i++) {
+			vectorIdxs[vectors[i]] = i;
+		}
+	}
 
 #ifdef USE_CUDA_VISIBILITY
 
-  Visibility(const HostVisibility hostVisibility) {
-	  std::cout << "Reading visibility from GPU" << std::endl;
-	  mainAxis = hostVisibility.mainAxis;
-	  vectorsSize = hostVisibility.vectorsSize;
-	  pointsSize = hostVisibility.pointsSize;
-	  visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
-	  for (size_t i = 0; i < pointsSize; i++) {
-		  pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
-	  }
-	  for (size_t i = 0; i < vectorsSize; i++) {
-		  vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
-	  }
-  }
+	Visibility(const HostVisibility hostVisibility) {
+		std::cout << "Reading visibility from GPU" << std::endl;
+		mainAxis = hostVisibility.mainAxis;
+		vectorsSize = hostVisibility.vectorsSize;
+		pointsSize = hostVisibility.pointsSize;
+		visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+		for (size_t i = 0; i < pointsSize; i++) {
+			pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+		}
+		for (size_t i = 0; i < vectorsSize; i++) {
+			vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+		}
+	}
 
-  Visibility(const HostVisibilityCPU hostVisibility) {
-	  std::cout << "Reading visibility from GPU" << std::endl;
-	  mainAxis = hostVisibility.mainAxis;
-	  vectorsSize = hostVisibility.vectorsSize;
-	  pointsSize = hostVisibility.pointsSize;
-	  visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
-	  for (size_t i = 0; i < pointsSize; i++) {
-		  pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
-	  }
-	  for (size_t i = 0; i < vectorsSize; i++) {
-		  vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
-	  }
-  }
+	Visibility(const HostVisibilityCPU hostVisibility) {
+		std::cout << "Reading visibility from GPU" << std::endl;
+		mainAxis = hostVisibility.mainAxis;
+		vectorsSize = hostVisibility.vectorsSize;
+		pointsSize = hostVisibility.pointsSize;
+		visibles = std::vector<bool>(hostVisibility.visibles, hostVisibility.visibles + vectorsSize * pointsSize);
+		for (size_t i = 0; i < pointsSize; i++) {
+			pointIdxs[vec3iToPointVector(hostVisibility.pointList[i])] = i;
+		}
+		for (size_t i = 0; i < vectorsSize; i++) {
+			vectorIdxs[vec3iToPointVector(hostVisibility.vectorList[i])] = i;
+		}
+	}
 
 #endif
 
-  size_t getVectorIdx(const IntegerVector &v) const {
-	  auto it = vectorIdxs.find(v);
-	  if (it != vectorIdxs.end()) return it->second;
-	  return vectorsSize;
-  }
+	size_t getVectorIdx(const IntegerVector &v) const {
+		auto it = vectorIdxs.find(v);
+		if (it != vectorIdxs.end()) return it->second;
+		return vectorsSize;
+	}
 
-  size_t getPointIdx(const IntegerVector &p) const {
-	  auto it = pointIdxs.find(p);
-	  if (it != pointIdxs.end()) return it->second;
-	  return pointsSize;
-  }
+	size_t getPointIdx(const IntegerVector &p) const {
+		auto it = pointIdxs.find(p);
+		if (it != pointIdxs.end()) return it->second;
+		return pointsSize;
+	}
 
-  bool isVisible(const Point &p1, const Point &p2) const {
-	  if (p1 == p2) return true;
-	  // Reorder points so that v is in the upper half plane
-	  if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
-	  IntegerVector v = p2 - p1;
-	  v = v / ic.gcd(v[0], ic.gcd(v[1], v[2]));
-	  auto vIdx = this->getVectorIdx(v);
-	  if (vIdx == vectorsSize) return false; // vector not computed
-	  for (IntegerVector p = p1; p != p2; p += v) {
-		  if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
-	  }
-	  return true;
-  }
+	bool isVisible(const Point &p1, const Point &p2) const {
+		if (p1 == p2) return true;
+		// Reorder points so that v is in the upper half plane
+		if (!isPointLowerThan(p1, p2)) return isVisible(p2, p1);
+		IntegerVector v = p2 - p1;
+		v = v / ic.gcd(v[0], ic.gcd(v[1], v[2]));
+		auto vIdx = this->getVectorIdx(v);
+		if (vIdx == vectorsSize) return false; // vector not computed
+		for (IntegerVector p = p1; p != p2; p += v) {
+			if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
+		}
+		return true;
+	}
 
-  void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
-	  auto p = offset;
-	  for (auto &interval: value) {
-		  for (int i = interval.first / 2; i <= interval.second / 2; i++) {
-			  p[mainAxis] = i;
-			  visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
-		  }
-	  }
-  }
+	void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
+		auto p = offset;
+		for (auto &interval: value) {
+			for (int i = interval.first / 2; i <= interval.second / 2; i++) {
+				p[mainAxis] = i;
+				visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
+			}
+		}
+	}
 
-  bool empty() const {
-	  return std::all_of(visibles.cbegin(), visibles.cend(), [](bool v) { return !v; });
-  }
+	bool empty() const {
+		return std::all_of(visibles.cbegin(), visibles.cend(), [](bool v) { return !v; });
+	}
 
-  void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
-	  this->mainAxis = mainAxis;
-	  vectorsSize = vectors.size();
-	  pointsSize = points.size();
-	  visibles = std::vector<bool>(vectorsSize * pointsSize, false);
-	  pointIdxs.clear();
-	  vectorIdxs.clear();
-	  for (size_t i = 0; i < pointsSize; i++) {
-		  pointIdxs[points[i]] = i;
-	  }
-	  for (size_t i = 0; i < vectorsSize; i++) {
-		  vectorIdxs[vectors[i]] = i;
-	  }
-  }
+	void reset(Dimension mainAxis, IntegerVectors vectors, std::vector<Point> points) {
+		this->mainAxis = mainAxis;
+		vectorsSize = vectors.size();
+		pointsSize = points.size();
+		visibles = std::vector<bool>(vectorsSize * pointsSize, false);
+		pointIdxs.clear();
+		vectorIdxs.clear();
+		for (size_t i = 0; i < pointsSize; i++) {
+			pointIdxs[points[i]] = i;
+		}
+		for (size_t i = 0; i < vectorsSize; i++) {
+			vectorIdxs[vectors[i]] = i;
+		}
+	}
 
 };
 

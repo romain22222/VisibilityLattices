@@ -23,9 +23,9 @@
 
 #define USETIMERS
 enum {
-  tid_this = 0,
-  tid_that,
-  tid_count
+	tid_this = 0,
+	tid_that,
+	tid_count
 };
 __device__ float cuda_timers[tid_count];
 #ifdef USETIMERS
@@ -49,35 +49,35 @@ __host__ __device__ int myMin(int a, int b) {
 
 template<typename Type>
 struct Buffer {
-  Type *data;
-  size_t capacity;
-  size_t size;
+	Type *data;
+	size_t capacity;
+	size_t size;
 
-  __host__ __device__ explicit Buffer(size_t cap) : capacity(cap), size(0) {
+	__host__ __device__ explicit Buffer(size_t cap) : capacity(cap), size(0) {
 //    CUDA_CHECK_DEVICE(cudaMalloc(&data, sizeof(Type) * capacity));
-	  data = new Type[capacity];
-  }
+		data = new Type[capacity];
+	}
 
-  __host__ __device__ ~Buffer() {
-	  if (data) {
+	__host__ __device__ ~Buffer() {
+		if (data) {
 //      cudaFree(data);
-		  delete[] data;
-	  }
-  }
+			delete[] data;
+		}
+	}
 
-  __device__ void push_back(const Type &v) {
-	  if (size >= capacity) {
-		  printf("Buffer overflow in push_back\n");
-	  }
-	  data[size++] = v;
-  }
+	__device__ void push_back(const Type &v) {
+		if (size >= capacity) {
+			printf("Buffer overflow in push_back\n");
+		}
+		data[size++] = v;
+	}
 
-  __host__ __device__ Type &operator[](size_t index) {
-	  if (index >= size) {
-		  printf("Buffer index out of range in operator[]\n");
-	  }
-	  return data[index];
-  }
+	__host__ __device__ Type &operator[](size_t index) {
+		if (index >= size) {
+			printf("Buffer index out of range in operator[]\n");
+		}
+		return data[index];
+	}
 };
 
 __host__  MyLatticeSet::MyLatticeSet(int axis, std::vector<Vec3i> &keys, std::vector<IntervalList *> &allIntervals)

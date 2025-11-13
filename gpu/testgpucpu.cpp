@@ -36,33 +36,33 @@ inline int gcd3CPU(int a, int b, int c) {
 
 template<typename Type>
 struct Buffer {
-  Type *data;
-  size_t capacity;
-  size_t size;
+	Type *data;
+	size_t capacity;
+	size_t size;
 
-  explicit Buffer(size_t cap) : capacity(cap), size(0) {
-	  data = new Type[capacity];
-  }
+	explicit Buffer(size_t cap) : capacity(cap), size(0) {
+		data = new Type[capacity];
+	}
 
-  ~Buffer() {
-	  if (data) {
-		  delete[] data;
-	  }
-  }
+	~Buffer() {
+		if (data) {
+			delete[] data;
+		}
+	}
 
-  void push_back(const Type &v) {
-	  if (size >= capacity) {
-		  printf("Buffer overflow in push_back\n");
-	  }
-	  data[size++] = v;
-  }
+	void push_back(const Type &v) {
+		if (size >= capacity) {
+			printf("Buffer overflow in push_back\n");
+		}
+		data[size++] = v;
+	}
 
-  Type &operator[](size_t index) {
-	  if (index >= size) {
-		  printf("Buffer index out of range in operator[]\n");
-	  }
-	  return data[index];
-  }
+	Type &operator[](size_t index) {
+		if (index >= size) {
+			printf("Buffer index out of range in operator[]\n");
+		}
+		return data[index];
+	}
 };
 
 IntervalListCPU::IntervalListCPU() : data(nullptr), capacity(0), size(0) {}
