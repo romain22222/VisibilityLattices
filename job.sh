@@ -14,4 +14,8 @@
 #export OMP_NUM_THREADS=128
 echo $OMP_NUM_THREADS
 
-/home/negror/VisibilityLattices/build/visibilityLattices -i /home/negror/VolGallery/Stanford-bunny/bunny-256.vol --gpuRun --computeNormals --computeCurvatures --save "visibility.vis" -r 20 -s 10
+
+for (( i = 1; i > 0; i-=0.01 )); do
+  echo "Running visibility computation with parameter i=${i}"
+#  /home/negror/VisibilityLattices/build/visibilityLattices -p tetrahedron -g i --gpuRun --computeNormals --computeCurvatures --save "visibility-${i}.vis" -r 20 -s 10
+done

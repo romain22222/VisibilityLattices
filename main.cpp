@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <random>
 #include <string>
@@ -234,7 +233,6 @@ public:
 			vectorIdxs[vectors[i]] = i;
 		}
 	}
-
 };
 
 Visibility visibility = Visibility();
@@ -379,7 +377,7 @@ Intervals intersect(const Intervals &l1, const Intervals &l2, bool debug = false
 	Intervals result;
 	// check 3rd example of testIntersection to see that you need at most this amount
 	result.reserve(l1.size() + l2.size() - 1);
-//	result.reserve( std::max( l1.size(), l2.size() ) );
+	//	result.reserve( std::max( l1.size(), l2.size() ) );
 	int k1 = 0, k2 = 0;
 	int count = 0;
 	while (k1 < l1.size() && k2 < l2.size()) {
@@ -710,28 +708,28 @@ void loadVisibility(const std::string &filename) {
 	std::ifstream file;
 	file.open(filename);
 	file >> visibility;
-/*
-	// print first infos of each variable to test
-	for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
-		auto it = visibility.vectorIdxs.begin();
-		std::advance(it, i);
-		trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-								 << ") has idx " << it->second << std::endl;
-	}
-	for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
-		auto it = visibility.pointIdxs.begin();
-		std::advance(it, i);
-		trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
-								 << ") has idx " << it->second << std::endl;
-	}
-	int start = 0;
-	while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
-	trace.info() << "First visible at index " << start << std::endl;
-	for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
-		trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
-	}
-	trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
-	*/
+	/*
+		// print first infos of each variable to test
+		for (int i = 0; i < 5 && i < visibility.vectorsSize; i++) {
+			auto it = visibility.vectorIdxs.begin();
+			std::advance(it, i);
+			trace.info() << "Vector (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+									 << ") has idx " << it->second << std::endl;
+		}
+		for (int i = 0; i < 5 && i < visibility.pointsSize; i++) {
+			auto it = visibility.pointIdxs.begin();
+			std::advance(it, i);
+			trace.info() << "Point (" << it->first[0] << "," << it->first[1] << "," << it->first[2]
+									 << ") has idx " << it->second << std::endl;
+		}
+		int start = 0;
+		while (start < visibility.visibles.size() && !visibility.visibles[start]) start++;
+		trace.info() << "First visible at index " << start << std::endl;
+		for (int i = start; i < start+20 && i < visibility.visibles.size(); i++) {
+			trace.info() << "Visible[" << i << "] = " << (visibility.visibles[i] ? "true" : "false") << std::endl;
+		}
+		trace.info() << "visibility size: " << visibility.visibles.size() << std::endl;
+		*/
 	file.close();
 }
 
@@ -776,7 +774,7 @@ void checkParallelism() {
 		if (counter[n] != n || cnt_max[n] != cnt_max[0])
 			ok = false;
 	trace.info() << "OMP parallelism " << (ok ? "(	OK	)" : "(ERROR)")
-	             << " #threads=" << cnt_max[0] << std::endl;
+		<< " #threads=" << cnt_max[0] << std::endl;
 	OMP_max_nb_threads = cnt_max[0];
 }
 
@@ -858,9 +856,10 @@ void computeVisibilityNormals() {
 		double total_w = 0.0;
 		for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
 			auto tmp = kdTree.position(point_idx);
-			if (visibility.isVisible(pointel, tmp)) { //	&& tmp != pointel) {
+			if (visibility.isVisible(pointel, tmp)) {
+				//	&& tmp != pointel) {
 				visibles.push_back(tmp);
-//				centroid += tmp;
+				//				centroid += tmp;
 				const double w = wSig((pointel - tmp).squaredNorm());
 				centroid += w * tmp;
 				total_w += w;
@@ -872,7 +871,7 @@ void computeVisibilityNormals() {
 			auto diff = pt - centroid;
 			for (int i = 0; i < 3; ++i) {
 				for (int j = 0; j < 3; ++j) {
-//					cov(i, j) += diff[i] * diff[j];
+					//					cov(i, j) += diff[i] * diff[j];
 					cov(i, j) += diff[i] * diff[j] * wSig((pt - pointel).squaredNorm());
 				}
 			}
@@ -894,9 +893,9 @@ void reorientVisibilityNormals() {
 	if (visibility_normals.empty()) {
 		computeVisibilityNormals();
 	}
-//	if (visibility_sharps.empty()) {
-//		computeVisibilityDirectionToSharpFeatures();
-//	}
+	//	if (visibility_sharps.empty()) {
+	//		computeVisibilityDirectionToSharpFeatures();
+	//	}
 	for (int i = 0; i < visibility_normals.size(); ++i) {
 		const auto triv_normal = getTrivNormal(i);
 		if (visibility_normals[i].dot(triv_normal) < 0)
@@ -975,8 +974,8 @@ void doRedisplayNormalAsColors() {
 	}
 }
 
-void computeL2looErrors() {
-//	std::cout << "Computing L2 and Loo errors" << std::endl;
+void computeL2looErrorsNormals() {
+	//	std::cout << "Computing L2 and Loo errors" << std::endl;
 	std::vector<double> angle_dev(visibility_normals.size());
 	std::vector<double> dummy(visibility_normals.size(), 0.0);
 	for (int i = 0; i < visibility_normals.size(); ++i) {
@@ -987,8 +986,24 @@ void computeL2looErrors() {
 	if (!noInterface)
 		psPrimalMesh->addVertexScalarQuantity("Angle deviation", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
 			"reds");
-	std::cout << "L2 error: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-	std::cout << "Loo error: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+	std::cout << "L2 error normals: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error normals: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+}
+
+void computeL2looErrorsCurvatures() {
+	const auto true_H = SHG3::getMeanCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
+	const auto true_G = SHG3::getGaussianCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
+	const auto true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
+	const auto true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
+
+	std::cout << "L2 error mean curvature: " << SHG3::getScalarsNormL2(H, true_H) << std::endl;
+	std::cout << "Loo error mean curvature: " << SHG3::getScalarsNormLoo(H, true_H) << std::endl;
+	std::cout << "L2 error Gaussian curvature: " << SHG3::getScalarsNormL2(G, true_G) << std::endl;
+	std::cout << "Loo error Gaussian curvature: " << SHG3::getScalarsNormLoo(G, true_G) << std::endl;
+	std::cout << "L2 error K1 curvature: " << SHG3::getScalarsNormL2(K1, true_K1) << std::endl;
+	std::cout << "Loo error K1 curvature: " << SHG3::getScalarsNormLoo(K1, true_K1) << std::endl;
+	std::cout << "L2 error K2 curvature: " << SHG3::getScalarsNormL2(K2, true_K2) << std::endl;
+	std::cout << "Loo error K2 curvature: " << SHG3::getScalarsNormLoo(K2, true_K2) << std::endl;
 }
 
 #ifdef USE_CUDA_VISIBILITY
@@ -1025,7 +1040,7 @@ void myCallback() {
 			selected_point = pointels[pointel_idx];
 			std::ostringstream otext;
 			otext << "Selected pointel = " << pointel_idx
-			      << " pos=" << selected_point;
+				<< " pos=" << selected_point;
 			ImGui::Text("%s", otext.str().c_str());
 		}
 	}
@@ -1070,7 +1085,7 @@ void myCallback() {
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
 		trace.beginBlock("Compute visibilities Normals Errors");
-		computeL2looErrors();
+		computeL2looErrorsNormals();
 		Time = trace.endBlock();
 	}
 	if (ImGui::Button("Compute Curvatures")) {
@@ -1135,13 +1150,13 @@ void TMP(std::string filename) {
 	const double h = 0.25;
 	CountedPtr<SH3::BinaryImage> binary_image;
 	SH3::KSpace K;
-//	if (filename == "") {
-//		params("polynomial", "goursat")("gridstep", h);
-//		auto implicit_shape = SH3::makeImplicitShape3D(params);
-//		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-//		binary_image = SH3::makeBinaryImage(digitized_shape, params);
-//		K = SH3::getKSpace(params);
-//	} else {
+	//	if (filename == "") {
+	//		params("polynomial", "goursat")("gridstep", h);
+	//		auto implicit_shape = SH3::makeImplicitShape3D(params);
+	//		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+	//		binary_image = SH3::makeBinaryImage(digitized_shape, params);
+	//		K = SH3::getKSpace(params);
+	//	} else {
 	int thresholdMin = 0;
 	int thresholdMax = 255;
 	params("thresholdMin", thresholdMin);
@@ -1150,7 +1165,7 @@ void TMP(std::string filename) {
 	binary_image = SH3::makeBinaryImage(filename, params);
 
 	K = SH3::getKSpace(binary_image, params);
-//	}
+	//	}
 	auto embedder = SH3::getCellEmbedder(K);
 	auto surface = SH3::makeLightDigitalSurface(binary_image, K, params);
 	SH3::Cell2Index c2i;
@@ -1159,9 +1174,9 @@ void TMP(std::string filename) {
 	SH3::RealPoints pos(pointels.size());
 	std::transform(pointels.cbegin(), pointels.cend(), pos.begin(),
 	               [&](const SH3::Cell &c) { return h * embedder(c); });
-//	auto ppos		 = SHG3::getPositions( implicit_shape, pos, params );
+	//	auto ppos		 = SHG3::getPositions( implicit_shape, pos, params );
 	// init primal_faces
-	std::vector<std::vector<std::size_t>> primal_faces;
+	std::vector<std::vector<std::size_t> > primal_faces;
 	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
 		primal_faces.push_back(primal_surface->incidentVertices(face));
 
@@ -1256,7 +1271,7 @@ int gpuRun(int argc, char *argv[]) {
 		trace.endBlock();
 	}
 
-	std::vector<std::vector<std::size_t>> primal_faces;
+	std::vector<std::vector<std::size_t> > primal_faces;
 	std::vector<RealPoint> primal_positions;
 
 
@@ -1351,13 +1366,16 @@ int gpuRun(int argc, char *argv[]) {
 		reorientVisibilityNormals();
 		Time = trace.endBlock();
 		if (is_polynomial) {
-			computeL2looErrors();
+			computeL2looErrorsNormals();
 		}
 	}
 	if (computeCurvaturesFlag) {
 		trace.beginBlock("Compute visibilities Curvatures");
 		computeCurvatures();
 		Time = trace.endBlock();
+		if (is_polynomial) {
+			computeL2looErrorsCurvatures();
+		}
 	}
 	if (!saveVisibilityFilename.empty()) {
 		trace.beginBlock("Save visibility");
@@ -1422,12 +1440,12 @@ int main(int argc, char *argv[]) {
 		listPolynomials();
 		return 0;
 	}
-//	if (polynomial != "") {
-//		TMP("");
-//	} else {
-//		TMP(filename);
-//	}
-//	return 0;
+	//	if (polynomial != "") {
+	//		TMP("");
+	//	} else {
+	//		TMP(filename);
+	//	}
+	//	return 0;
 	// Use options
 	auto params = SH3::defaultParameters()
 	              | SHG3::defaultParameters()
@@ -1469,7 +1487,7 @@ int main(int argc, char *argv[]) {
 		trace.endBlock();
 	}
 
-	std::vector<std::vector<std::size_t>> primal_faces;
+	std::vector<std::vector<std::size_t> > primal_faces;
 	std::vector<RealPoint> primal_positions;
 
 
@@ -1554,9 +1572,9 @@ int main(int argc, char *argv[]) {
 		trace.beginBlock("Compute visibilities");
 		computeVisibilityOmp(VisibilityRadius);
 		Time = trace.endBlock();
-//		trace.beginBlock("Compute mean distance visibility");
-//		computeMeanDistanceVisibility();
-//		Time = trace.endBlock();
+		//		trace.beginBlock("Compute mean distance visibility");
+		//		computeMeanDistanceVisibility();
+		//		Time = trace.endBlock();
 	} else {
 		polyscope::init();
 		psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",
@@ -1568,5 +1586,4 @@ int main(int argc, char *argv[]) {
 		polyscope::show();
 	}
 	return EXIT_SUCCESS;
-
 }
