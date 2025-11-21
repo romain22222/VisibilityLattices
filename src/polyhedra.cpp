@@ -67,7 +67,7 @@ namespace Polyhedra {
 					const RealPoint &n = pl.first;
 					double d = pl.second;
 
-					double dist = n.dot(x) - d;
+					double dist = n.dot(x) - d*d;
 					if (dist > 0) // outside half-space → project
 						totalCorrection -= gamma * dist * n;
 				}
@@ -81,18 +81,22 @@ namespace Polyhedra {
 		}
 
 		RealVector gradient(const RealPoint &p) const {
-			double maxDist = -1e300;
-			RealVector bestN(0, 0, 0);
-
-			for (auto &pl: myPlanes) {
-				double dist = pl.first.dot(p) - pl.second;
-				if (dist > maxDist) {
+			auto np = nearestPoint(p, 1e-10, 100, 0.5);
+			// First compute the nearest plane(s) to p
+			double maxDist = -std::numeric_limits<double>::infinity();
+			for (const auto &pl: myPlanes) {
+				double dist = pl.first.dot(np) - pl.second*pl.second;
+				if (dist > maxDist)
 					maxDist = dist;
-					bestN = pl.first; // plane normal
-				}
 			}
-
-			return bestN;
+			// Then sum the normals of all planes at this distance
+			RealVector grad(0, 0, 0);
+			for (const auto &pl: myPlanes) {
+				double dist = pl.first.dot(np) - pl.second*pl.second;
+				if (std::abs(dist - maxDist) < 1e-10) // consider numerical precision
+					grad += pl.first;
+			}
+			return normalize(grad);
 		}
 
 	};
@@ -122,7 +126,7 @@ namespace Polyhedra {
 			};
 
 			for (const auto &n: normals)
-				planes.emplace_back(normalize(n), d);
+				planes.emplace_back(n, d);
 		} else if (shape == "dodecahedron") {
 			double phi = (1.0 + std::sqrt(5.0)) / 2.0;
 			std::vector<RealPoint> normals = {
