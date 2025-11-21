@@ -69,6 +69,7 @@ std::vector<Point> pointels;
 std::size_t pointel_idx = 0;
 Point selected_point;
 CountedPtr<SH3::ImplicitShape3D> implicit_shape(nullptr);
+CountedPtr<Polyhedra::PolyhedronShape> polyhedra(nullptr);
 CountedPtr<SH3::BinaryImage> binary_image(nullptr);
 CountedPtr<SH3::DigitalSurface> digital_surface(nullptr);
 CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
@@ -76,6 +77,7 @@ CountedPtr<SH3::SurfaceMesh> primal_surface(nullptr);
 std::vector<RealPoint> visibility_normals;
 std::vector<RealPoint> normalVisibilityColors;
 std::vector<RealPoint> normalIIColors;
+std::vector<RealPoint> normalTrueColors;
 std::vector<RealPoint> visibility_sharps;
 
 std::vector<RealPoint> true_normals;
@@ -960,9 +962,17 @@ void doRedisplayNormalAsColors() {
 	for (const auto &n: ii_normals) {
 		normalIIColors.push_back(0.5f * (n + 1.0f));
 	}
-
 	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
 	psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
+
+	if (!true_normals.empty()) {
+		normalTrueColors.clear();
+		normalTrueColors.reserve(true_normals.size());
+		for (const auto &n: true_normals) {
+			normalTrueColors.push_back(0.5f * (n + 1.0f));
+		}
+		psPrimalMesh->addVertexColorQuantity("Normals true as colors", normalTrueColors);
+	}
 }
 
 void computeL2looErrors() {
@@ -1443,7 +1453,8 @@ int main(int argc, char *argv[]) {
 			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
-			binary_image = Polyhedra::makeBinaryPolyhedron(polynomial, gridstep, minAABB, maxAABB);
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
 			std::cout << "Digitization done." << std::endl;
 			K = SH3::getKSpace(binary_image, params);
 			std::cout << "KSpace done." << std::endl;
@@ -1467,7 +1478,9 @@ int main(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
-	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+	if (Polyhedra::isPolyhedron(polynomial)) {
+		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
+	} else if (is_polynomial) {
 		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
 	}
 	// Need to convert the faces
@@ -1490,7 +1503,7 @@ int main(int argc, char *argv[]) {
 	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 	primal_surface->faceNormals() = surfel_trivial_normals;
 	params("r-radius", iiRadius);
-//	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 	for (auto i = 1; i < t_ring + 3; i++) {
 		primal_surface->computeVertexNormalsFromFaceNormals();
 		primal_surface->computeFaceNormalsFromVertexNormals();
@@ -1498,10 +1511,10 @@ int main(int argc, char *argv[]) {
 	}
 	trivial_normals = primal_surface->vertexNormals();
 	trivial_normals.resize(pointels.size());
-//	ii_normals.resize(pointels.size());
+	ii_normals.resize(pointels.size());
 	true_normals.resize(pointels.size());
 	for (auto &n: trivial_normals) n = RealVector::zero;
-//	for (auto &n: ii_normals) n = RealVector::zero;
+	for (auto &n: ii_normals) n = RealVector::zero;
 	for (auto &n: true_normals) n = RealVector::zero;
 	for (auto k = 0; k < surfels.size(); k++) {
 		const auto &surf = surfels[k];
@@ -1510,14 +1523,14 @@ int main(int argc, char *argv[]) {
 			const auto p = K.uCoords(c0);
 			const auto idx = pTC->index(p);
 			trivial_normals[idx] += surfel_trivial_normals[k];
-//			ii_normals[idx] += surfel_ii_normals[k];
-			if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+			ii_normals[idx] += surfel_ii_normals[k];
+			if (is_polynomial) {
 				true_normals[idx] += surfel_true_normals[k];
 			}
 		}
 	}
 	for (auto &n: trivial_normals) n /= n.norm();
-//	for (auto &n: ii_normals) n /= n.norm();
+	for (auto &n: ii_normals) n /= n.norm();
 	for (auto &n: true_normals) n /= n.norm();
 
 	primal_surface->vertexNormals() = trivial_normals;
