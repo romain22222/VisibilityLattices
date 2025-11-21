@@ -67,7 +67,7 @@ namespace Polyhedra {
 					const RealPoint &n = pl.first;
 					double d = pl.second;
 
-					double dist = n.dot(x) - d*d;
+					double dist = n.dot(x) - d * d;
 					if (dist > 0) // outside half-space → project
 						totalCorrection -= gamma * dist * n;
 				}
@@ -85,14 +85,14 @@ namespace Polyhedra {
 			// First compute the nearest plane(s) to p
 			double maxDist = -std::numeric_limits<double>::infinity();
 			for (const auto &pl: myPlanes) {
-				double dist = pl.first.dot(np) - pl.second*pl.second;
+				double dist = pl.first.dot(np) - pl.second * pl.second;
 				if (dist > maxDist)
 					maxDist = dist;
 			}
 			// Then sum the normals of all planes at this distance
 			RealVector grad(0, 0, 0);
 			for (const auto &pl: myPlanes) {
-				double dist = pl.first.dot(np) - pl.second*pl.second;
+				double dist = pl.first.dot(np) - pl.second * pl.second;
 				if (std::abs(dist - maxDist) < 1e-10) // consider numerical precision
 					grad += pl.first;
 			}
@@ -147,30 +147,69 @@ namespace Polyhedra {
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
 		} else if (shape == "icosahedron") {
 			double phi = (1.0 + std::sqrt(5.0)) / 2.0;
-			std::vector<RealPoint> normals = {
-				{0,    1,    phi},
-				{0,    -1,   phi},
-				{0,    1,    -phi},
-				{0,    -1,   -phi},
-				{1,    phi,  0},
-				{-1,   phi,  0},
-				{1,    -phi, 0},
-				{-1,   -phi, 0},
-				{phi,  0,    1},
-				{-phi, 0,    1},
-				{phi,  0,    -1},
-				{-phi, 0,    -1},
-				{1,    1,    phi},
-				{-1,   1,    phi},
-				{1,    -1,   phi},
-				{-1,   -1,   phi},
-				{1,    1,    -phi},
-				{-1,   1,    -phi},
-				{1,    -1,   -phi},
-				{-1,   -1,   -phi}
+			std::vector<RealPoint> positions = {
+				{phi,  1,    0},
+				{-phi, 1,    0},
+				{phi,  -1,   0},
+				{-phi, -1,   0},
+				{1,    0,    phi},
+				{1,    0,    -phi},
+				{-1,   0,    phi},
+				{-1,   0,    -phi},
+				{0,    phi,  1},
+				{0,    -phi, 1},
+				{0,    phi,  -1},
+				{0,    -phi, -1}
 			};
+			std::vector<RealPoint> normals;
+			for (size_t i = 0; i < positions.size(); ++i) {
+				for (size_t j = i + 1; j < positions.size(); ++j) {
+					for (size_t k = j + 1; k < positions.size(); ++k) {
+						// First check if they form a face (ie distance between points is correct)
+						double d1 = (positions[i] - positions[j]).norm();
+						double d2 = (positions[j] - positions[k]).norm();
+						double d3 = (positions[k] - positions[i]).norm();
+						double expected = 2;
+						if (std::abs(d1 - expected) < 1e-5 &&
+						    std::abs(d2 - expected) < 1e-5 &&
+						    std::abs(d3 - expected) < 1e-5) {
+							// They form a face → compute normal
+							RealVector v1 = positions[j] - positions[i];
+							RealVector v2 = positions[k] - positions[i];
+							RealVector n = v1.crossProduct(v2);
+							// Ensure normal points outward
+							RealPoint center = (positions[i] + positions[j] + positions[k]) /
+							                   RealPoint(3, 3, 3);
+							if (n.dot(center) < 0)
+								n = -n;
+							normals.push_back(n);
+						}
+					}
+				}
+			}
 			double d = 3;
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
+			auto normalToPutDown = planes[0].first;
+			auto normalDown = RealPoint(0, -1, 0 );
+			auto c = normalToPutDown.dot(normalDown);
+			auto v = normalToPutDown.crossProduct(normalDown);
+			auto vx = SimpleMatrix<double, 3, 3>();
+			vx(0, 0) = 0;
+			vx(0, 1) = -v[2];
+			vx(0, 2) = v[1];
+			vx(1, 0) = v[2];
+			vx(1, 1) = 0;
+			vx(1, 2) = -v[0];
+			vx(2, 0) = -v[1];
+			vx(2, 1) = v[0];
+			vx(2, 2) = 0;
+			SimpleMatrix<double, 3, 3> R;
+			R.identity();
+			R += vx;
+			R += (vx * vx) * (1 / (1 + c));
+			for (auto &p: planes) {
+				p.first = R * p.first;
+			}
 		} else {
 			trace.error() << "[makeImplicitPolyhedron] Unknown shape: " << shape << std::endl;
 		}
