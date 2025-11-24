@@ -6,6 +6,7 @@ namespace Polyhedra {
 	using namespace DGtal;
 	using namespace Z3i;
 	using Scalar = RealVector::Component;
+	using Scalars = std::vector<Scalar>;
 
 	bool isPolyhedron(const std::string &shape) {
 		static const std::vector<std::string> names =
@@ -31,12 +32,14 @@ namespace Polyhedra {
 		using Space = Z3i::Space;
 		using RealPoint = Space::RealPoint;
 		using RealVector = Space::RealVector;
+
 	private:
-		std::vector<std::pair<RealPoint, double>> myPlanes;
+		std::vector<std::pair<RealPoint, double> > myPlanes;
 
 	public:
-		PolyhedronShape(const std::vector<std::pair<RealPoint, double>> &planes)
-			: myPlanes(planes) {}
+		PolyhedronShape(const std::vector<std::pair<RealPoint, double> > &planes)
+			: myPlanes(planes) {
+		}
 
 		DGtal::Orientation orientation(const RealPoint &p) const {
 			std::vector<DGtal::Orientation> orientations(myPlanes.size(), DGtal::INSIDE);
@@ -48,7 +51,6 @@ namespace Polyhedra {
 				else if (dot == pl.second)
 					orientations[i] = DGtal::ON;
 				i++;
-
 			}
 			if (std::ranges::any_of(orientations, [](DGtal::Orientation o) { return o == DGtal::ON; }))
 				return DGtal::ON;
@@ -131,27 +133,27 @@ namespace Polyhedra {
 	};
 
 	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape) {
-		std::vector<std::pair<RealPoint, double>> planes;
+		std::vector<std::pair<RealPoint, double> > planes;
 
 		if (shape == "cube") {
 			double d = 5.0;
 			planes = {
-				{{1,  0,  0},  d},
-				{{-1, 0,  0},  d},
-				{{0,  1,  0},  d},
-				{{0,  -1, 0},  d},
-				{{0,  0,  1},  d},
-				{{0,  0,  -1}, d}
+				{{1, 0, 0}, d},
+				{{-1, 0, 0}, d},
+				{{0, 1, 0}, d},
+				{{0, -1, 0}, d},
+				{{0, 0, 1}, d},
+				{{0, 0, -1}, d}
 			};
 		} else if (shape == "tetrahedron" || shape == "triangular_pyramid") {
 			// Regular tetrahedron with base normal (0,-1,0)
 			double d = 3;
 
 			std::vector<RealPoint> normals = {
-				{0.0,     -1.0,   0.0},               // base
-				{0.9428,  0.3333, 0.0000},      // side 1
-				{-0.4714, 0.3333, 0.8165},      // side 2
-				{-0.4714, 0.3333, -0.8165}       // side 3
+				{0.0, -1.0, 0.0}, // base
+				{0.9428, 0.3333, 0.0000}, // side 1
+				{-0.4714, 0.3333, 0.8165}, // side 2
+				{-0.4714, 0.3333, -0.8165} // side 3
 			};
 
 			for (const auto &n: normals)
@@ -159,36 +161,36 @@ namespace Polyhedra {
 		} else if (shape == "dodecahedron") {
 			double phi = (1.0 + std::sqrt(5.0)) / 2.0;
 			std::vector<RealPoint> normals = {
-				{0,    1,    phi},
-				{0,    -1,   phi},
-				{0,    1,    -phi},
-				{0,    -1,   -phi},
-				{1,    phi,  0},
-				{-1,   phi,  0},
-				{1,    -phi, 0},
-				{-1,   -phi, 0},
-				{phi,  0,    1},
-				{-phi, 0,    1},
-				{phi,  0,    -1},
-				{-phi, 0,    -1}
+				{0, 1, phi},
+				{0, -1, phi},
+				{0, 1, -phi},
+				{0, -1, -phi},
+				{1, phi, 0},
+				{-1, phi, 0},
+				{1, -phi, 0},
+				{-1, -phi, 0},
+				{phi, 0, 1},
+				{-phi, 0, 1},
+				{phi, 0, -1},
+				{-phi, 0, -1}
 			};
 			double d = 3;
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
 		} else if (shape == "icosahedron") {
 			double phi = (1.0 + std::sqrt(5.0)) / 2.0;
 			std::vector<RealPoint> positions = {
-				{phi,  1,    0},
-				{-phi, 1,    0},
-				{phi,  -1,   0},
-				{-phi, -1,   0},
-				{1,    0,    phi},
-				{1,    0,    -phi},
-				{-1,   0,    phi},
-				{-1,   0,    -phi},
-				{0,    phi,  1},
-				{0,    -phi, 1},
-				{0,    phi,  -1},
-				{0,    -phi, -1}
+				{phi, 1, 0},
+				{-phi, 1, 0},
+				{phi, -1, 0},
+				{-phi, -1, 0},
+				{1, 0, phi},
+				{1, 0, -phi},
+				{-1, 0, phi},
+				{-1, 0, -phi},
+				{0, phi, 1},
+				{0, -phi, 1},
+				{0, phi, -1},
+				{0, -phi, -1}
 			};
 			std::vector<RealPoint> normals;
 			for (size_t i = 0; i < positions.size(); ++i) {
@@ -219,7 +221,7 @@ namespace Polyhedra {
 			double d = 3;
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
 			auto normalToPutDown = planes[0].first;
-			auto normalDown = RealPoint(0, -1, 0 );
+			auto normalDown = RealPoint(0, -1, 0);
 			auto c = normalToPutDown.dot(normalDown);
 			auto v = normalToPutDown.crossProduct(normalDown);
 			auto vx = SimpleMatrix<double, 3, 3>();
@@ -273,33 +275,72 @@ namespace Polyhedra {
 		return binary_image;
 	}
 
+	template<typename ReturnType, template<typename> class Functor>
+	static std::vector<ReturnType> getMeasureEstimation(
+		const CountedPtr<PolyhedronShape> &shape,
+		const KSpace &K,
+		const SH3::SurfelRange &surfels,
+		const Parameters &params) {
+		using MeasureFunctor = Functor<PolyhedronShape>;
+		using MeasureEstimator = TrueDigitalSurfaceLocalEstimator
+			<KSpace, PolyhedronShape, MeasureFunctor>;
+		std::vector<ReturnType> n_true_estimations;
+		MeasureEstimator true_estimator;
+		int maxIter = params["projectionMaxIter"].as<int>();
+		double accuracy = params["projectionAccuracy"].as<double>();
+		double gamma = params["projectionGamma"].as<double>();
+		Scalar gridstep = params["gridstep"].as<Scalar>();
+		true_estimator.attach(*shape);
+		true_estimator.setParams(K, MeasureFunctor(), maxIter, accuracy, gamma);
+		true_estimator.init(gridstep, surfels.begin(), surfels.end());
+		true_estimator.eval(surfels.begin(), surfels.end(),
+		                    std::back_inserter(n_true_estimations));
+		return n_true_estimations;
+	}
+
 	std::vector<RealVector>
 	getNormalVectors(const CountedPtr<PolyhedronShape> &shape,
 	                 const KSpace &K,
 	                 const SH3::SurfelRange &surfels,
 	                 const Parameters &params) {
-		using NormalEstimator =
-			DGtal::TrueDigitalSurfaceLocalEstimator<
-				KSpace,
-				PolyhedronShape,
-				NormalFunctor>;
-
-		std::vector<RealVector> n_estimations;
-		NormalEstimator estimator;
-
-		int maxIter = params["projectionMaxIter"].as<int>();
-		auto accuracy = params["projectionAccuracy"].as<double>();
-		auto gamma = params["projectionGamma"].as<double>();
-		auto h = params["gridstep"].as<Scalar>();
-
-		estimator.attach(*shape);
-		estimator.setParams(K, NormalFunctor(), maxIter, accuracy, gamma);
-		estimator.init(h, surfels.begin(), surfels.end());
-		estimator.eval(surfels.begin(), surfels.end(),
-		               std::back_inserter(n_estimations));
-
-		return n_estimations;
+		return getMeasureEstimation<RealVector, sgf::ShapeNormalVectorFunctor >(
+			shape, K, surfels, params);
 	}
 
+	// Mean curvature
+	Scalars getMeanCurvatureEstimation(const CountedPtr<PolyhedronShape> &shape,
+	                                   const KSpace &K,
+	                                   const SH3::SurfelRange &surfels,
+	                                   const Parameters &params) {
+		return getMeasureEstimation<Scalar, sgf::ShapeMeanCurvatureFunctor >(
+			shape, K, surfels, params);
+	}
 
+	// Gaussian curvature
+	Scalars getGaussianCurvatureEstimation(const CountedPtr<PolyhedronShape> &shape,
+	                                       const KSpace &K,
+	                                       const SH3::SurfelRange &surfels,
+	                                       const Parameters &params) {
+		return getMeasureEstimation<Scalar, sgf::ShapeGaussianCurvatureFunctor >(
+			shape, K, surfels, params);
+	}
+
+	// Principal curvatures
+	Scalars getFirstPrincipalCurvatureEstimation(const CountedPtr<PolyhedronShape> &shape,
+	                                         const KSpace &K,
+	                                         const SH3::SurfelRange &surfels,
+	                                         const Parameters &params) {
+		return getMeasureEstimation<Scalar,
+			sgf::ShapeFirstPrincipalCurvatureFunctor >(
+			shape, K, surfels, params);
+	}
+
+	Scalars getSecondPrincipalCurvatureEstimation(const CountedPtr<PolyhedronShape> &shape,
+	                                              const KSpace &K,
+	                                              const SH3::SurfelRange &surfels,
+	                                              const Parameters &params) {
+		return getMeasureEstimation<Scalar,
+			sgf::ShapeSecondPrincipalCurvatureFunctor >(
+			shape, K, surfels, params);
+	}
 }

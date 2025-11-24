@@ -106,6 +106,7 @@ double gridstep = 1.0;
 int OMP_max_nb_threads = 1;
 double Time = 0.0;
 bool noInterface = false;
+std::string polynomial;
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -991,10 +992,19 @@ void computeL2looErrorsNormals() {
 }
 
 void computeL2looErrorsCurvatures() {
-	const auto true_H = SHG3::getMeanCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
-	const auto true_G = SHG3::getGaussianCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
-	const auto true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
-	const auto true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape,K,surfels, SHG3::parametersShapeGeometry());
+	SH3::Scalars true_H, true_G, true_K1, true_K2;
+	if (Polyhedra::isPolyhedron(polynomial)) {
+		true_H = Polyhedra::getMeanCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+		true_G = Polyhedra::getGaussianCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+		true_K1 = Polyhedra::getFirstPrincipalCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+		true_K2 = Polyhedra::getSecondPrincipalCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+	}
+	else {
+		true_H = SHG3::getMeanCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+		true_G = SHG3::getGaussianCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+		true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+		true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+	}
 
 	std::cout << "L2 error mean curvature: " << SHG3::getScalarsNormL2(H, true_H) << std::endl;
 	std::cout << "Loo error mean curvature: " << SHG3::getScalarsNormLoo(H, true_H) << std::endl;
@@ -1093,6 +1103,12 @@ void myCallback() {
 		computeCurvatures();
 		Time = trace.endBlock();
 		doRedisplayCurvatures();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Compute curvature errors")) {
+		trace.beginBlock("Compute visibilities Curvature Errors");
+		computeL2looErrorsCurvatures();
+		Time = trace.endBlock();
 	}
 #ifdef USE_CUDA_VISIBILITY
 	if (ImGui::Button("Compute CUDA visibilities")) {
@@ -1197,7 +1213,6 @@ int gpuRun(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	std::string polynomial;
 	int minAABB = -10;
 	int maxAABB = 10;
 	bool listP = false;
@@ -1249,19 +1264,28 @@ int gpuRun(int argc, char *argv[]) {
 	bool is_polynomial = !polynomial.empty();
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
-		params("polynomial", polynomial);
-		params("gridstep", gridstep);
-		params("minAABB", minAABB);
-		params("maxAABB", maxAABB);
-		params("offset", 1.0);
-		params("closed", 1);
-		implicit_shape = SH3::makeImplicitShape3D(params);
-		auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-		K = SH3::getKSpace(params);
-		binary_image = SH3::makeBinaryImage(digitized_shape,
-		                                    SH3::Domain(K.lowerBound(),
-		                                                K.upperBound()),
-		                                    params);
+		if (!Polyhedra::isPolyhedron(polynomial)) {
+			params("polynomial", polynomial);
+			params("gridstep", gridstep);
+			params("minAABB", minAABB);
+			params("maxAABB", maxAABB);
+			params("offset", 1.0);
+			params("closed", 1);
+			implicit_shape = SH3::makeImplicitShape3D(params);
+			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
+			K = SH3::getKSpace(params);
+			binary_image = SH3::makeBinaryImage(digitized_shape,
+			                                    SH3::Domain(K.lowerBound(),
+			                                                K.upperBound()),
+			                                    params);
+		} else {
+			std::cout << "Using polyhedron: " << polynomial << std::endl;
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
+			std::cout << "Digitization done." << std::endl;
+			K = SH3::getKSpace(binary_image, params);
+			std::cout << "KSpace done." << std::endl;
+		}
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
@@ -1281,6 +1305,11 @@ int gpuRun(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
+	if (Polyhedra::isPolyhedron(polynomial)) {
+		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
+	} else if (is_polynomial) {
+		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+	}
 	// Need to convert the faces
 	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
 		primal_faces.push_back(primal_surface->incidentVertices(face));
@@ -1301,6 +1330,7 @@ int gpuRun(int argc, char *argv[]) {
 		int t_ring = int(round(params["t-ring"].as<double>()));
 		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 		primal_surface->faceNormals() = surfel_trivial_normals;
+		surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 		for (auto i = 1; i < t_ring + 3; i++) {
 			primal_surface->computeVertexNormalsFromFaceNormals();
 			primal_surface->computeFaceNormalsFromVertexNormals();
@@ -1308,7 +1338,11 @@ int gpuRun(int argc, char *argv[]) {
 		}
 		trivial_normals = primal_surface->vertexNormals();
 		trivial_normals.resize(pointels.size());
+		ii_normals.resize(pointels.size());
+		true_normals.resize(pointels.size());
 		for (auto &n: trivial_normals) n = RealVector::zero;
+		for (auto &n: ii_normals) n = RealVector::zero;
+		for (auto &n: true_normals) n = RealVector::zero;
 		for (auto k = 0; k < surfels.size(); k++) {
 			const auto &surf = surfels[k];
 			const auto cells0 = SH3::getPrimalVertices(K, surf);
@@ -1316,9 +1350,15 @@ int gpuRun(int argc, char *argv[]) {
 				const auto p = K.uCoords(c0);
 				const auto idx = pTC->index(p);
 				trivial_normals[idx] += surfel_trivial_normals[k];
+				ii_normals[idx] += surfel_ii_normals[k];
+				if (is_polynomial) {
+					true_normals[idx] += surfel_true_normals[k];
+				}
 			}
 		}
 		for (auto &n: trivial_normals) n /= n.norm();
+		for (auto &n: ii_normals) n /= n.norm();
+		for (auto &n: true_normals) n /= n.norm();
 		primal_surface->vertexNormals() = trivial_normals;
 		trace.endBlock();
 
@@ -1398,7 +1438,6 @@ int main(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	std::string polynomial;
 	int minAABB = -10;
 	int maxAABB = 10;
 	int VisibilityRadiusTmp = -1;
