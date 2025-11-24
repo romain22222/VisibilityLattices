@@ -99,36 +99,28 @@ namespace Polyhedra {
 			return normalize(grad);
 		}
 
-		double meanCurvature(const RealPoint &p) const {
+		int countIntersections(const RealPoint &p) const {
 			auto intersectingPlanes = 0;
 			for (const auto &pl: myPlanes) {
 				if (pl.first.dot(p) >= pl.second) {
 					intersectingPlanes++;
 				}
 			}
-			return intersectingPlanes < 2 ? 0.0 : std::numeric_limits<double>::infinity();
+			return intersectingPlanes;
+		}
+
+		double meanCurvature(const RealPoint &p) const {
+			return countIntersections(p) < 2 ? 0.0 : std::numeric_limits<double>::infinity();
 		}
 
 		double gaussianCurvature(const RealPoint &p) const {
-			auto intersectingPlanes = 0;
-			for (const auto &pl: myPlanes) {
-				if (pl.first.dot(p) >= pl.second) {
-					intersectingPlanes++;
-				}
-			}
-			return intersectingPlanes < 3 ? 0.0 : std::numeric_limits<double>::infinity();
+			return countIntersections(p) < 3 ? 0.0 : std::numeric_limits<double>::infinity();
 		}
 
 		void principalCurvatures(const RealPoint &p,
 		                         double &k1,
 		                         double &k2) const {
-			auto intersectingPlanes = 0;
-			for (const auto &pl: myPlanes) {
-				if (pl.first.dot(p) >= pl.second) {
-					intersectingPlanes++;
-				}
-			}
-			if (intersectingPlanes < 2) {
+			if (countIntersections(p) < 2) {
 				k1 = 0.0;
 				k2 = 0.0;
 			} else {

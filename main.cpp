@@ -1204,6 +1204,7 @@ int gpuRun(int argc, char *argv[]) {
 	bool computeCurvaturesFlag = false;
 	bool computeNormalsFlag = false;
 	double sigmaTmp = -1.0;
+	int VisibilityRadiusTmp = -1;
 	std::string saveVisibilityFilename;
 	std::string visibComputeMethod = "OMP_GPU";
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
@@ -1217,7 +1218,7 @@ int gpuRun(int argc, char *argv[]) {
 	               "the maximal threshold M (included) for a voxel to belong to the digital shape.");
 	app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
 	app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
-	app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+	app.add_option("-r,--radius", VisibilityRadiusTmp, "the radius of the visibility sphere");
 	app.add_flag("-l", listP, "lists the known named polynomials.");
 	app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
 	app.add_flag("--gpuRun", noInterface, "only work as the job asked for gpuRun function");
@@ -1335,6 +1336,11 @@ int gpuRun(int argc, char *argv[]) {
 		sigma = 5 * pow(gridstep, -0.5);
 	}
 	minus2SigmaSquare = -2 * sigma * sigma;
+	if (VisibilityRadiusTmp > 0) {
+		VisibilityRadius = VisibilityRadiusTmp;
+	} else {
+		VisibilityRadius = 2 * static_cast<int>(sigma);
+	}
 	std::cout << "sigma = " << sigma << std::endl;
 
 
@@ -1395,6 +1401,7 @@ int main(int argc, char *argv[]) {
 	std::string polynomial;
 	int minAABB = -10;
 	int maxAABB = 10;
+	int VisibilityRadiusTmp = -1;
 	bool listP = false;
 	bool gpuRunFlag = false;
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
@@ -1408,7 +1415,7 @@ int main(int argc, char *argv[]) {
 	               "the maximal threshold M (included) for a voxel to belong to the digital shape.");
 	app.add_option("--minAABB", minAABB, "the lowest coordinate for the domain.");
 	app.add_option("--maxAABB", maxAABB, "the highest coordinate for the domain.");
-	app.add_option("-r,--radius", VisibilityRadius, "the radius of the visibility sphere");
+	app.add_option("-r,--radius", VisibilityRadiusTmp, "the radius of the visibility sphere");
 	app.add_flag("-l", listP, "lists the known named polynomials.");
 	app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
 	app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
@@ -1557,6 +1564,11 @@ int main(int argc, char *argv[]) {
 		sigma = sigmaTmp;
 	} else {
 		sigma = 5 * pow(gridstep, -0.5);
+	}
+	if (VisibilityRadiusTmp > 0) {
+		VisibilityRadius = VisibilityRadiusTmp;
+	} else {
+		VisibilityRadius = 2 * static_cast<int>(sigma);
 	}
 	minus2SigmaSquare = -2 * sigma * sigma;
 
