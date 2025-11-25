@@ -107,6 +107,7 @@ int OMP_max_nb_threads = 1;
 double Time = 0.0;
 bool noInterface = false;
 std::string polynomial;
+char *inputVisibilityFilename = new char[256]("visibility.vis");
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -708,6 +709,8 @@ std::istream &operator>>(std::istream &is, Visibility &visib) {
 void loadVisibility(const std::string &filename) {
 	std::ifstream file;
 	file.open(filename);
+	// Print full path
+	trace.info() << "Loading visibility from file: " << std::filesystem::absolute(filename) << std::endl;
 	file >> visibility;
 	/*
 		// print first infos of each variable to test
@@ -1033,7 +1036,6 @@ void computeVisibilityCudaCPU(int radius) {
 #endif
 
 void myCallback() {
-	char *inputVisibilityFilename = new char[256]("visibility.vis");
 	std::string visibilityFilename;
 	// Select a vertex with the mouse
 	if (polyscope::haveSelection()) {
