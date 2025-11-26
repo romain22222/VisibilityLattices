@@ -978,6 +978,7 @@ void doRedisplayNormalAsColors() {
 	}
 }
 
+
 void computeL2looErrorsNormals() {
 	//	std::cout << "Computing L2 and Loo errors" << std::endl;
 	std::vector<double> angle_dev(visibility_normals.size());
@@ -994,29 +995,57 @@ void computeL2looErrorsNormals() {
 	std::cout << "Loo error normals: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
 
+std::vector<double> operator-(const std::vector<double> &lhs, const std::vector<double> &rhs) {
+	std::vector<double> res(lhs.size());
+	for (size_t i = 0; i < lhs.size(); ++i) {
+		res[i] = lhs[i] - rhs[i];
+	}
+	return res;
+}
+
 void computeL2looErrorsCurvatures() {
 	SH3::Scalars true_H, true_G, true_K1, true_K2;
 	if (Polyhedra::isPolyhedron(polynomial)) {
 		true_H = Polyhedra::getMeanCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
 		true_G = Polyhedra::getGaussianCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
-		true_K1 = Polyhedra::getFirstPrincipalCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
-		true_K2 = Polyhedra::getSecondPrincipalCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
-	}
-	else {
+		true_K1 = Polyhedra::getFirstPrincipalCurvatureEstimation(polyhedra, K, surfels,
+		                                                          SHG3::parametersShapeGeometry());
+		true_K2 = Polyhedra::getSecondPrincipalCurvatureEstimation(polyhedra, K, surfels,
+		                                                           SHG3::parametersShapeGeometry());
+	} else {
 		true_H = SHG3::getMeanCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
 		true_G = SHG3::getGaussianCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
 		true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
 		true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
 	}
 
-	std::cout << "L2 error mean curvature: " << SHG3::getScalarsNormL2(H, true_H) << std::endl;
-	std::cout << "Loo error mean curvature: " << SHG3::getScalarsNormLoo(H, true_H) << std::endl;
-	std::cout << "L2 error Gaussian curvature: " << SHG3::getScalarsNormL2(G, true_G) << std::endl;
-	std::cout << "Loo error Gaussian curvature: " << SHG3::getScalarsNormLoo(G, true_G) << std::endl;
-	std::cout << "L2 error K1 curvature: " << SHG3::getScalarsNormL2(K1, true_K1) << std::endl;
-	std::cout << "Loo error K1 curvature: " << SHG3::getScalarsNormLoo(K1, true_K1) << std::endl;
-	std::cout << "L2 error K2 curvature: " << SHG3::getScalarsNormL2(K2, true_K2) << std::endl;
-	std::cout << "Loo error K2 curvature: " << SHG3::getScalarsNormLoo(K2, true_K2) << std::endl;
+	if (!noInterface) {
+		psPrimalMesh->addFaceScalarQuantity("H true curvature", true_H)
+			->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+		psPrimalMesh->addFaceScalarQuantity("G true curvature", true_G)
+			->setMapRange({-0.5 * MaxCurv * MaxCurv, 0.5 * MaxCurv * MaxCurv})->setColorMap("coolwarm");
+		psPrimalMesh->addFaceScalarQuantity("K1 true curvature", true_K1)
+			->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+		psPrimalMesh->addFaceScalarQuantity("K2 true curvature", true_K2)
+			->setMapRange({-MaxCurv, MaxCurv})->setColorMap("coolwarm");
+	}
+
+	for (const auto &[computedC, trueC]: {
+		     std::pair(H, true_H), std::pair(G, true_G), std::pair(K1, true_K1), std::pair(K2, true_K2)
+	     }) {
+		for (auto f: {SHG3::getScalarsNormL2, SHG3::getScalarsNormLoo})
+			std::cout << "L" << (f == SHG3::getScalarsNormL2 ? "2" : "oo")
+				<< " error for " << (computedC == H ? "H" : computedC == G ? "G" : computedC == K1 ? "K1" : "K2")
+				<< " curvature: "
+				<< f(computedC, trueC) << std::endl;
+		if (!noInterface) {
+			psPrimalMesh->addFaceScalarQuantity(
+					std::string("Error ") +
+					(computedC == H ? "H" : computedC == G ? "G" : computedC == K1 ? "K1" : "K2") + " curvature",
+					computedC - trueC)
+				->setMapRange({0.0, MaxCurv})->setColorMap("reds");
+		}
+	}
 }
 
 #ifdef USE_CUDA_VISIBILITY
