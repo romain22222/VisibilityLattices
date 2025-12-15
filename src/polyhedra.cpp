@@ -191,11 +191,10 @@ namespace Polyhedra {
 
 	};
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape) {
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, int d) {
 		std::vector<std::pair<RealPoint, double> > planes;
 
 		if (shape == "cube") {
-			double d = 5.0;
 			planes = {
 				{{1, 0, 0}, d},
 				{{-1, 0, 0}, d},
@@ -206,8 +205,6 @@ namespace Polyhedra {
 			};
 		} else if (shape == "tetrahedron" || shape == "triangular_pyramid") {
 			// Regular tetrahedron with base normal (0,-1,0)
-			double d = 3;
-
 			std::vector<RealPoint> normals = {
 				{0.0, -1.0, 0.0}, // base
 				{0.9428, 0.3333, 0.0000}, // side 1
@@ -233,7 +230,6 @@ namespace Polyhedra {
 				{phi, 0, -1},
 				{-phi, 0, -1}
 			};
-			double d = 3;
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
 		} else if (shape == "icosahedron") {
 			double phi = (1.0 + std::sqrt(5.0)) / 2.0;
@@ -277,7 +273,6 @@ namespace Polyhedra {
 					}
 				}
 			}
-			double d = 3;
 			for (const auto &n: normals) planes.emplace_back(normalize(n), d);
 			auto normalToPutDown = planes[0].first;
 			auto normalDown = RealPoint(0, -1, 0);

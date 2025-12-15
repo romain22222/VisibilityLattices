@@ -12,3 +12,5 @@ cmake-build-*
 /DGMM2025/beamer_aux
 /DGMM2025/beamer_out
 **/visibility.vis
+/shapes/**.vol
+/visibilities/**.vis

@@ -21,7 +21,7 @@ namespace Polyhedra {
 
 	class PolyhedronShape;
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape);
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, int d = 1.0);
 
 	typedef sgf::ShapeNormalVectorFunctor<PolyhedronShape> NormalFunctor;
 

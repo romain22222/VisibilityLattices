@@ -14,10 +14,10 @@
 #export OMP_NUM_THREADS=128
 echo $OMP_NUM_THREADS
 
-# Do a for loop that prints the numbers from 1 to 0.01 in steps of 0.01
-for i in $(seq 1 -0.01 0.01); do
+# Do a for loop that prints the numbers from 1 to 0.02 in steps of 0.01
+for i in $(seq 1 -0.01 0.02); do
   tmp=$(printf "%.0f" $(echo "$i * 100" | bc))
-  /home/negror/VisibilityLattices/build/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --save "visibility-${tmp}.vis"
-#  ./cmake-build-release/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --save "visibility-${tmp}.vis"
+#  /home/negror/VisibilityLattices/build/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --save "./visibilities/visibility-${tmp}.vis"
+  ./cmake-build-release/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --saveVisibility "./visibilities/visibility-${tmp}.vis"
 #  ./cmake-build-release/visibilityLattices -l
 done

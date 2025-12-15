@@ -1249,9 +1249,11 @@ int gpuRun(int argc, char *argv[]) {
 	bool listP = false;
 	bool computeCurvaturesFlag = false;
 	bool computeNormalsFlag = false;
+	bool noFurtherComputation = false;
 	double sigmaTmp = -1.0;
 	int VisibilityRadiusTmp = -1;
 	std::string saveVisibilityFilename;
+	std::string saveShapeFilename = "shape.vol";
 	std::string visibComputeMethod = "OMP_GPU";
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
 	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
@@ -1272,9 +1274,12 @@ int gpuRun(int argc, char *argv[]) {
 	app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
 	app.add_flag("--computeCurvatures", computeCurvaturesFlag,
 	             "compute curvatures after visibility normals computation");
-	app.add_option("--save", saveVisibilityFilename, "a filename to save the computed visibility");
+	app.add_option("--saveShapeFilename", saveShapeFilename, "a flag to save the primal surface shape in an OBJ file after computation");
+	app.add_option("--saveVisibility", saveVisibilityFilename, "a filename to save the computed visibility");
 	app.add_option("--visibComputeMethod", visibComputeMethod,
 	               "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
+	app.add_flag("--noFurtherComputation", noFurtherComputation,
+	             "if set, no computation after generating the shape");
 
 	CLI11_PARSE(app, argc, argv)
 	if (listP) {
@@ -1325,6 +1330,13 @@ int gpuRun(int argc, char *argv[]) {
 		binary_image = SH3::makeBinaryImage(filename, params);
 		K = SH3::getKSpace(binary_image, params);
 		trace.endBlock();
+	}
+
+	if (!saveShapeFilename.empty()) {
+		GenericWriter<SH3::BinaryImage>::exportFile(saveShapeFilename, *binary_image);
+	}
+	if (noFurtherComputation) {
+		return 0;
 	}
 
 	std::vector<std::vector<std::size_t> > primal_faces;
@@ -1500,9 +1512,12 @@ int main(int argc, char *argv[]) {
 	app.add_flag("--computeNormals", ignore, "gpuRun only : compute visibility normals after visibility computation");
 	app.add_flag("--computeCurvatures", ignore,
 	             "gpuRun only : compute curvatures after visibility normals computation");
-	app.add_option("--save", _, "gpuRun only : a filename to save the computed visibility");
+	app.add_option("--saveShapeFilename", _, "gpuRun only : a flag to save the primal surface shape in an OBJ file after computation");
+	app.add_option("--saveVisibility", _, "gpuRun only : a filename to save the computed visibility");
 	app.add_option("--visibComputeMethod", _,
 	               "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
+	app.add_flag("--noFurtherComputation", ignore,
+	             "gpuRun only : if set, no computation after generating the shape");
 
 	// -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
 	// Parse command line options. Exit on error.
