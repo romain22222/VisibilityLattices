@@ -111,84 +111,24 @@ namespace Polyhedra {
 			return intersectingPlanes;
 		}
 
-		/*double meanCurvature(const RealPoint &p) const {
-			return countIntersections(p) < 2 ? 0.0 : std::numeric_limits<double>::infinity();
-		}
-
-		double gaussianCurvature(const RealPoint &p) const {
-			return countIntersections(p) < 3 ? 0.0 : std::numeric_limits<double>::infinity();
-		}
-
-		void principalCurvatures(const RealPoint &p,
-		                         double &k1,
-		                         double &k2) const {
+		void principalCurvatures(const RealPoint &p, double &k1, double &k2) const {
 			if (countIntersections(p) < 2) {
 				k1 = 0.0;
 				k2 = 0.0;
-			} else {
-				k1 = std::numeric_limits<double>::infinity();
-				k2 = std::numeric_limits<double>::infinity();
 			}
-		}*/
-
-		std::vector<RealPoint> activeNormals(const RealPoint& p) const {
-			std::vector<RealPoint> normals;
-			for (const auto& pl : myPlanes) {
-				double val = pl.first.dot(p);
-				if (std::abs(val - pl.second) < 1e-12) { // point sur la face
-					normals.push_back(pl.first);
-				}
-			}
-			return normals;
-		}
-
-		double edgeAngle(const RealPoint& n1, const RealPoint& n2) const {
-			double c = std::clamp(n1.dot(n2), -1.0, 1.0);
-			return M_PI - std::acos(c);
-		}
-
-		void principalCurvatures(const RealPoint& p, double &k1, double &k2) const {
-			auto normals = activeNormals(p);
-			int k = normals.size();
-			k1 = 0.0;
-
-			if (k < 2) {
-				k2 = 0.0;
-				return;
-			}
-
-			if (k == 2) {
-				k2 = edgeAngle(normals[0], normals[1]);
-				return;
-			}
-
-			double sumTheta = 0.0;
-			for (int i = 0; i < k; ++i) {
-				sumTheta += edgeAngle(normals[i], normals[(i+1) % k]);
-			}
-
-			k1 = 0.0;
-			k2 = sumTheta / k;
+			k1 = std::numeric_limits<double>::infinity();
+			k2 = std::numeric_limits<double>::infinity();
 		}
 
 		double meanCurvature(const RealPoint &p) const {
-			auto normals = activeNormals(p);
-			int k = normals.size();
-
-			if (k < 2)
+			if (countIntersections(p) < 2)
 				return 0.0;
-
-			double sumTheta = 0.0;
-			for (int i = 0; i < k; ++i)
-				sumTheta += edgeAngle(normals[i], normals[(i+1)%k]);
-
-			return 0.5 * sumTheta;
+			return std::numeric_limits<double>::infinity();
 		}
 
 		double gaussianCurvature(const RealPoint &p) const {
 			return 0.0;
 		}
-
 	};
 
 	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, int d) {
@@ -357,7 +297,7 @@ namespace Polyhedra {
 	                 const KSpace &K,
 	                 const SH3::SurfelRange &surfels,
 	                 const Parameters &params) {
-		return getMeasureEstimation<RealVector, sgf::ShapeNormalVectorFunctor >(
+		return getMeasureEstimation<RealVector, sgf::ShapeNormalVectorFunctor>(
 			shape, K, surfels, params);
 	}
 
@@ -366,7 +306,7 @@ namespace Polyhedra {
 	                                   const KSpace &K,
 	                                   const SH3::SurfelRange &surfels,
 	                                   const Parameters &params) {
-		return getMeasureEstimation<Scalar, sgf::ShapeMeanCurvatureFunctor >(
+		return getMeasureEstimation<Scalar, sgf::ShapeMeanCurvatureFunctor>(
 			shape, K, surfels, params);
 	}
 
@@ -375,17 +315,17 @@ namespace Polyhedra {
 	                                       const KSpace &K,
 	                                       const SH3::SurfelRange &surfels,
 	                                       const Parameters &params) {
-		return getMeasureEstimation<Scalar, sgf::ShapeGaussianCurvatureFunctor >(
+		return getMeasureEstimation<Scalar, sgf::ShapeGaussianCurvatureFunctor>(
 			shape, K, surfels, params);
 	}
 
 	// Principal curvatures
 	Scalars getFirstPrincipalCurvatureEstimation(const CountedPtr<PolyhedronShape> &shape,
-	                                         const KSpace &K,
-	                                         const SH3::SurfelRange &surfels,
-	                                         const Parameters &params) {
+	                                             const KSpace &K,
+	                                             const SH3::SurfelRange &surfels,
+	                                             const Parameters &params) {
 		return getMeasureEstimation<Scalar,
-			sgf::ShapeFirstPrincipalCurvatureFunctor >(
+			sgf::ShapeFirstPrincipalCurvatureFunctor>(
 			shape, K, surfels, params);
 	}
 
@@ -394,7 +334,7 @@ namespace Polyhedra {
 	                                              const SH3::SurfelRange &surfels,
 	                                              const Parameters &params) {
 		return getMeasureEstimation<Scalar,
-			sgf::ShapeSecondPrincipalCurvatureFunctor >(
+			sgf::ShapeSecondPrincipalCurvatureFunctor>(
 			shape, K, surfels, params);
 	}
 }
