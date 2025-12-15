@@ -16,12 +16,46 @@ namespace Polyhedra {
 	using namespace Z3i;
 	typedef Shortcuts<KSpace> SH3;
 	typedef ShortcutsGeometry<KSpace> SHG3;
+	typedef std::pair<RealPoint, double> Plane;
+
+	double planeDistance(const Plane &plane, const RealPoint &p, double gridstep);
 
 	bool isPolyhedron(const std::string &shape);
 
-	class PolyhedronShape;
+	class PolyhedronShape {
+	public:
+		using Space = Z3i::Space;
+		using RealPoint = Space::RealPoint;
+		using RealVector = Space::RealVector;
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, int d = 1.0);
+	private:
+		std::vector<Plane> myPlanes;
+		double digitization_gridstep;
+
+	public:
+		PolyhedronShape(const std::vector<Plane> &planes, double gridstep);
+
+		std::vector<Plane> getPlanes() const;
+
+		Orientation orientation(const RealPoint &p) const;
+
+		RealPoint nearestPoint(RealPoint x,
+		                       double accuracy,
+		                       int maxIter,
+		                       double gamma) const;
+
+		RealVector gradient(const RealPoint &p) const;
+
+		int countIntersections(const RealPoint &p) const;
+
+		void principalCurvatures(const RealPoint &p, double &k1, double &k2) const;
+
+		double meanCurvature(const RealPoint &p) const;
+
+		double gaussianCurvature(const RealPoint &p) const;
+	};
+
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, int d = 1.0);
 
 	typedef sgf::ShapeNormalVectorFunctor<PolyhedronShape> NormalFunctor;
 

@@ -975,6 +975,7 @@ void doRedisplayNormalAsColors() {
 			normalTrueColors.push_back(0.5f * (n + 1.0f));
 		}
 		psPrimalMesh->addVertexColorQuantity("Normals true as colors", normalTrueColors);
+		psPrimalMesh->addVertexVectorQuantity("Normals true", true_normals);
 	}
 }
 
@@ -984,6 +985,10 @@ void computeL2looErrorsNormals() {
 	std::vector<double> angle_dev(visibility_normals.size());
 	std::vector<double> dummy(visibility_normals.size(), 0.0);
 	for (int i = 0; i < visibility_normals.size(); ++i) {
+		if (true_normals[i].norm() == 0) {
+			angle_dev[i] = 0.0;
+			continue;
+		}
 		const auto sp = visibility_normals[i].dot(true_normals[i]);
 		const auto fxp = std::min(1.0, std::max(-1.0, sp));
 		angle_dev[i] = acos(fxp);
@@ -1003,21 +1008,55 @@ std::vector<double> operator-(const std::vector<double> &lhs, const std::vector<
 	return res;
 }
 
-void computeL2looErrorsCurvatures() {
-	SH3::Scalars true_H, true_G, true_K1, true_K2;
-	if (Polyhedra::isPolyhedron(polynomial)) {
-		true_H = Polyhedra::getMeanCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
-		true_G = Polyhedra::getGaussianCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
-		true_K1 = Polyhedra::getFirstPrincipalCurvatureEstimation(polyhedra, K, surfels,
-		                                                          SHG3::parametersShapeGeometry());
-		true_K2 = Polyhedra::getSecondPrincipalCurvatureEstimation(polyhedra, K, surfels,
-		                                                           SHG3::parametersShapeGeometry());
-	} else {
-		true_H = SHG3::getMeanCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
-		true_G = SHG3::getGaussianCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
-		true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
-		true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+void computeL2looErrorsCurvaturesPolyhedron() {
+	auto true_H = Polyhedra::getMeanCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+	auto true_G = Polyhedra::getGaussianCurvatureEstimation(polyhedra, K, surfels, SHG3::parametersShapeGeometry());
+	auto true_K1 = Polyhedra::getFirstPrincipalCurvatureEstimation(polyhedra, K, surfels,
+	                                                               SHG3::parametersShapeGeometry());
+	auto true_K2 = Polyhedra::getSecondPrincipalCurvatureEstimation(polyhedra, K, surfels,
+	                                                                SHG3::parametersShapeGeometry());
+
+	// L2 and Loo errors
+	for (const auto &[computedC, trueC]: {
+		     std::pair(H, true_H), std::pair(G, true_G), std::pair(K1, true_K1), std::pair(K2, true_K2)
+	     }) {
+		// For each value pair in each pair, use it if true is not infinite
+		std::vector<double> filteredComputedC;
+		std::vector<double> filteredTrueC;
+		for (size_t i = 0; i < computedC.size(); ++i) {
+			if (std::isfinite(trueC[i])) {
+				filteredComputedC.push_back(computedC[i]);
+				filteredTrueC.push_back(trueC[i]);
+			} else {
+				filteredComputedC.push_back(0);
+				filteredTrueC.push_back(0);
+			}
+		}
+		for (auto f: {SHG3::getScalarsNormL2, SHG3::getScalarsNormLoo})
+			std::cout << "L" << (f == SHG3::getScalarsNormL2 ? "2" : "oo")
+				<< " error for " << (computedC == H ? "H" : computedC == G ? "G" : computedC == K1 ? "K1" : "K2")
+				<< " curvature: "
+				<< f(filteredComputedC, filteredTrueC) << std::endl;
+
+		if (!noInterface) {
+			psPrimalMesh->addFaceScalarQuantity(
+					std::string("Error ") +
+					(computedC == H ? "H" : computedC == G ? "G" : computedC == K1 ? "K1" : "K2") + " curvature",
+					filteredComputedC - filteredTrueC)
+				->setMapRange({0.0, MaxCurv})->setColorMap("reds");
+		}
 	}
+}
+
+void computeL2looErrorsCurvatures() {
+	if (Polyhedra::isPolyhedron(polynomial)) {
+		computeL2looErrorsCurvaturesPolyhedron();
+		return;
+	}
+	auto true_H = SHG3::getMeanCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+	auto true_G = SHG3::getGaussianCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+	auto true_K1 = SHG3::getFirstPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
+	auto true_K2 = SHG3::getSecondPrincipalCurvatures(implicit_shape, K, surfels, SHG3::parametersShapeGeometry());
 
 	if (!noInterface) {
 		psPrimalMesh->addFaceScalarQuantity("H true curvature", true_H)
@@ -1063,6 +1102,20 @@ void computeVisibilityCudaCPU(int radius) {
 }
 
 #endif
+
+void testDistancePlan() {
+	// For each plan of the implicit shape, compute using planeDistance the distance of each pointel to the plan and put the values in polyscope
+	auto plans = polyhedra->getPlanes();
+	std::vector<double> distances(pointels.size());
+	for (size_t i = 0; i < plans.size(); ++i) {
+		for (size_t j = 0; j < pointels.size(); ++j) {
+			distances[j] = Polyhedra::planeDistance(plans[i], pointels[j], gridstep);
+		}
+		psPrimalMesh->addVertexScalarQuantity("Distances to plan " + std::to_string(i), distances)->setMapRange({
+			-0.1, 0.1
+		})->setColorMap("coolwarm");
+	}
+}
 
 void myCallback() {
 	std::string visibilityFilename;
@@ -1166,6 +1219,9 @@ void myCallback() {
 	}
 	ImGui::SameLine();
 	ImGui::Text("nb threads = %d", OMP_max_nb_threads);
+	if (ImGui::Button("TEST DISTANCE PLAN")) {
+		testDistancePlan();
+	}
 }
 
 void testIntersection() {
@@ -1274,7 +1330,8 @@ int gpuRun(int argc, char *argv[]) {
 	app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
 	app.add_flag("--computeCurvatures", computeCurvaturesFlag,
 	             "compute curvatures after visibility normals computation");
-	app.add_option("--saveShapeFilename", saveShapeFilename, "a flag to save the primal surface shape in an OBJ file after computation");
+	app.add_option("--saveShapeFilename", saveShapeFilename,
+	               "a flag to save the primal surface shape in an OBJ file after computation");
 	app.add_option("--saveVisibility", saveVisibilityFilename, "a filename to save the computed visibility");
 	app.add_option("--visibComputeMethod", visibComputeMethod,
 	               "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
@@ -1316,7 +1373,7 @@ int gpuRun(int argc, char *argv[]) {
 			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
-			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial, gridstep);
 			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
 			std::cout << "Digitization done." << std::endl;
 			K = SH3::getKSpace(binary_image, params);
@@ -1394,14 +1451,18 @@ int gpuRun(int argc, char *argv[]) {
 				const auto idx = pTC->index(p);
 				trivial_normals[idx] += surfel_trivial_normals[k];
 				ii_normals[idx] += surfel_ii_normals[k];
-				if (is_polynomial) {
+				if (Polyhedra::isPolyhedron(polynomial)) {
+					if (surfel_true_normals[k].norm() != 0) {
+						true_normals[idx] += surfel_true_normals[k];
+					}
+				} else if (is_polynomial) {
 					true_normals[idx] += surfel_true_normals[k];
 				}
 			}
 		}
 		for (auto &n: trivial_normals) n /= n.norm();
 		for (auto &n: ii_normals) n /= n.norm();
-		for (auto &n: true_normals) n /= n.norm();
+		for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
 		primal_surface->vertexNormals() = trivial_normals;
 		trace.endBlock();
 
@@ -1512,7 +1573,8 @@ int main(int argc, char *argv[]) {
 	app.add_flag("--computeNormals", ignore, "gpuRun only : compute visibility normals after visibility computation");
 	app.add_flag("--computeCurvatures", ignore,
 	             "gpuRun only : compute curvatures after visibility normals computation");
-	app.add_option("--saveShapeFilename", _, "gpuRun only : a flag to save the primal surface shape in an OBJ file after computation");
+	app.add_option("--saveShapeFilename", _,
+	               "gpuRun only : a flag to save the primal surface shape in an OBJ file after computation");
 	app.add_option("--saveVisibility", _, "gpuRun only : a filename to save the computed visibility");
 	app.add_option("--visibComputeMethod", _,
 	               "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
@@ -1563,7 +1625,7 @@ int main(int argc, char *argv[]) {
 			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
-			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial, gridstep);
 			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
 			std::cout << "Digitization done." << std::endl;
 			K = SH3::getKSpace(binary_image, params);
@@ -1634,14 +1696,18 @@ int main(int argc, char *argv[]) {
 			const auto idx = pTC->index(p);
 			trivial_normals[idx] += surfel_trivial_normals[k];
 			ii_normals[idx] += surfel_ii_normals[k];
-			if (is_polynomial) {
+			if (Polyhedra::isPolyhedron(polynomial)) {
+				if (surfel_true_normals[k].norm() != 0) {
+					true_normals[idx] += surfel_true_normals[k];
+				}
+			} else if (is_polynomial) {
 				true_normals[idx] += surfel_true_normals[k];
 			}
 		}
 	}
 	for (auto &n: trivial_normals) n /= n.norm();
 	for (auto &n: ii_normals) n /= n.norm();
-	for (auto &n: true_normals) n /= n.norm();
+	for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
 
 	primal_surface->vertexNormals() = trivial_normals;
 
