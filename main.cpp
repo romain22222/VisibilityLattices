@@ -108,6 +108,7 @@ double Time = 0.0;
 bool noInterface = false;
 std::string polynomial;
 char *inputVisibilityFilename = new char[256]("visibility.vis");
+int nStarTest = 1;
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -125,6 +126,13 @@ bool isPointLowerThan(const Point &p1, const Point &p2) {
 Point vec3iToPointVector(const Vec3i &vector) {
 	return Point(vector.x, vector.y, vector.z);
 }
+
+class ComputeVisibilityParams : public Parameters {
+public:
+	ComputeVisibilityParams() {
+		this->operator()("nStar", 1);
+	}
+};
 
 class Visibility {
 public:
@@ -207,10 +215,10 @@ public:
 		return true;
 	}
 
-	void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
-		auto p = offset;
+	void set(const Point &offset, const Intervals &value, const size_t vectorIdx, const int scale) {
+		auto p = offset / scale;
 		for (auto &interval: value) {
-			for (int i = interval.first / 2; i <= interval.second / 2; i++) {
+			for (int i = interval.first / scale; i <= interval.second / scale; i++) {
 				p[mainAxis] = i;
 				visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
 			}
@@ -417,10 +425,21 @@ Intervals matchVector(Intervals &toCheck,
 	return toCheck;
 }
 
-void computeVisibilityOmp(int radius) {
+LatticeSetByIntervals<Space> getNStarOfShape(int n) {
+	auto shapeLattice = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), 0).starOfPoints();
+	for (auto i = 1; i < n; i++) {
+		shapeLattice = shapeLattice.starOfPoints();
+	}
+	return shapeLattice;
+}
+
+void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibilityParams()) {
 	std::cout << "Computing visibility OMP" << std::endl;
 	Dimension axis = getLargeAxis();
-	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	auto latticeStart = getNStarOfShape(params["nStar"].as<int>());
+	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
+	const int scalingFactor = pow(2, params["nStar"].as<int>());
+	auto tmpFigLattices = latticeStart.data();
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
 		figLattices[p.first] = p.second.data();
@@ -456,9 +475,11 @@ void computeVisibilityOmp(int radius) {
 			for (auto tx = minTx; tx < maxTx; tx++) {
 				for (auto ty = minTy; ty < maxTy; ty++) {
 					eligibles.clear();
-					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-					const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-					                      axis == 2 ? 0 : 2 * ty);
+					eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1,
+					                       scalingFactor * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : scalingFactor * tx,
+					                      axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : scalingFactor * ty);
 					for (const auto &cInfo: latticeVector) {
 						const auto it = figLattices.find(pInterest + cInfo.first);
 						if (it == figLattices.end()) {
@@ -469,7 +490,7 @@ void computeVisibilityOmp(int radius) {
 						if (eligibles.empty()) break;
 					}
 					if (!eligibles.empty()) {
-						visibility.set(pInterest / 2, eligibles, segmentIdx);
+						visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
 					}
 				}
 			}
@@ -478,10 +499,15 @@ void computeVisibilityOmp(int radius) {
 	std::cout << "Visibility computed" << std::endl;
 }
 
-void computeVisibilityOmpGPU(int radius) {
+
+void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisibilityParams()) {
 	std::cout << "Computing visibility OMP" << std::endl;
 	Dimension axis = getLargeAxis();
-	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	auto nStar = params["nStar"].as<int>();
+	auto latticeStart = getNStarOfShape(nStar);
+	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
+	auto tmpFigLattices = latticeStart.data();
+	const int scalingFactor = pow(2, nStar);
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
 		figLattices[p.first] = p.second.data();
@@ -518,9 +544,9 @@ void computeVisibilityOmpGPU(int radius) {
 			for (auto tx = minTx; tx < maxTx; tx++) {
 				for (auto ty = minTy; ty < maxTy; ty++) {
 					eligibles.clear();
-					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-					const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-					                      axis == 2 ? 0 : 2 * ty);
+					eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1, scalingFactor * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : scalingFactor * tx, axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : scalingFactor * ty);
 					for (const auto &cInfo: latticeVector) {
 						const auto it = figLattices.find(pInterest + cInfo.first);
 						if (it == figLattices.end()) {
@@ -531,7 +557,7 @@ void computeVisibilityOmpGPU(int radius) {
 						if (eligibles.empty()) break;
 					}
 					if (!eligibles.empty()) {
-						visibility.set(pInterest / 2, eligibles, segmentIdx);
+						visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
 					}
 				}
 			}
@@ -540,15 +566,32 @@ void computeVisibilityOmpGPU(int radius) {
 	std::cout << "Visibility computed" << std::endl;
 }
 
+void testNStarOfShape(int n) {
+	auto shapeLattice = getNStarOfShape(n);
+	std::cout << "Lattice size after " << n << " stars: " << shapeLattice.size() << std::endl;
+	// show in polyscope
+	auto points = shapeLattice.toPointRange();
+	std::vector<RealPoint> vp;
+	embedPointels(points, vp);
+	for (auto &p: vp) {
+		p /= 2;
+	}
+	polyscope::registerPointCloud("NStar Shape Lattice", vp);
+}
+
 /**
  * Compute the figure visibility using lattices
  * @param idx
  * @return
  */
-void computeVisibility(int radius) {
+void computeVisibility(int radius, const Parameters &params = ComputeVisibilityParams()) {
 	std::cout << "Computing visibility" << std::endl;
 	Dimension axis = getLargeAxis();
-	auto tmpFigLattices = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), axis).starOfPoints().data();
+	auto nStar = params["nStar"].as<int>();
+	auto latticeStart = getNStarOfShape(nStar);
+	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
+	auto tmpFigLattices = latticeStart.data();
+	auto scalingFactor = pow(2, nStar);
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
 		figLattices[p.first] = p.second.data();
@@ -577,16 +620,18 @@ void computeVisibility(int radius) {
 		for (auto tx = minTx; tx < maxTx; tx++) {
 			for (auto ty = minTy; ty < maxTy; ty++) {
 				eligibles.clear();
-				eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1, 2 * digital_dimensions[axis + 6] + 1);
-				const Point pInterest(axis == 0 ? 0 : 2 * tx, axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
-				                      axis == 2 ? 0 : 2 * ty);
+				eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1,
+				                       scalingFactor * digital_dimensions[axis + 6] + 1);
+				const Point pInterest(axis == 0 ? 0 : scalingFactor * tx,
+				                      axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
+				                      axis == 2 ? 0 : scalingFactor * ty);
 				for (const auto &cInfo: latticeVector) {
 					// time this call
 					eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
 					if (eligibles.empty()) break;
 				}
 				if (!eligibles.empty()) {
-					visibility.set(pInterest / 2, eligibles, segmentIdx);
+					visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
 				}
 			}
 		}
@@ -1143,9 +1188,12 @@ void myCallback() {
 		computeVisibilityWithPointShow(pointel_idx);
 	}
 	if (ImGui::Button("Visibilities")) {
-		trace.beginBlock("Compute visibilities");
-		computeVisibility(VisibilityRadius);
+		trace.beginBlock("Compute visibilities star 1");
+		computeVisibility(VisibilityRadius, ComputeVisibilityParams());
 		Time = trace.endBlock();
+		// trace.beginBlock("Compute visibilities star 2");
+		// computeVisibility(VisibilityRadius, ComputeVisibilityParams()("nStar", 2));
+		// Time = trace.endBlock();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Visibilities OMP")) {
@@ -1155,9 +1203,12 @@ void myCallback() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Visibilities OMP GPU")) {
-		trace.beginBlock("Compute visibilities OMP GPU");
-		computeVisibilityOmpGPU(VisibilityRadius);
+		trace.beginBlock("Compute visibilities OMP GPU star 1");
+		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams());
 		Time = trace.endBlock();
+		// trace.beginBlock("Compute visibilities OMP GPU star 2");
+		// computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams()("nStar", 2));
+		// Time = trace.endBlock();
 	}
 	if (ImGui::Button("Measure Mean Distance Visibility")) {
 		computeMeanDistanceVisibility();
@@ -1221,6 +1272,11 @@ void myCallback() {
 	ImGui::Text("nb threads = %d", OMP_max_nb_threads);
 	if (ImGui::Button("TEST DISTANCE PLAN")) {
 		testDistancePlan();
+	}
+	ImGui::InputInt("nstar", &nStarTest, 1);
+	ImGui::SameLine();
+	if (ImGui::Button("testNStarOfShape")) {
+		testNStarOfShape(nStarTest);
 	}
 }
 
@@ -1390,7 +1446,7 @@ int gpuRun(int argc, char *argv[]) {
 	}
 
 	if (!saveShapeFilename.empty()) {
-		GenericWriter<SH3::BinaryImage>::exportFile(saveShapeFilename, *binary_image);
+		SH3::saveBinaryImage(binary_image, saveShapeFilename);
 	}
 	if (noFurtherComputation) {
 		return 0;
@@ -1492,11 +1548,11 @@ int gpuRun(int argc, char *argv[]) {
 
 	trace.beginBlock("Compute visibilities");
 	if (visibComputeMethod == "CPU") {
-		computeVisibility(VisibilityRadius);
+		computeVisibility(VisibilityRadius, ComputeVisibilityParams());
 	} else if (visibComputeMethod == "OMP") {
 		computeVisibilityOmp(VisibilityRadius);
 	} else if (visibComputeMethod == "OMP_GPU") {
-		computeVisibilityOmpGPU(VisibilityRadius);
+		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams());
 	} else if (visibComputeMethod == "GPU") {
 #ifdef USE_CUDA_VISIBILITY
 		computeVisibilityCuda(VisibilityRadius);

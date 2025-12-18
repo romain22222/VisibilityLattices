@@ -18,6 +18,6 @@ echo $OMP_NUM_THREADS
 for i in $(seq 1 -0.01 0.02); do
   tmp=$(printf "%.0f" $(echo "$i * 100" | bc))
 #  /home/negror/VisibilityLattices/build/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --save "./visibilities/visibility-${tmp}.vis"
-  ./cmake-build-release/visibilityLattices -p tetrahedron -g $i --gpuRun --computeNormals --computeCurvatures --saveVisibility "./visibilities/visibility-${tmp}.vis"
+  ./cmake-build-release/visibilityLattices -p $1 -g $i --gpuRun --computeNormals --computeCurvatures --saveVisibility "./visibilities/visibility-${tmp}.vis" --saveShapeFilename "./shapes/shape-${tmp}.vol"
 #  ./cmake-build-release/visibilityLattices -l
 done
