@@ -210,17 +210,21 @@ public:
 		auto vIdx = this->getVectorIdx(v);
 		if (vIdx == vectorsSize) return false; // vector not computed
 		for (IntegerVector p = p1; p != p2; p += v) {
-			if (!visibles[vIdx * pointsSize + this->getPointIdx(p)]) return false;
+			auto pointIdx = this->getPointIdx(p);
+			if (pointIdx == pointsSize) return false;
+			if (!visibles[vIdx * pointsSize + pointIdx]) return false;
 		}
 		return true;
 	}
 
-	void set(const Point &offset, const Intervals &value, const size_t vectorIdx, const int scale) {
-		auto p = offset / scale;
+	void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
+		auto p = offset / 2;
 		for (auto &interval: value) {
-			for (int i = interval.first / scale; i <= interval.second / scale; i++) {
+			for (int i = interval.first/2; i <= interval.second/2; i++) {
 				p[mainAxis] = i;
-				visibles[vectorIdx * pointsSize + this->getPointIdx(p)] = true;
+				auto pointIdx = this->getPointIdx(p);
+				if (pointIdx == pointsSize) continue;
+				visibles[vectorIdx * pointsSize + pointIdx] = true;
 			}
 		}
 	}
@@ -425,10 +429,53 @@ Intervals matchVector(Intervals &toCheck,
 	return toCheck;
 }
 
-LatticeSetByIntervals<Space> getNStarOfShape(int n) {
-	auto shapeLattice = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), 0).starOfPoints();
+LatticeSetByIntervals<Space> getCoverOfShape(LatticeSetByIntervals<Space> &shapeLattice, int dim) {
+	LatticeSetByIntervals<Space> result = shapeLattice;
+
+	for (auto &pV: shapeLattice.data()) {
+		// Each pv is a point entry and all its shifts which are in the star. So we also need to add all its upper and lower neighbors and dilate the intervals too
+		// 1. Get the current point and its intervals
+		const Point &p = pV.first;
+		LatticeSetByIntervals<Space>::Intervals::Container intervals = pV.second.data();
+
+		// 2. On received intervals, dilate them by 2 in both directions
+		LatticeSetByIntervals<Space>::Intervals::Container dilatedIntervals;
+		for (const auto &interval: intervals) {
+			dilatedIntervals.emplace_back(interval.first - 2, interval.second + 2);
+		}
+		LatticeSetByIntervals<Space>::Intervals::Container mergedIntervals;
+		for (const auto &interval: dilatedIntervals) {
+			if (mergedIntervals.empty() || mergedIntervals.back().second + 1 < interval.first) {
+				mergedIntervals.push_back(interval);
+			} else {
+				mergedIntervals.back().second = interval.second;
+			}
+		}
+		auto dilatedLatticeSet = LatticeSetByIntervals<Space>::Intervals();
+		dilatedLatticeSet.data() = mergedIntervals;
+		// 3. For each delta in {-2, ..., 2}^(d-1), add the intervals to point p + delta
+		for (int i = 0; i < pow(5, dim - 1); i++) {
+			Point delta;
+			int idx = i;
+			for (Dimension d = 0; d < dim; d++) {
+				if (d == shapeLattice.axis()) {
+					delta[d] = 0;
+				} else {
+					delta[d] = (idx % 5) - 2;
+					idx /= 5;
+				}
+			}
+			result.at(p + delta) = result.at(p + delta).set_union(dilatedLatticeSet);
+		}
+	}
+
+	return result;
+}
+
+LatticeSetByIntervals<Space> getNStarOfShape(const int n, const int d) {
+	auto shapeLattice = LatticeSetByIntervals<Space>(pointels.cbegin(), pointels.cend(), d).starOfPoints();
 	for (auto i = 1; i < n; i++) {
-		shapeLattice = shapeLattice.starOfPoints();
+		shapeLattice = getCoverOfShape(shapeLattice, shapeLattice.dimension);
 	}
 	return shapeLattice;
 }
@@ -436,9 +483,8 @@ LatticeSetByIntervals<Space> getNStarOfShape(int n) {
 void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibilityParams()) {
 	std::cout << "Computing visibility OMP" << std::endl;
 	Dimension axis = getLargeAxis();
-	auto latticeStart = getNStarOfShape(params["nStar"].as<int>());
+	auto latticeStart = getNStarOfShape(params["nStar"].as<int>(), axis);
 	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
-	const int scalingFactor = pow(2, params["nStar"].as<int>());
 	auto tmpFigLattices = latticeStart.data();
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
@@ -450,7 +496,20 @@ void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibili
 	// avoid thread imbalance
 	std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-	visibility.reset(axis, segmentList, pointels);
+	std::vector<Point> figLatticePoints;
+	figLatticePoints.reserve(pointels.size() * 4);
+	for (const auto &p: figLattices) {
+		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
+			for (const auto &interval: p.second) {
+				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
+					Point pt = p.first/2;
+					pt[axis] = i/2;
+					figLatticePoints.emplace_back(pt);
+				}
+			}
+		}
+	}
+	visibility.reset(axis, segmentList, figLatticePoints);
 	size_t chunkSize = 64;
 	auto chunkAmount = segmentList.size() / chunkSize + 1;
 	auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
@@ -475,11 +534,11 @@ void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibili
 			for (auto tx = minTx; tx < maxTx; tx++) {
 				for (auto ty = minTy; ty < maxTy; ty++) {
 					eligibles.clear();
-					eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1,
-					                       scalingFactor * digital_dimensions[axis + 6] + 1);
-					const Point pInterest(axis == 0 ? 0 : scalingFactor * tx,
-					                      axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
-					                      axis == 2 ? 0 : scalingFactor * ty);
+					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1,
+					                       2 * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : 2 * tx,
+					                      axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : 2 * ty);
 					for (const auto &cInfo: latticeVector) {
 						const auto it = figLattices.find(pInterest + cInfo.first);
 						if (it == figLattices.end()) {
@@ -490,7 +549,7 @@ void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibili
 						if (eligibles.empty()) break;
 					}
 					if (!eligibles.empty()) {
-						visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
+						visibility.set(pInterest, eligibles, segmentIdx);
 					}
 				}
 			}
@@ -504,10 +563,9 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 	std::cout << "Computing visibility OMP" << std::endl;
 	Dimension axis = getLargeAxis();
 	auto nStar = params["nStar"].as<int>();
-	auto latticeStart = getNStarOfShape(nStar);
+	auto latticeStart = getNStarOfShape(nStar, axis);
 	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
 	auto tmpFigLattices = latticeStart.data();
-	const int scalingFactor = pow(2, nStar);
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
 		figLattices[p.first] = p.second.data();
@@ -518,7 +576,20 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 	// avoid thread imbalance
 	std::shuffle(segmentList.begin(), segmentList.end(), std::mt19937(std::random_device()()));
 
-	visibility.reset(axis, segmentList, pointels);
+	std::vector<Point> figLatticePoints;
+	figLatticePoints.reserve(pointels.size() * 26);
+	for (const auto &p: figLattices) {
+		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
+			for (const auto &interval: p.second) {
+				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
+					Point pt = p.first/2;
+					pt[axis] = i/2;
+					figLatticePoints.emplace_back(pt);
+				}
+			}
+		}
+	}
+	visibility.reset(axis, segmentList, figLatticePoints);
 	size_t chunkSize = 64;
 	auto chunkAmount = segmentList.size() / chunkSize + 1;
 	auto isSegmentListMultChunkSize = segmentList.size() % chunkSize == 0;
@@ -544,9 +615,11 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 			for (auto tx = minTx; tx < maxTx; tx++) {
 				for (auto ty = minTy; ty < maxTy; ty++) {
 					eligibles.clear();
-					eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1, scalingFactor * digital_dimensions[axis + 6] + 1);
-					const Point pInterest(axis == 0 ? 0 : scalingFactor * tx, axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
-					                      axis == 2 ? 0 : scalingFactor * ty);
+					eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1,
+					                       2 * digital_dimensions[axis + 6] + 1);
+					const Point pInterest(axis == 0 ? 0 : 2 * tx,
+					                      axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+					                      axis == 2 ? 0 : 2 * ty);
 					for (const auto &cInfo: latticeVector) {
 						const auto it = figLattices.find(pInterest + cInfo.first);
 						if (it == figLattices.end()) {
@@ -557,7 +630,7 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 						if (eligibles.empty()) break;
 					}
 					if (!eligibles.empty()) {
-						visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
+						visibility.set(pInterest, eligibles, segmentIdx);
 					}
 				}
 			}
@@ -567,16 +640,16 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 }
 
 void testNStarOfShape(int n) {
-	auto shapeLattice = getNStarOfShape(n);
+	auto shapeLattice = getNStarOfShape(n, getLargeAxis());
 	std::cout << "Lattice size after " << n << " stars: " << shapeLattice.size() << std::endl;
 	// show in polyscope
-	auto points = shapeLattice.toPointRange();
+	auto points = shapeLattice.toPointRange();/*
 	std::vector<RealPoint> vp;
 	embedPointels(points, vp);
 	for (auto &p: vp) {
 		p /= 2;
-	}
-	polyscope::registerPointCloud("NStar Shape Lattice", vp);
+	}*/
+	polyscope::registerPointCloud("NStar Shape Lattice", points);
 }
 
 /**
@@ -588,10 +661,9 @@ void computeVisibility(int radius, const Parameters &params = ComputeVisibilityP
 	std::cout << "Computing visibility" << std::endl;
 	Dimension axis = getLargeAxis();
 	auto nStar = params["nStar"].as<int>();
-	auto latticeStart = getNStarOfShape(nStar);
+	auto latticeStart = getNStarOfShape(nStar, axis);
 	std::cout << "Lattice size: " << latticeStart.size() << std::endl;
 	auto tmpFigLattices = latticeStart.data();
-	auto scalingFactor = pow(2, nStar);
 	std::map<Point, Intervals> figLattices;
 	for (auto p: tmpFigLattices) {
 		figLattices[p.first] = p.second.data();
@@ -600,7 +672,23 @@ void computeVisibility(int radius, const Parameters &params = ComputeVisibilityP
 	IntegerVector segment;
 	Intervals eligibles;
 	auto segmentList = getAllVectors(radius);
-	visibility.reset(axis, segmentList, pointels);
+	// I can't reset the visibility with pointels directly because i need to have the same order of points as in figLattices's closed points
+	// visibility.reset(axis, segmentList, pointels);
+	// So I create a vector of points from figLattices, which are all the points in the figure's n-star which have only even coordinates
+	std::vector<Point> figLatticePoints;
+	figLatticePoints.reserve(pointels.size() * 26);
+	for (const auto &p: figLattices) {
+		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
+			for (const auto &interval: p.second) {
+				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
+					Point pt = p.first/2;
+					pt[axis] = i/2;
+					figLatticePoints.emplace_back(pt);
+				}
+			}
+		}
+	}
+	visibility.reset(axis, segmentList, figLatticePoints);
 	int minTx, maxTx, minTy, maxTy;
 	std::vector<long> durations = std::vector<long>(segmentList.size() / 100, 0);
 	std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
@@ -620,18 +708,18 @@ void computeVisibility(int radius, const Parameters &params = ComputeVisibilityP
 		for (auto tx = minTx; tx < maxTx; tx++) {
 			for (auto ty = minTy; ty < maxTy; ty++) {
 				eligibles.clear();
-				eligibles.emplace_back(scalingFactor * digital_dimensions[axis + 3] - 1,
-				                       scalingFactor * digital_dimensions[axis + 6] + 1);
-				const Point pInterest(axis == 0 ? 0 : scalingFactor * tx,
-				                      axis == 1 ? 0 : scalingFactor * (axis == 0 ? tx : ty),
-				                      axis == 2 ? 0 : scalingFactor * ty);
+				eligibles.emplace_back(2 * digital_dimensions[axis + 3] - 1,
+				                       2 * digital_dimensions[axis + 6] + 1);
+				const Point pInterest(axis == 0 ? 0 : 2 * tx,
+				                      axis == 1 ? 0 : 2 * (axis == 0 ? tx : ty),
+				                      axis == 2 ? 0 : 2 * ty);
 				for (const auto &cInfo: latticeVector) {
 					// time this call
 					eligibles = matchVector(eligibles, cInfo.second, figLattices[pInterest + cInfo.first]);
 					if (eligibles.empty()) break;
 				}
 				if (!eligibles.empty()) {
-					visibility.set(pInterest, eligibles, segmentIdx, scalingFactor);
+					visibility.set(pInterest, eligibles, segmentIdx);
 				}
 			}
 		}
@@ -895,6 +983,12 @@ double wSig(double d2) {
 	return exp(d2 / minus2SigmaSquare);
 }
 
+double noWeight(double _) {
+	return 1.0;
+}
+
+auto weighter = wSig;
+
 void computeVisibilityNormals() {
 	visibility_normals.clear();
 	visibility_normals.reserve(pointels.size());
@@ -909,7 +1003,7 @@ void computeVisibilityNormals() {
 				//	&& tmp != pointel) {
 				visibles.push_back(tmp);
 				//				centroid += tmp;
-				const double w = wSig((pointel - tmp).squaredNorm());
+				const double w = weighter((pointel - tmp).squaredNorm());
 				centroid += w * tmp;
 				total_w += w;
 			}
@@ -921,7 +1015,7 @@ void computeVisibilityNormals() {
 			for (int i = 0; i < 3; ++i) {
 				for (int j = 0; j < 3; ++j) {
 					//					cov(i, j) += diff[i] * diff[j];
-					cov(i, j) += diff[i] * diff[j] * wSig((pt - pointel).squaredNorm());
+					cov(i, j) += diff[i] * diff[j] * weighter((pt - pointel).squaredNorm());
 				}
 			}
 		}
@@ -1189,7 +1283,7 @@ void myCallback() {
 	}
 	if (ImGui::Button("Visibilities")) {
 		trace.beginBlock("Compute visibilities star 1");
-		computeVisibility(VisibilityRadius, ComputeVisibilityParams());
+		computeVisibility(VisibilityRadius, ComputeVisibilityParams()("nStar", nStarTest));
 		Time = trace.endBlock();
 		// trace.beginBlock("Compute visibilities star 2");
 		// computeVisibility(VisibilityRadius, ComputeVisibilityParams()("nStar", 2));
@@ -1203,12 +1297,9 @@ void myCallback() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Visibilities OMP GPU")) {
-		trace.beginBlock("Compute visibilities OMP GPU star 1");
-		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams());
+		trace.beginBlock("Compute visibilities OMP GPU star 2");
+		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams()("nStar", nStarTest));
 		Time = trace.endBlock();
-		// trace.beginBlock("Compute visibilities OMP GPU star 2");
-		// computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams()("nStar", 2));
-		// Time = trace.endBlock();
 	}
 	if (ImGui::Button("Measure Mean Distance Visibility")) {
 		computeMeanDistanceVisibility();
@@ -1277,6 +1368,15 @@ void myCallback() {
 	ImGui::SameLine();
 	if (ImGui::Button("testNStarOfShape")) {
 		testNStarOfShape(nStarTest);
+	}
+	// Add a selector for the weighting function used for normal estimation
+	const char *items[] = { "Gaussian", "No Weight" };
+	static int item_current = 0;
+	ImGui::Combo("Weighter", &item_current, items, IM_ARRAYSIZE(items));
+	if (item_current == 0) {
+		weighter = wSig;
+	} else {
+		weighter = noWeight;
 	}
 }
 
