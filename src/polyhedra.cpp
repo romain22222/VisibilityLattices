@@ -85,7 +85,7 @@ namespace Polyhedra {
 		RealVector grad(0, 0, 0);
 		int count = 0;
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep + eps) {
+			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
 				grad = pl.first;
 				count++;
 			}
@@ -101,7 +101,7 @@ namespace Polyhedra {
 	int PolyhedronShape::countIntersections(const RealPoint &p) const {
 		auto intersectingPlanes = 0;
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep + eps) {
+			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
 				intersectingPlanes++;
 			}
 		}

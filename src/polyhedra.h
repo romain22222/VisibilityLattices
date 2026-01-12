@@ -18,6 +18,8 @@ namespace Polyhedra {
 	typedef ShortcutsGeometry<KSpace> SHG3;
 	typedef std::pair<RealPoint, double> Plane;
 
+	inline float digitization_gridstep_distance = 1.0f;
+
 	double planeDistance(const Plane &plane, const RealPoint &p, double gridstep);
 
 	bool isPolyhedron(const std::string &shape);

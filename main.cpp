@@ -1282,22 +1282,19 @@ void myCallback() {
 		computeVisibilityWithPointShow(pointel_idx);
 	}
 	if (ImGui::Button("Visibilities")) {
-		trace.beginBlock("Compute visibilities star 1");
+		trace.beginBlock("Compute visibilities");
 		computeVisibility(VisibilityRadius, ComputeVisibilityParams()("nStar", nStarTest));
 		Time = trace.endBlock();
-		// trace.beginBlock("Compute visibilities star 2");
-		// computeVisibility(VisibilityRadius, ComputeVisibilityParams()("nStar", 2));
-		// Time = trace.endBlock();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Visibilities OMP")) {
-		trace.beginBlock("Compute visibilities OMP");
+		trace.beginBlock("Compute visibilities OMP (nStar not taken into account and may fail)");
 		computeVisibilityOmp(VisibilityRadius);
 		Time = trace.endBlock();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Visibilities OMP GPU")) {
-		trace.beginBlock("Compute visibilities OMP GPU star 2");
+		trace.beginBlock("Compute visibilities OMP GPU");
 		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams()("nStar", nStarTest));
 		Time = trace.endBlock();
 	}
@@ -1378,6 +1375,8 @@ void myCallback() {
 	} else {
 		weighter = noWeight;
 	}
+	// Add a slider for Polyhedra::digitization_gridstep_distance (default 1.0f, can vary from 0.5f to 5.0f)
+	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.5f, 5.0f);
 }
 
 void testIntersection() {
