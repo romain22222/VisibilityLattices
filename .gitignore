@@ -5,6 +5,8 @@ cmake-build-*
 /imgui.ini
 /gpu/buildR
 /auxil
+**/auxil
+*.zip
 /out
 /build
 /DGMM2025_arXiv.zip

@@ -39,7 +39,7 @@ estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
 $E_{\max}$.
 
-\begin{figure}
+\begin{figure*}
     \centering
     \begin{tabular}{c c}
         \begin{tikzpicture}
@@ -230,9 +230,9 @@ $E_{\max}$.
     \end{tabular}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution}
     \label{fig:errors-normals}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
     \begin{tabular}{|c||c|c|}
         \hline
@@ -273,7 +273,7 @@ $E_{\max}$.
     our normal estimator are computed using a deviation of $\sigma=4$, and so
     a radius of $r=2\sigma=8$}
     \label{fig:normals-estimation}
-\end{figure}
+\end{figure*}
 
 %% Then, to compute the curvatures, we use the Corrected Normal Current
 %% estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
@@ -339,7 +339,7 @@ $\sigma=4$) while the result is visually indistinguishable.
     \end{tikzpicture}}
 % \newcommand{\MyZoom}[1]{\includegraphics[width=0.3\textwidth]{#1}}
 
-\begin{figure}
+\begin{figure*}
     \begin{center}
         \resizebox{!}{0.4\textheight}{%
             \begin{tabular}{|c||c|c|c|}
@@ -378,4 +378,4 @@ $\sigma=4$) while the result is visually indistinguishable.
         Gaussian curvature $G$. The range of curvature between deep
         blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
         color equal to $0$.}
-\end{figure}
+\end{figure*}

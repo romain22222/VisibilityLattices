@@ -13,14 +13,14 @@ all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
 Figure~\ref{fig:lattice-representation} for an illustration).
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \input{lattice.tikz}
   \caption{\label{fig:lattice-representation} Representation of a
     2d cell complex (here the star of a given curve) as a lattice
     map. From 63 cells (with two coordinates) on the left, we get 11
     intervals on the right.}
-\end{figure}
+\end{figure*}
 
 
 A \emph{sequence of intervals} is an ordered list of intervals $L =
@@ -97,7 +97,7 @@ $\Omega$, and then intersecting all the translations.
 \end{algorithm}
 
 
-\begin{figure}
+\begin{figure*}
   \centering
   \input{algorithm.tikz}
   \caption{Evolution of the visibility check algorithm for a $(2,1)$
@@ -108,7 +108,7 @@ $\Omega$, and then intersecting all the translations.
     bottom-up and the found visibilities are drawn on the
     uppest figure.}
   \label{fig:visibility-algorithm-evolution}
-\end{figure}
+\end{figure*}
 
 Figure~\ref{fig:visibility-algorithm-evolution} shows an example of
 execution of this algorithm in an elementary case. It reduces to
@@ -164,7 +164,7 @@ returns the intersection of both lists of intervals.
 
 % Insert visibility results images
 
-\begin{figure}
+\begin{figure*}
   \centering
   \begin{tabular}{c c}
     \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} &
@@ -174,22 +174,22 @@ returns the intersection of both lists of intervals.
     (left) the visibility is stopped at the sharp edge, (right) the
     visibility does not cross the gap between the two parts.}
   \label{fig:visibility-results}
-\end{figure}
+\end{figure*}
 %
-%    \begin{figure}
+%    \begin{figure*}
 %        \begin{center}
 %            \includegraphics[width=0.8\textwidth]{pictures/visibility_from_given_point_r_10}
 %            \caption{Visibility of a point on an edge of a fandisk}
 %            \label{fig:visibility-fandisk}
 %        \end{center}
-%    \end{figure}
-%    \begin{figure}
+%    \end{figure*}
+%    \begin{figure*}
 %        \begin{center}
 %            \includegraphics[width=0.8\textwidth]{pictures/visibility_aware_of_features}
 %            \caption{Visibility of a point on a torus knot (the visibility is feature-aware)}
 %            \label{fig:visibility-torus-knot}
 %        \end{center}
-%    \end{figure}
+%    \end{figure*}
 
 
 % Quantitative results
@@ -206,7 +206,7 @@ real 3d images, a maximal radius below 10 is sufficient for normal and
 curvature estimation.
 
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \input{pointelscomptime.tikz}
   \caption{ \label{fig:meanvisibility-computationComplexity}Computation
@@ -217,10 +217,10 @@ curvature estimation.
     different figures (goursat, torus, rcube, sphere9, leopold,
     ``D20'') with various gridsteps, ($\#$ pointels ranging from 520
     to 390235).}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
   \centering
   \input{mean-distance.tikz}
   \caption{\label{fig:meanvisibility-gridstep} Mean distance of visibility as a function of the gridstep $h$ (see text).}
-\end{figure}
+\end{figure*}
