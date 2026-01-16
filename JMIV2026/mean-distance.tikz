@@ -1,0 +1,63 @@
+  \begin{tikzpicture}
+    \centering
+    \begin{axis}[
+        width=0.8\textwidth,
+        height=0.5\textwidth,
+        legend columns=3,
+        %xlabel={Gridstep},
+        ylabel={Mean distance},
+        x dir=reverse,
+        legend pos=north west,
+        ymajorgrids=true,
+        grid style=dashed,
+        ymax=50,
+        ymode=log,
+        xmode=log,
+        log ticks with fixed point,
+      ]
+
+      \addplot[
+        color=cyan,
+      ] coordinates {
+        (0.0625,3*7.61948)(0.125,3*5.49755)(0.25,3*3.97418)(0.375,3*3.00921)(0.5,3*2.85702)(0.625,3*2.34448)(0.75,3*1.85023)(0.875,3*2.16868)(1.0,3*1.85023)
+      };
+      \addlegendentry{sphere9}
+      %% \addplot[
+      %%   color=cyan,
+      %% ] coordinates {
+      %%   (0.0625,7.61948)(0.125,5.49755)(0.25,3.97418)(0.375,3.00921)(0.5,2.85702)(0.625,2.34448)(0.75,1.85023)(0.875,2.16868)(1.0,1.85023)
+      %% };
+      %% \addlegendentry{sphere1}
+      \addplot[
+        color=red,
+      ] coordinates {
+        (0.0625,38.1045)(0.125,26.8765)(0.25,19.6747)(0.375,16.6192)(0.5,14.0867)(0.625,12.5062)(0.75,11.3734)(0.875,10.2845)(1,8.90781)
+      };
+      \addlegendentry{goursat}
+      \addplot[
+        color=violet,
+      ] coordinates {
+        (0.0625,25.5024)(0.125,18.2364)(0.25,12.3975)(0.375,9.41303)(0.5,8.69558)(0.625,7.37667)(0.75,6.82131)(0.875,6.05735)(1,6.33877)
+      };
+      \addlegendentry{torus}
+      \addplot[
+        color=MyGreen,
+      ] coordinates {
+        (0.0625,27.9287)(0.125,17.5104)(0.25,10.8007)(0.375,8.69514)(0.5,7.26074)(0.625,6.2309)(0.75,5.6897)(0.875,5.28197)(1,4.96098)
+      };
+      \addlegendentry{leopold}
+      \addplot[
+        color=yellow!80!black,
+      ] coordinates {
+        (0.0625,41.9816)(0.125,27.7104)(0.25,18.2339)(0.375,14.6475)(0.5,12.3618)(0.625,9.55647)(0.75,9.83208)(0.875,7.51861)(1,7.99732)
+      };
+      \addlegendentry{rcube}
+      \addplot [
+        color=black,
+        thick,
+        domain=0.0625:1,
+        samples=100,
+      ] {5*x^(-0.5)};
+      \addlegendentry{$\Theta\left(\sqrt{h}\right)$} %%=\sqrt{\frac{1}{x}}$}
+    \end{axis}
+  \end{tikzpicture}

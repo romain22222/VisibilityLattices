@@ -1,0 +1,51 @@
+\begin{tabular}{c c}
+  \begin{tikzpicture}[scale=0.75]
+    \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,1.75) grid (7.25,7.25);
+    \filldraw[black] (1,4) circle (0.05);
+    \filldraw[black] (1,5) circle (0.05);
+    \filldraw[black] (2,5) circle (0.05);
+    \filldraw[black] (3,5) circle (0.05);
+    \filldraw[black] (3,4) circle (0.05);
+    \filldraw[black] (3,3) circle (0.05);
+    \filldraw[black] (3,2) circle (0.05);
+    \filldraw[black] (2,2) circle (0.05);
+    \filldraw[black] (1,2) circle (0.05);
+    \filldraw[black] (4,2) circle (0.05);
+    %% \filldraw[black] (2,1) circle (0.05);
+    %% \filldraw[black] (1,1) circle (0.05);
+    %% \filldraw[black] (1,0) circle (0.05);
+    %% \filldraw[black] (2,0) circle (0.05);
+    %% \filldraw[black] (3,0) circle (0.05);
+    %% \filldraw[black] (3,1) circle (0.05);
+    %% \filldraw[black] (4,1) circle (0.05);
+    %% \filldraw[black] (5,1) circle (0.05);
+    \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
+    \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
+    \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+  \end{tikzpicture} &
+  \begin{tikzpicture}[scale=0.75]
+    \foreach \y in {2,2.5,...,7} {
+      \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
+    }
+    \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,6.5)};
+    \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4.5)--(3.6,4.5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4)--(1.6,4);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,4)--(3.6,4);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,3.5)--(1.6,3.5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3.5)--(3.6,3.5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (2.4,3)--(3.6,3);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2.5)--(4.6,2.5);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2)--(4.6,2);
+    \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(4.6,1.5);
+    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1)--(5.6,1);
+    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0.5)--(5.6,0.5);
+    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0)--(3.6,0);
+    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,-0.5)--(3.6,-0.5);
+    %\filldraw[white,yshift=-1.25cm] (0,2) circle (0.01); % readjust the height to match the original path
+  \end{tikzpicture}\\[-8mm]
+\end{tabular}

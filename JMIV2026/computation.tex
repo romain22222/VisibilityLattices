@@ -1,0 +1,226 @@
+As said in the introduction, any cell of $\mathcal{C}$ can be
+characterized as a point with integer coordinates, aka \emph{lattice
+point}. For instance, a standard way is to double the coordinates of
+the centroid of the cell (often called its Khalimsky code). Now we
+have to represent an arbitrary set $K$ of lattice points.
+
+Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$.  We may
+choose an arbitrary projection \emph{axis} $j \in
+\{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
+can collect all the cells of $K$ that projects onto the same
+points. Let $p \in K$. Then $\pi^{-1}_j(p) \cap \Star{K}$ is a set of cells having
+all the same coordinates except along coordinate $j$. This set can be
+ordered increasingly and stored as a list of integer intervals (see
+Figure~\ref{fig:lattice-representation} for an illustration).
+
+\begin{figure}[t]
+  \centering
+  \input{lattice.tikz}
+  \caption{\label{fig:lattice-representation} Representation of a
+    2d cell complex (here the star of a given curve) as a lattice
+    map. From 63 cells (with two coordinates) on the left, we get 11
+    intervals on the right.}
+\end{figure}
+
+
+A \emph{sequence of intervals} is an ordered list of intervals $L =
+([a_i,b_i])_{i=1,\ldots,n}$ such that $a_i \in \Z, b_i \in \Z, b_i + 1
+< a_{i+1}$, i.e., disjoint intervals with at least a missing
+integer. We denote by $\mathbb{L}$ the set of sequences of
+intervals. An integer $k$ belongs to $L$ iff there exists $i$ such that
+$a_i \Le k \Le b_i$. For a finite set of integers, there is a unique
+sequence of intervals representing it.
+
+A \emph{lattice map along axis $j$} is a set of pairs $(q,L_q)$, with
+$q \in \Z^{d-1}$ and $L_q \in \mathbb{L}$. The lattice map $M_K$
+\emph{represents} $K$ when, for any point $p \in K$, the pair
+$(\pi_j(p), L_{\pi_j(p)})$ exists in $M_K$ and $p_j \in L_{\pi_j(p)}$,
+with $p_j$ the $j$-th coordinate of $p$, and reciprocally, $\forall
+(q,L_q) \in M_K, \forall i \in L_q, q+i\ve_j \in K$. A lattice map is
+thus made of pairs $(q,L_q)$, where $q$ is the \emph{shift} while
+$L_q$ is the \emph{intervals}. For a point $q$ which is a shift of
+$M_K$, we write $M_K[q]$ for the corresponding intervals $L_q$.
+
+The global algorithm for computing visibility is given in
+Algorithm~\ref{alg:visibility}.  Given a digital input surface $C$ (a
+subcomplex), we compute the lattice map $\Omega$ of $\Star{C}$ once,
+generally along the axis where $C$ is the most elongated. In order to
+compute visibility up to a given distance $r$, we consider all non-null
+primitive vectors $D$ with infinity norm no greater than $r$.
+For each vector $\vv$, we compute the lattice map $M_\vv$ of its
+intersected cells (as a vector from $\mathbf{0}$ to $\vv$ in
+$\R^d$). The visibility along the direction $\vv$ reduces to computing
+for each pair of $M_\vv$ the possible translations of intervals in
+$\Omega$, and then intersecting all the translations.
+
+%% \begin{definition}
+%%   A sequence of intervals is an ordered list of intervals $L = ([a_i,b_i])_{i=1,\ldots,n}$ such that $b_i + 1 < a_{i+1}$, i.e., disjoint intervals with at least a missing integer.
+%% \end{definition}
+
+%% \begin{definition}
+%%   A translation of an interval $A$ is defined as $A+t \coloneqq [a+t, b+t]$
+%% \end{definition}
+
+%% \begin{definition}
+%%   A translation of a sequence of intervals $L$ is the sequence defined as $L+t \coloneqq \{L_1+t,\ldots,L_n+t\}$
+%% \end{definition}
+
+%% \begin{definition}
+%%   All translations $T$ of an interval or a sequence of intervals $A$ in a sequence of intervals $L$ are defined as $ T \coloneqq \{ t, st. A+t \subset L\}$
+%% \end{definition}
+
+%% We will consider lattice maps as pairs of (shift, intervals), where shifts are points $p \in \R^{d-1}$. All coordinates are doubled, so that the represented cell $\forall c \in \R^d$ will have a dimension equal to $\sum_{i=1}^d \left(c[i]\mod d\right)$.
+%% In figure~\ref{fig:lattice-representation}, we display a representation of lattice maps applied to a 2-d cell complex where all coordinates are already doubled. Note that the examples are in 2-d, the shown results are in 3-d and the algorithm is for n-d.
+
+
+\begin{algorithm}
+  \caption{Given a subcomplex $C$ and an integer $r$, returns the visibility from every point of $C$ up to distance $r$. The main axis is supposed to be $z$, while $x,y$ are the auxiliary axes.}
+  \label{alg:visibility}
+  \begin{algorithmic}
+    \Function{Visibility}{$C$: Subcomplex, $r$: Integer}
+    \State $\Omega \gets M_{\Call{Star}{C}}$ \Comment{Lattice map of the star of input subcomplex}
+    \State $Directions \gets \Call{GetAllPrimalDirections}{r}$
+    \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Directions) \times \#C.pointels$}
+    \State $low, high \gets \Call{BoundingBoxZ}{\Omega}$
+    \ForAll{$\vv$ in $Directions$}
+    \ForAll{shift $S$ in $\Omega$}
+    \State $R \gets [low, high]$
+    \ForAll{pair $P$ in $M_{\Call{Star}{[\mathbf{0},\mathbf{v}]}}$}
+    \State $R \gets R \cap \Call{Translations}{P.intervals,\Omega[S + P.shift]}$
+    \EndFor
+    \State \Call{UpdateVisibility}{$V$, $R$}
+    \EndFor
+    \EndFor
+    \State \Return $V$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}
+  \centering
+  \input{algorithm.tikz}
+  \caption{Evolution of the visibility check algorithm for a $(2,1)$
+    vector. Green is the vector lattice map, black is the figure
+    lattice map, red are the current intervals of positions where
+    the visibility is still possible. The last red intervals are
+    the visible positions. We travel the lattice maps from
+    bottom-up and the found visibilities are drawn on the
+    uppest figure.}
+  \label{fig:visibility-algorithm-evolution}
+\end{figure}
+
+Figure~\ref{fig:visibility-algorithm-evolution} shows an example of
+execution of this algorithm in an elementary case. It reduces to
+determining all the possible inclusions by translation of sequences of
+intervals in another sequence of intervals (note that for
+pairwise visibility, it is enough to consider all the possible
+inclusions by translation of one interval in another sequence of
+intervals), and then intersecting progressively the results. Of
+course, the process is stopped as soon as the intersection is
+empty. Some results of visible points are displayed on
+figure~\ref{fig:visibility-results} on 3d shapes.
+
+%% In order to compute the visibility, we first compute $\Omega = \text{Star}(C)$. Then for each primal direction of
+%% coordinates at most $r$, we look at all the possible positions this specific direction does link 2 visible points
+%% of the cell complex. In order to do so, for each shift in $\Omega$, we compute the positions where points are
+%% visible using the same method as presented in~\ref{fig:visibility-algorithm-evolution}. Some results of visible
+%% points are present in figure~\ref{fig:visibility-results}.
+
+\begin{algorithm}
+  \caption{Given 2 lists of integer intervals $K$ and $L$, returns $K \cap L$}
+  \label{alg:intersection}
+  \begin{algorithmic}
+    \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
+    \State $R \gets \emptyset$; $k \gets 0$; $l \gets 0$;
+    \While{$k < K.nbIntervals \And l < L.nbIntervals$}
+    \State $[a,b] \gets K[k]$; $[c,d] \gets L[l]$
+    \State $e \gets \max(a, c)$; $f \gets \min(b, d)$;
+    \If{$e \leq f$}
+    $R.append([e, f])$;
+    \EndIf
+    \If{$b \leq d$}
+    $k \gets k+1$;
+    \EndIf
+    \If{$d \leq b$}
+    $l \gets l+1$;
+    \EndIf
+    \EndWhile
+    \State \Return $R$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+To efficiently compute the intersection of two sequences of intervals
+$K$ and $L$ (Algorithm~\ref{alg:intersection}), we go through the
+first $2$ unvisited elements of the $2$ lists. If they do not overlap
+(i.e.\ the start and end of the 1st interval are both smaller than the
+start of the other), then we can discard the smaller interval. Else,
+we construct the intersection of these 2 intervals as one of the
+resulting intervals. We then can skip the interval with the smallest
+end. If both intervals have the same end, then both intervals can be
+skipped. Doing this computation until one of the lists is empty
+returns the intersection of both lists of intervals.
+
+% Insert visibility results images
+
+\begin{figure}
+  \centering
+  \begin{tabular}{c c}
+    \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} &
+    \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_features}
+  \end{tabular}
+  \caption{Examples of visibilities from a source point:
+    (left) the visibility is stopped at the sharp edge, (right) the
+    visibility does not cross the gap between the two parts.}
+  \label{fig:visibility-results}
+\end{figure}
+%
+%    \begin{figure}
+%        \begin{center}
+%            \includegraphics[width=0.8\textwidth]{pictures/visibility_from_given_point_r_10}
+%            \caption{Visibility of a point on an edge of a fandisk}
+%            \label{fig:visibility-fandisk}
+%        \end{center}
+%    \end{figure}
+%    \begin{figure}
+%        \begin{center}
+%            \includegraphics[width=0.8\textwidth]{pictures/visibility_aware_of_features}
+%            \caption{Visibility of a point on a torus knot (the visibility is feature-aware)}
+%            \label{fig:visibility-torus-knot}
+%        \end{center}
+%    \end{figure}
+
+
+% Quantitative results
+
+We have plotted on Figure~\ref{fig:meanvisibility-computationComplexity}
+the running times to compute global visibility of both~\cite[Algorithm
+  3]{lachaud:2022-jmiv} and our algorithm. Timings are very
+similar. Our algorithm is faster for smaller maximal radii (up to 20),
+while the other is slightly faster for bigger radii. We have also
+measured the (discrete) average visibility distance along digitization
+of smooth shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows
+a law proportionnal to $\sqrt{h}$. As shown in the next section, for
+real 3d images, a maximal radius below 10 is sufficient for normal and
+curvature estimation.
+
+
+\begin{figure}[t]
+  \centering
+  \input{pointelscomptime.tikz}
+  \caption{ \label{fig:meanvisibility-computationComplexity}Computation
+    time of visibility as a function of the number of pointels. We
+    compare the running time of the naive breadth first visibility
+    algorithm against our algorithm using intervals. We input the same
+    maximal radius to both versions (10, 20, 30) and test it on 6
+    different figures (goursat, torus, rcube, sphere9, leopold,
+    ``D20'') with various gridsteps, ($\#$ pointels ranging from 520
+    to 390235).}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \input{mean-distance.tikz}
+  \caption{\label{fig:meanvisibility-gridstep} Mean distance of visibility as a function of the gridstep $h$ (see text).}
+\end{figure}
