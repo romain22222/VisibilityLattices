@@ -79,6 +79,9 @@ std::vector<RealPoint> normalIIColors;
 std::vector<RealPoint> normalTrueColors;
 std::vector<RealPoint> visibility_sharps;
 
+std::vector<RealPoint> mitra_normals;
+std::vector<RealPoint> normalMitraColors;
+
 std::vector<RealPoint> true_normals;
 std::vector<RealPoint> trivial_normals;
 std::vector<RealPoint> surfel_true_normals;
@@ -977,6 +980,7 @@ void computeVisibilityDirectionToSharpFeatures() {
 }
 
 double sigma = -1;
+int mitra_radius = (int) 4./gridstep;
 double minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
@@ -988,6 +992,40 @@ double noWeight(double _) {
 }
 
 auto weighter = wSig;
+
+void computeMitraNormals() {
+	mitra_normals.clear();
+	mitra_normals.reserve(pointels.size());
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (const auto &pointel: pointels) {
+	// 1. Get all the points in the ball of mitra_radius
+	// 2. Compute the centroid of these points
+	// 3. Compute the covariance matrix of these points
+		std::vector<Point> neighbors;
+		RealPoint centroid(0, 0, 0);
+		for (auto point_idx: kdTree.pointsInBall(pointel, mitra_radius)) {
+			auto tmp = kdTree.position(point_idx);
+			neighbors.push_back(tmp);
+			centroid += tmp;
+		}
+		centroid /= (double) neighbors.size();
+		Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
+		for (const auto &pt: neighbors) {
+			auto diff = pt - centroid;
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+					cov(i, j) += diff[i] * diff[j];
+				}
+			}
+		}
+		Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov / (double) neighbors.size());
+		auto normalE = solver.eigenvectors().col(0);
+		mitra_normals.emplace_back(normalE.x(), normalE.y(), normalE.z());
+	}
+	if (!noInterface) {
+		psPrimalMesh->addVertexVectorQuantity("Pointel Mitra normals", mitra_normals);
+	}
+}
 
 void computeVisibilityNormals() {
 	visibility_normals.clear();
@@ -1044,6 +1082,13 @@ void reorientVisibilityNormals() {
 		if (visibility_normals[i].dot(triv_normal) < 0)
 			visibility_normals[i] = -visibility_normals[i];
 	}
+	if (!mitra_normals.empty()) {
+		for (int i = 0; i < mitra_normals.size(); ++i) {
+			const auto triv_normal = getTrivNormal(i);
+			if (mitra_normals[i].dot(triv_normal) < 0)
+				mitra_normals[i] = -mitra_normals[i];
+		}
+	}
 	if (!noInterface) {
 		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
 		psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
@@ -1098,14 +1143,20 @@ void doRedisplayNormalAsColors() {
 	normalIIColors.clear();
 	normalVisibilityColors.reserve(visibility_normals.size());
 	normalIIColors.reserve(visibility_normals.size());
+	normalMitraColors.clear();
+	normalMitraColors.reserve(mitra_normals.size());
 	for (const auto &n: visibility_normals) {
 		normalVisibilityColors.push_back(0.5f * (n + 1.0f));
 	}
 	for (const auto &n: ii_normals) {
 		normalIIColors.push_back(0.5f * (n + 1.0f));
 	}
+	for (const auto &n: mitra_normals) {
+		normalMitraColors.push_back(0.5f * (n + 1.0f));
+	}
 	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
 	psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
+	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors", normalMitraColors);
 
 	if (!true_normals.empty()) {
 		normalTrueColors.clear();
@@ -1119,7 +1170,31 @@ void doRedisplayNormalAsColors() {
 }
 
 
+auto olddgd = Polyhedra::digitization_gridstep_distance;
+
 void computeL2looErrorsNormals() {
+	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
+		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << std::endl;
+		auto params = SHG3::parametersShapeGeometry();
+		auto pTC = new TangencyComputer<KSpace>(K);
+		pTC->init(pointels.cbegin(), pointels.cend(), true);
+		params("r-radius", iiRadius);
+		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);;
+		for (auto &n: true_normals) n = RealVector::zero;
+		for (auto k = 0; k < surfels.size(); k++) {
+			const auto &surf = surfels[k];
+			const auto cells0 = SH3::getPrimalVertices(K, surf);
+			for (const auto &c0: cells0) {
+				const auto p = K.uCoords(c0);
+				const auto idx = pTC->index(p);
+				if (surfel_true_normals[k].norm() != 0) {
+					true_normals[idx] += surfel_true_normals[k];
+				}
+			}
+		}
+		for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
+		olddgd = gridstep;
+	}
 	//	std::cout << "Computing L2 and Loo errors" << std::endl;
 	std::vector<double> angle_dev(visibility_normals.size());
 	std::vector<double> dummy(visibility_normals.size(), 0.0);
@@ -1133,10 +1208,44 @@ void computeL2looErrorsNormals() {
 		angle_dev[i] = acos(fxp);
 	}
 	if (!noInterface)
-		psPrimalMesh->addVertexScalarQuantity("Angle deviation", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation visib", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
 			"reds");
-	std::cout << "L2 error normals: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-	std::cout << "Loo error normals: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+	std::cout << "L2 error normals visib: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error normals visib: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+
+	angle_dev.clear();
+	angle_dev.resize(ii_normals.size());
+	for (int i = 0; i < ii_normals.size(); ++i) {
+		if (true_normals[i].norm() == 0) {
+			angle_dev[i] = 0.0;
+			continue;
+		}
+		const auto sp = ii_normals[i].dot(true_normals[i]);
+		const auto fxp = std::min(1.0, std::max(-1.0, sp));
+		angle_dev[i] = acos(fxp);
+	}
+	if (!noInterface)
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation II", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
+			"reds");
+	std::cout << "L2 error normals II: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error normals II: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+
+	angle_dev.clear();
+	angle_dev.resize(mitra_normals.size());
+	for (int i = 0; i < mitra_normals.size(); ++i) {
+		if (true_normals[i].norm() == 0) {
+			angle_dev[i] = 0.0;
+			continue;
+		}
+		const auto sp = mitra_normals[i].dot(true_normals[i]);
+		const auto fxp = std::min(1.0, std::max(-1.0, sp));
+		angle_dev[i] = acos(fxp);
+	}
+	if (!noInterface)
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation Mitra", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
+			"reds");
+	std::cout << "L2 error normals Mitra: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error normals Mitra: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
 
 std::vector<double> operator-(const std::vector<double> &lhs, const std::vector<double> &rhs) {
@@ -1278,6 +1387,7 @@ void myCallback() {
 		}
 	}
 	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
+	ImGui::SliderInt("mitra radius", &mitra_radius, 1, 20);
 	if (ImGui::Button("Visibility")) {
 		computeVisibilityWithPointShow(pointel_idx);
 	}
@@ -1313,6 +1423,7 @@ void myCallback() {
 		computeVisibilityNormals();
 		reorientVisibilityNormals();
 		Time = trace.endBlock();
+		computeMitraNormals();
 		doRedisplayNormalAsColors();
 	}
 	ImGui::SameLine();
