@@ -1574,6 +1574,7 @@ int gpuRun(int argc, char *argv[]) {
 	bool noFurtherComputation = false;
 	double sigmaTmp = -1.0;
 	int VisibilityRadiusTmp = -1;
+	int nstar = 1;
 	std::string saveVisibilityFilename;
 	std::string saveShapeFilename = "shape.vol";
 	std::string visibComputeMethod = "OMP_GPU";
@@ -1603,6 +1604,8 @@ int gpuRun(int argc, char *argv[]) {
 	               "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 	app.add_flag("--noFurtherComputation", noFurtherComputation,
 	             "if set, no computation after generating the shape");
+	app.add_option("--nstar", nstar, "number of stars to use in visibility computation (default 1, will do every star from 1 to nstar)");
+	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
 
 	CLI11_PARSE(app, argc, argv)
 	if (listP) {
@@ -1729,6 +1732,7 @@ int gpuRun(int argc, char *argv[]) {
 		for (auto &n: trivial_normals) n /= n.norm();
 		for (auto &n: ii_normals) n /= n.norm();
 		for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
+		computeMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
 		trace.endBlock();
 
@@ -1755,50 +1759,53 @@ int gpuRun(int argc, char *argv[]) {
 
 
 	// Ready to choose program
-
-	trace.beginBlock("Compute visibilities");
-	if (visibComputeMethod == "CPU") {
-		computeVisibility(VisibilityRadius, ComputeVisibilityParams());
-	} else if (visibComputeMethod == "OMP") {
-		computeVisibilityOmp(VisibilityRadius);
-	} else if (visibComputeMethod == "OMP_GPU") {
-		computeVisibilityOmpGPU(VisibilityRadius, ComputeVisibilityParams());
-	} else if (visibComputeMethod == "GPU") {
+	for (int star = 1; star <= nstar; ++star) {
+		std::cout << "GPU run for nStar = " << star << std::endl;
+		auto params = ComputeVisibilityParams()("nStar", star);
+		trace.beginBlock("Compute visibilities for nStar=" + std::to_string(star));
+		if (visibComputeMethod == "CPU") {
+			computeVisibility(VisibilityRadius, params);
+		} else if (visibComputeMethod == "OMP") {
+			computeVisibilityOmp(VisibilityRadius);
+		} else if (visibComputeMethod == "OMP_GPU") {
+			computeVisibilityOmpGPU(VisibilityRadius, params);
+		} else if (visibComputeMethod == "GPU") {
 #ifdef USE_CUDA_VISIBILITY
-		computeVisibilityCuda(VisibilityRadius);
+			computeVisibilityCuda(VisibilityRadius);
 #else
-		std::cerr << "Error: CUDA visibility computation not available. Recompile with CUDA support." << std::endl;
-		return 1;
+			std::cerr << "Error: CUDA visibility computation not available. Recompile with CUDA support." << std::endl;
+			return 1;
 #endif
-	} else {
-		std::cerr << "Error: unknown visibility computation method '" << visibComputeMethod << "'." << std::endl;
-		return 1;
-	}
-	Time = trace.endBlock();
-	computeMeanDistanceVisibility();
-	if (computeNormalsFlag) {
-		trace.beginBlock("Compute visibilities Normals");
-		computeVisibilityNormals();
-		reorientVisibilityNormals();
-		Time = trace.endBlock();
-		if (is_polynomial) {
-			computeL2looErrorsNormals();
+		} else {
+			std::cerr << "Error: unknown visibility computation method '" << visibComputeMethod << "'." << std::endl;
+			return 1;
 		}
-	}
-	if (computeCurvaturesFlag) {
-		trace.beginBlock("Compute visibilities Curvatures");
-		computeCurvatures();
 		Time = trace.endBlock();
-		if (is_polynomial) {
-			computeL2looErrorsCurvatures();
+		computeMeanDistanceVisibility();
+		if (computeNormalsFlag) {
+			trace.beginBlock("Compute visibilities Normals");
+			computeVisibilityNormals();
+			reorientVisibilityNormals();
+			Time = trace.endBlock();
+			if (is_polynomial) {
+				computeL2looErrorsNormals();
+			}
 		}
+		if (computeCurvaturesFlag) {
+			trace.beginBlock("Compute visibilities Curvatures");
+			computeCurvatures();
+			Time = trace.endBlock();
+			if (is_polynomial) {
+				computeL2looErrorsCurvatures();
+			}
+		}
+		/*if (!saveVisibilityFilename.empty()) {
+			trace.beginBlock("Save visibility");
+			saveVisibility(saveVisibilityFilename);
+			trace.endBlock();
+		}*/
+		std::cout << "GPU run completed successfully." << std::endl;
 	}
-	if (!saveVisibilityFilename.empty()) {
-		trace.beginBlock("Save visibility");
-		saveVisibility(saveVisibilityFilename);
-		trace.endBlock();
-	}
-	std::cout << "GPU run completed successfully." << std::endl;
 	return 0;
 }
 
@@ -1846,6 +1853,8 @@ int main(int argc, char *argv[]) {
 	               "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 	app.add_flag("--noFurtherComputation", ignore,
 	             "gpuRun only : if set, no computation after generating the shape");
+	app.add_option("--nstar", ignore, "number of stars to use in visibility computation (default 1)");
+	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
 
 	// -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
 	// Parse command line options. Exit on error.
