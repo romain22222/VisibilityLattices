@@ -942,7 +942,7 @@ void computeMeanDistanceVisibility() {
 
 	// pick 100 random pointels
 
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	unsigned seed = 0;
 	std::mt19937 gen(seed);
 	auto pointelsSample = pickSet(pointels.size(), pointels.size(), gen);
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
@@ -1174,7 +1174,8 @@ auto olddgd = Polyhedra::digitization_gridstep_distance;
 
 void computeL2looErrorsNormals() {
 	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
-		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << std::endl;
+		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << " (old was "
+		          << olddgd << ")" << std::endl;
 		auto params = SHG3::parametersShapeGeometry();
 		auto pTC = new TangencyComputer<KSpace>(K);
 		pTC->init(pointels.cbegin(), pointels.cend(), true);
@@ -1421,9 +1422,9 @@ void myCallback() {
 	if (ImGui::Button("Compute Normals")) {
 		trace.beginBlock("Compute visibilities Normals");
 		computeVisibilityNormals();
-		reorientVisibilityNormals();
 		Time = trace.endBlock();
 		computeMitraNormals();
+		reorientVisibilityNormals();
 		doRedisplayNormalAsColors();
 	}
 	ImGui::SameLine();
