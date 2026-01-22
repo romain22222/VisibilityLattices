@@ -1,4 +1,4 @@
-\begin{tabular}{c@{~}|@{~}c@{~}|@{~}c@{~}|@{~}c}
+\begin{tabular}{c|c}
   \begin{tikzpicture}
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (3.75,2.75);
     \draw[dashed] (0,0) -- (2,1);
@@ -20,7 +20,9 @@
     }
     \draw [thick] (0,0) -- (0,1) -- (0.5,1) -- (0.5,1.5) -- (1,1.5) -- (1,1) -- (1.5,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (0,1.5) -- (0,2) -- (1.5,2) -- (1.5,1.5) -- (2,1.5)  -- (2,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
-  \end{tikzpicture} &
+  \end{tikzpicture} \\
+  Visible                       & Non-Visible                   \\
+  \hline
   \begin{tikzpicture}
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (2.75,2.75);
     \draw[red,dashed,thick] (0,0) -- (1,0);
@@ -43,7 +45,6 @@
     \draw [thick] (0,0) -- (0,1) -- (1,1);
     \draw[thick,dashed] (-0.5,-0.5) -- (-0.5,1.5) -- (1.5,1.5) -- (1.5,0.5) -- (0.5,0.5) -- (0.5,-0.5) -- (-0.5,-0.5);
   \end{tikzpicture} \\
-  Visible     & Non-Visible                   &
   Non-Visible & Non-Visible
 \end{tabular}
 

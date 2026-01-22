@@ -39,13 +39,13 @@ estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
 $E_{\max}$.
 
-\begin{figure*}
+\begin{figure}
     \centering
-    \begin{tabular}{c c}
+    \begin{tabular}{c}
         \begin{tikzpicture}
             \centering
             \begin{axis}[
-                width=0.53\textwidth,
+                width=0.53\columnwidth,
                 xlabel={Gridstep},
                 ylabel={RMSE error},
                 x dir=reverse,
@@ -118,12 +118,12 @@ $E_{\max}$.
                     samples=200,
                 ] {0.1*x^(0.66)} node[pos=0.2, anchor=south west] {$h^{\frac{2}{3}}$};
             \end{axis}
-        \end{tikzpicture} &
+        \end{tikzpicture} \\
         \begin{tikzpicture}
             \centering
             \begin{axis}
                 [
-                width=0.53\textwidth,
+                width=0.53\columnwidth,
                 xlabel={Gridstep},
                 ylabel={$E_{\max}$ error},
                 x dir=reverse,
@@ -197,40 +197,38 @@ $E_{\max}$.
                 ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
             \end{axis}
         \end{tikzpicture} \\
-        \multicolumn{2}{c}{
-            \begin{tikzpicture}
-                \begin{axis}[
-                    hide axis,
-                    xmin=0, xmax=1,
-                    ymin=0, ymax=1,
-                    legend columns=3,
-                    legend style={
-                        at={(0.5,-0.2)},
-                        anchor=north,
-                        draw=none,
-                        column sep=15pt,
-                    }
-                ]
-                    \addlegendimage{mark=halfcircle}
-                    \addlegendentry{VN}
-                    \addlegendimage{mark=square}
-                    \addlegendentry{II}
-                    \addlegendimage{color=cyan}
-                    \addlegendentry{ellipsoid}
-                    \addlegendimage{color=red}
-                    \addlegendentry{goursat}
-                    \addlegendimage{color=MyGreen}
-                    \addlegendentry{rcube}
-                    \addlegendimage{color=orange}
-                    \addlegendentry{sphere9}
+        \begin{tikzpicture}
+            \begin{axis}[
+                hide axis,
+                xmin=0, xmax=1,
+                ymin=0, ymax=1,
+                legend columns=3,
+                legend style={
+                    at={(0.5,-0.2)},
+                    anchor=north,
+                    draw=none,
+                    column sep=15pt,
+                }
+            ]
+                \addlegendimage{mark=halfcircle}
+                \addlegendentry{VN}
+                \addlegendimage{mark=square}
+                \addlegendentry{II}
+                \addlegendimage{color=cyan}
+                \addlegendentry{ellipsoid}
+                \addlegendimage{color=red}
+                \addlegendentry{goursat}
+                \addlegendimage{color=MyGreen}
+                \addlegendentry{rcube}
+                \addlegendimage{color=orange}
+                \addlegendentry{sphere9}
 
-                \end{axis}
-            \end{tikzpicture}
-        } \\
+            \end{axis}
+        \end{tikzpicture}
     \end{tabular}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution}
     \label{fig:errors-normals}
-\end{figure*}
+\end{figure}
 
 \begin{figure*}
     \centering
