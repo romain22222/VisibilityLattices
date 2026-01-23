@@ -18,6 +18,20 @@ namespace Polyhedra {
 	typedef ShortcutsGeometry<KSpace> SHG3;
 	typedef std::pair<RealPoint, double> Plane;
 
+	struct Ellipse {
+		RealPoint center;
+		RealVector u; // axe 1 (unitaire)
+		RealVector v; // axe 2 (unitaire)
+		double a; // demi-grand axe
+		double b; // demi-petit axe
+	};
+
+	enum class EllipseCombinationMode {
+		INTERSECTION,
+		UNION
+	};
+
+
 	inline float digitization_gridstep_distance = 1.0f;
 
 	double planeDistance(const Plane &plane, const RealPoint &p, double gridstep);
@@ -32,12 +46,22 @@ namespace Polyhedra {
 
 	private:
 		std::vector<Plane> myPlanes;
+		std::vector<Ellipse> myEllipses;
+		EllipseCombinationMode ellipseMode = EllipseCombinationMode::UNION;
 		double digitization_gridstep;
 
 	public:
 		PolyhedronShape(const std::vector<Plane> &planes, double gridstep);
 
+		PolyhedronShape(const std::vector<Plane> &planes,
+		                const std::vector<Ellipse> &ellipses,
+		                EllipseCombinationMode mode,
+		                double gridstep);
+
+
 		std::vector<Plane> getPlanes() const;
+
+		double implicitDistance(const RealPoint &p) const;
 
 		Orientation orientation(const RealPoint &p) const;
 

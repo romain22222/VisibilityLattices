@@ -38,65 +38,147 @@ namespace Polyhedra {
 		: myPlanes(planes), digitization_gridstep(gridstep) {
 	}
 
+	PolyhedronShape::PolyhedronShape(const std::vector<Plane> &planes,
+	                                 const std::vector<Ellipse> &ellipses,
+	                                 EllipseCombinationMode mode,
+	                                 double gridstep)
+		: myPlanes(planes),
+		  myEllipses(ellipses),
+		  ellipseMode(mode),
+		  digitization_gridstep(gridstep) {
+	}
+
 	std::vector<Plane> PolyhedronShape::getPlanes() const {
 		return myPlanes;
 	}
 
+	double ellipseDistance(const Ellipse &e,
+	                       const RealPoint &p,
+	                       double gridstep) {
+		RealVector d = gridstep * p - e.center;
+		double x = d.dot(e.u) / e.a;
+		double y = d.dot(e.v) / e.b;
+		return x * x + y * y - 1.0;
+	}
+
 	Orientation PolyhedronShape::orientation(const RealPoint &p) const {
-		std::vector<DGtal::Orientation> orientations(myPlanes.size(), DGtal::INSIDE);
-		int i = 0;
-		for (auto &pl: myPlanes) {
-			double dot = pl.first.dot(p);
-			if (dot > pl.second + eps)
-				return DGtal::OUTSIDE;
-			else if (dot > pl.second - eps)
-				orientations[i] = DGtal::ON;
-			i++;
+		bool onBoundary = false;
+
+		// 1. Plans → toujours intersection
+		for (const auto &pl: myPlanes) {
+			double d = planeDistance(pl, p, digitization_gridstep);
+			if (d > eps) return DGtal::OUTSIDE;
+			if (std::abs(d) <= eps) onBoundary = true;
 		}
-		if (std::ranges::any_of(orientations, [](DGtal::Orientation o) { return o == DGtal::ON; }))
-			return DGtal::ON;
-		else
-			return DGtal::INSIDE;
+
+		// 2. Ellipses
+		if (!myEllipses.empty()) {
+			if (ellipseMode == EllipseCombinationMode::INTERSECTION) {
+				for (const auto &e: myEllipses) {
+					double d = ellipseDistance(e, p, digitization_gridstep);
+					if (d > eps) return DGtal::OUTSIDE;
+					if (std::abs(d) <= eps) onBoundary = true;
+				}
+			} else // UNION
+			{
+				bool insideAtLeastOne = false;
+				for (const auto &e: myEllipses) {
+					double d = ellipseDistance(e, p, digitization_gridstep);
+					if (d <= eps) {
+						insideAtLeastOne = true;
+						if (std::abs(d) <= eps) onBoundary = true;
+						break;
+					}
+				}
+				if (!insideAtLeastOne) return DGtal::OUTSIDE;
+			}
+		}
+
+		return onBoundary ? DGtal::ON : DGtal::INSIDE;
+	}
+
+
+	double PolyhedronShape::implicitDistance(const RealPoint &p) const {
+		double dmax = -std::numeric_limits<double>::infinity();
+
+		for (const auto &pl: myPlanes)
+			dmax = std::max(dmax, planeDistance(pl, p, digitization_gridstep));
+
+		if (!myEllipses.empty()) {
+			if (ellipseMode == EllipseCombinationMode::INTERSECTION) {
+				for (const auto &e: myEllipses)
+					dmax = std::max(dmax, ellipseDistance(e, p, digitization_gridstep));
+			} else // UNION
+			{
+				double dmin = std::numeric_limits<double>::infinity();
+				for (const auto &e: myEllipses)
+					dmin = std::min(dmin, ellipseDistance(e, p, digitization_gridstep));
+				dmax = std::max(dmax, dmin);
+			}
+		}
+
+		return dmax;
+	}
+
+
+	RealVector ellipseGradient(const Ellipse &e,
+	                           const RealPoint &p) {
+		RealVector d = p - e.center;
+		double du = d.dot(e.u) / (e.a * e.a);
+		double dv = d.dot(e.v) / (e.b * e.b);
+		return 2.0 * (du * e.u + dv * e.v);
 	}
 
 	RealPoint PolyhedronShape::nearestPoint(RealPoint x,
 	                                        double accuracy,
 	                                        int maxIter,
 	                                        double gamma) const {
-		for (int iter = 0; iter < maxIter; ++iter) {
-			RealPoint totalCorrection = RealPoint(0, 0, 0);
-
-			for (const auto &pl: myPlanes) {
-				auto dist = planeDistance(pl, x, digitization_gridstep);
-				if (dist > 0) // outside half-space -> project
-					totalCorrection -= gamma * dist * pl.first;
-			}
-
-			if (totalCorrection.norm() < accuracy)
-				break; // converged
-
-			x += totalCorrection;
-		}
+		double d = implicitDistance(x);
+		if (d > 0)
+			x -= gamma * d * gradient(x);
 		return x;
 	}
 
 	RealVector PolyhedronShape::gradient(const RealPoint &p) const {
-		// First compute the nearest plane(s) to p
+		double worst = -1e300;
 		RealVector grad(0, 0, 0);
-		int count = 0;
+
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+			double d = planeDistance(pl, p, digitization_gridstep);
+			if (d > worst) {
+				worst = d;
 				grad = pl.first;
-				count++;
 			}
-			if (count >= 2)
-				break;
 		}
-		if (count > 1) {
-			grad = RealVector(0, 0, 0); // ambiguous gradient
+
+		if (!myEllipses.empty()) {
+			if (ellipseMode == EllipseCombinationMode::INTERSECTION) {
+				for (const auto &e: myEllipses) {
+					double d = ellipseDistance(e, p, digitization_gridstep);
+					if (d > worst) {
+						worst = d;
+						grad = ellipseGradient(e, p);
+					}
+				}
+			} else // UNION
+			{
+				double best = 1e300;
+				const Ellipse *bestEllipse = nullptr;
+				for (const auto &e: myEllipses) {
+					double d = ellipseDistance(e, p, digitization_gridstep);
+					if (d < best) {
+						best = d;
+						bestEllipse = &e;
+					}
+				}
+				if (bestEllipse && best > worst)
+					grad = ellipseGradient(*bestEllipse, p);
+			}
 		}
+
 		return normalize(grad);
 	}
+
 
 	int PolyhedronShape::countIntersections(const RealPoint &p) const {
 		auto intersectingPlanes = 0;
