@@ -17,7 +17,7 @@ namespace Polyhedra {
 
 	bool isPolyhedron(const std::string &shape) {
 		static const std::vector<std::string> names =
-			{"cube", "tetrahedron", "triangular_pyramid", "dodecahedron", "icosahedron"};
+			{"cube", "tetrahedron", "triangular_pyramid", "dodecahedron", "icosahedron", "cubesphere", "doubleEllipsoid"};
 		return std::ranges::any_of(names, [&](const std::string &n) { return n == shape; });
 	}
 
@@ -27,6 +27,8 @@ namespace Polyhedra {
 		std::cout << " - tetrahedron (alias: triangular_pyramid)\n";
 		std::cout << " - dodecahedron\n";
 		std::cout << " - icosahedron\n";
+		std::cout << " - cubesphere\n";
+		std::cout << " - doubleEllipsoid\n";
 	}
 
 	static RealPoint normalize(const RealPoint &v) {
@@ -213,6 +215,7 @@ namespace Polyhedra {
 
 	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, int d) {
 		std::vector<Plane> planes;
+		std::vector<Ellipse> ellipses;
 
 		if (shape == "cube") {
 			planes = {
@@ -315,11 +318,31 @@ namespace Polyhedra {
 			for (auto &p: planes) {
 				p.first = R * p.first;
 			}
+		} else if (shape == "cubesphere") {
+			planes = {
+				{{1, 0, 0}, d},
+				{{-1, 0, 0}, d},
+				{{0, 1, 0}, d},
+				{{0, -1, 0}, d},
+				{{0, 0, 1}, d},
+				{{0, 0, -1}, d}
+			};
+			for (auto &pl: planes)
+				pl.first = normalize(pl.first);
+			ellipses = {
+				{{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, d / std::sqrt(2), d / std::sqrt(2)}
+			};
+		} else if (shape == "doubleEllipsoid") {
+			ellipses.reserve(2);
+			ellipses.push_back(Ellipse{{-d / 2., 0, 0}, {1, 0, 0}, {0, 1, 0}, d / 2., d / 1.5});
+			ellipses.push_back(Ellipse{{d / 2., 0, 0}, {1, 0, 0}, {0, 1, 0}, d / 2., d / 1.5});
 		} else {
 			trace.error() << "[makeImplicitPolyhedron] Unknown shape: " << shape << std::endl;
 		}
 
-		return CountedPtr<PolyhedronShape>(new PolyhedronShape(planes, gridstep));
+		return CountedPtr<PolyhedronShape>(new PolyhedronShape(planes, ellipses,
+		                                                        EllipseCombinationMode::UNION,
+		                                                        gridstep));
 	}
 
 	CountedPtr<SH3::BinaryImage> makeBinaryPolyhedron(const std::string &shape,
