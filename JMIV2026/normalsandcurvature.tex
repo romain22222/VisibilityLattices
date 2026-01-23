@@ -29,7 +29,8 @@ touching the point $p$.
 
 \paragraph{Experimental validation.}
 Figure~\ref{fig:normals-estimation} shows an example
-of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}.
+of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
+and the Mitra estimator~\cite{mitra:2003-acm}.
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
 normals computed on a digital surface with respect to the normals computed
@@ -230,46 +231,51 @@ $E_{\max}$.
     \label{fig:errors-normals}
 \end{figure}
 
+\newcommand{\formatImageFigNormalesShow}[1]{%
+    \includegraphics[width=0.26\textwidth]{./pictures/figNormalesDisplay/#1}%
+}
+
 \begin{figure*}
     \centering
-    \begin{tabular}{|c||c|c|}
+    \begin{tabular}{|c||c|c|c|}
         \hline
-        Normals & With cube edges & Flat (no shading) \\
+        Shape    & II & Mitra & Ours \\
         \hline
         \hline
-        \raisebox{18mm}{II} &
-        \includegraphics[width=0.3\textwidth]{pictures/cps-IIN-flat-edge-small} &
-        \includegraphics[width=0.3\textwidth]{pictures/cps-IIN-flat-small} \\
-        %% \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-cubes-II} &
-        %% \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-smooth-II} \\
+        Cps      &    &       &      \\
         \hline
-        \raisebox{18mm}{Ours} &
-        \includegraphics[width=0.3\textwidth]{pictures/cps-VN-flat-edge-small} &
-        \includegraphics[width=0.3\textwidth]{pictures/cps-VN-flat-small} \\
-        %% \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-cubes-NV} &
-        %% \includegraphics[width=0.4\textwidth]{pictures/chinese-dragon-normal-estimation-smooth-NV} \\
+        \raisebox{6mm}{With cube edges} &
+        \formatImageFigNormalesShow{cps-IIN-flat-edge} &
+        \formatImageFigNormalesShow{cps-Mitra-flat-edge} &
+        \formatImageFigNormalesShow{cps-VN-flat-edge} \\
         \hline
-        \raisebox{18mm}{II} &
-        \includegraphics[width=0.43\textwidth]{pictures/tie256-IIN-flat-edge-small} &
-        \includegraphics[width=0.43\textwidth]{pictures/tie256-IIN-flat-small} \\
-        %% \includegraphics[width=0.4\textwidth]{pictures/octaflower-normal-estimation-cubes-II} &
-        %% \includegraphics[width=0.4\textwidth]{pictures/octaflower-normal-estimation-smooth-II} \\
+        \raisebox{6mm}{Flat (no shading)} &
+        \formatImageFigNormalesShow{cps-IIN-flat} &
+        \formatImageFigNormalesShow{cps-Mitra-flat} &
+        \formatImageFigNormalesShow{cps-VN-flat} \\
         \hline
-        \raisebox{18mm}{Ours} &
-        \includegraphics[width=0.43\textwidth]{pictures/tie256-VN-flat-edge-small} &
-        \includegraphics[width=0.43\textwidth]{pictures/tie256-VN-flat-small} \\
-        %% \includegraphics[width=0.4\textwidth]{pictures/octaflower-normal-estimation-cubes-NV} &
-        %% \includegraphics[width=0.4\textwidth]{pictures/octaflower-normal-estimation-smooth-NV} \\
+        Filigree &    &       &      \\
+        \hline
+        \raisebox{6mm}{With cube edges} &
+        \formatImageFigNormalesShow{filigree-IIN-flat-edge} &
+        \formatImageFigNormalesShow{filigree-Mitra-flat-edge} &
+        \formatImageFigNormalesShow{filigree-VN-flat-edge} \\
+        \hline
+        \raisebox{6mm}{Flat (no shading)} &
+        \formatImageFigNormalesShow{filigree-IIN-flat} &
+        \formatImageFigNormalesShow{filigree-Mitra-flat} &
+        \formatImageFigNormalesShow{filigree-VN-flat} \\
         \hline
     \end{tabular}
     \caption{Examples of normals computed on a cps, then on a
-    tie as a color map. First set displays II normals, second set
-    uses the visibility algorithm to compute them. The normals are colored
-    according to their orientation as $0.5 \cdot (n_i + \mathbbm{1})$. The
-    right images are the smooth version of the left images. ``Integral
-    Invariant normals'' are computed using a radius of $r=4.5$, while
-    our normal estimator are computed using a deviation of $\sigma=4$, and so
-    a radius of $r=2\sigma=8$}
+    filigree as a color map. First set displays II normals, second set
+    uses the Mitra algorithm, and last set uses our visibility algorithm
+    to compute them. The normals are colored according to their
+    orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
+    The bottom images are the smooth version of the top ones. ``Integral
+    Invariant normals'' are computed using a radius of $r=4.5$, Mitra with
+    a discrete radius of 4 (empirical), while our normal estimator are
+    computed using a deviation of $\sigma=4$, and so a radius of $r=2\sigma=8$}
     \label{fig:normals-estimation}
 \end{figure*}
 
