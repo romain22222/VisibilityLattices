@@ -337,34 +337,41 @@ $\sigma=4$) while the result is visually indistinguishable.
 
 
 \newcommand{\MyZoom}[1]{%
-    \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
-    \node[inner sep=0pt] {\pgfimage[width=0.3\textwidth]{#1}};
-    \spy[overlay,blue] on (0.4,0.2) in node at (-0.8,0.8);
+    \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=0.8cm,connect spies}]
+    \node[inner sep=0pt] {\pgfimage[width=0.1\textwidth]{#1}};
+    \spy[overlay,blue] on (0.25,-0.2) in node at (-0.4,-0.4);
     \end{tikzpicture}}
 % \newcommand{\MyZoom}[1]{\includegraphics[width=0.3\textwidth]{#1}}
 
+% insert variable for raisebox size
+\newcommand{\raiseboxsize}{10mm}
+
 \begin{figure*}
     \begin{center}
-        \resizebox{!}{0.4\textheight}{%
-            \begin{tabular}{|c||c|c|c|}
+        \resizebox{!}{0.3\textheight}{%
+            \begin{tabular}{|c||c|c|c|c|}
                 \hline
-                Curv. & II normals & CTriv normals & Our normals \\ \hline \hline
-                \raisebox{18mm}{$\kappa_1$} &
-                \MyZoom{pictures/d20-k1-II-small.jpg} &
-                \MyZoom{pictures/d20-k1-CTriv-small.jpg}&
-                \MyZoom{pictures/d20-k1-VN-small.jpg}\\ \hline
-                \raisebox{18mm}{$\kappa_2$} &
-                \MyZoom{pictures/d20-k2-II-small.jpg} &
-                \MyZoom{pictures/d20-k2-CTriv-small.jpg}&
-                \MyZoom{pictures/d20-k2-VN-small.jpg}\\ \hline
-                \raisebox{18mm}{$H$} &
-                \MyZoom{pictures/d20-H-II-small.jpg} &
-                \MyZoom{pictures/d20-H-CTriv-small.jpg}&
-                \MyZoom{pictures/d20-H-VN-small.jpg}\\ \hline
-                \raisebox{18mm}{$G$} &
-                \MyZoom{pictures/d20-G-II-small.jpg} &
-                \MyZoom{pictures/d20-G-CTriv-small.jpg}&
-                \MyZoom{pictures/d20-G-VN-small.jpg}\\ \hline
+                \backslashbox{}{} & II & CTriv & Mitra & Ours \\ \hline \hline
+                \raisebox{\raiseboxsize}{$\kappa_1$} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-II-K1} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K1}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K1}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-VN-K1}\\ \hline
+                \raisebox{\raiseboxsize}{$\kappa_2$} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-II-K2} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K2}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K2}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-VN-K2}\\ \hline
+                \raisebox{\raiseboxsize}{$H$} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-II-H} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-H}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-H}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-VN-H}\\ \hline
+                \raisebox{\raiseboxsize}{$G$} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-II-G} &
+                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-G}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-G}&
+                \MyZoom{pictures/figCurvDisplay/d20-256-VN-G}\\ \hline
             \end{tabular}%
         }
     \end{center}
@@ -374,12 +381,12 @@ $\sigma=4$) while the result is visually indistinguishable.
     Thingi10K database at resolution $256^3$. This estimator is
     parameterized by an input normal estimator: first column by
     ``Integral Invariant normals'' (radius $r=6$), second column
-    by ``Convolved Trivial normals'' (radius $k=6$), third
+    by ``Convolved Trivial normals'' (radius $k=6$), third by ``Mitra Normals`` (radius $r=4$),fourth
     column by our presented normal estimator (deviation
         $\sigma=4$, radius $r=2\sigma=8$). Per row are displayed the
         estimated curvatures in order: first and second principal
         curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
         Gaussian curvature $G$. The range of curvature between deep
-        blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
+        blue and deep red is $\lbrack -0.2, 0.2 \rbrack$ with white
         color equal to $0$.}
 \end{figure*}

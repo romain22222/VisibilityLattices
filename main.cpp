@@ -1096,8 +1096,10 @@ void reorientVisibilityNormals() {
 	}
 }
 
-void computeCurvatures() {
-	primal_surface->setVertexNormals(visibility_normals.cbegin(), visibility_normals.cend());
+
+
+void computeCurvaturesFor(std::vector<RealVector> &normals) {
+	primal_surface->setVertexNormals(normals.cbegin(), normals.cend());
 	primal_surface->computeFaceNormalsFromVertexNormals();
 
 	mu0 = pCNC->computeMu0();
@@ -1457,9 +1459,20 @@ void myCallback() {
 		computeL2looErrorsNormals();
 		Time = trace.endBlock();
 	}
+	const char *items[] = { "Visibility normals", "Mitra normals", "II normals", "CTriv" };
+	static int item_current = 0;
+	ImGui::Combo("Normals to use for curv.", &item_current, items, IM_ARRAYSIZE(items));
 	if (ImGui::Button("Compute Curvatures")) {
 		trace.beginBlock("Compute visibilities Curvatures");
-		computeCurvatures();
+		if (item_current == 0) {
+			computeCurvaturesFor(visibility_normals);
+		} else if (item_current == 1) {
+			computeCurvaturesFor(mitra_normals);
+		} else if (item_current == 2) {
+			computeCurvaturesFor(ii_normals);
+		} else {
+			computeCurvaturesFor(trivial_normals);
+		}
 		Time = trace.endBlock();
 		doRedisplayCurvatures();
 	}
@@ -1503,10 +1516,10 @@ void myCallback() {
 		testNStarOfShape(nStarTest);
 	}
 	// Add a selector for the weighting function used for normal estimation
-	const char *items[] = { "Gaussian", "No Weight" };
-	static int item_current = 0;
-	ImGui::Combo("Weighter", &item_current, items, IM_ARRAYSIZE(items));
-	if (item_current == 0) {
+	const char *weightSelectorItems[] = { "Gaussian", "No Weight" };
+	static int weightCurrentItem = 0;
+	ImGui::Combo("Weighter", &weightCurrentItem, weightSelectorItems, IM_ARRAYSIZE(weightSelectorItems));
+	if (weightCurrentItem == 0) {
 		weighter = wSig;
 	} else {
 		weighter = noWeight;
@@ -1816,6 +1829,7 @@ int gpuRun(int argc, char *argv[]) {
 		if (computeNormalsFlag) {
 			trace.beginBlock("Compute visibilities Normals");
 			computeVisibilityNormals();
+			computeMitraNormals();
 			reorientVisibilityNormals();
 			Time = trace.endBlock();
 			if (is_polynomial) {
@@ -1824,7 +1838,19 @@ int gpuRun(int argc, char *argv[]) {
 		}
 		if (computeCurvaturesFlag) {
 			trace.beginBlock("Compute visibilities Curvatures");
-			computeCurvatures();
+			computeCurvaturesFor(visibility_normals);
+			Time = trace.endBlock();
+			if (is_polynomial) {
+				computeL2looErrorsCurvatures();
+			}
+			trace.beginBlock("Compute mitra curvatures");
+			computeCurvaturesFor(mitra_normals);
+			Time = trace.endBlock();
+			if (is_polynomial) {
+				computeL2looErrorsCurvatures();
+			}
+			trace.beginBlock("Compute ii curvatures");
+			computeCurvaturesFor(ii_normals);
 			Time = trace.endBlock();
 			if (is_polynomial) {
 				computeL2looErrorsCurvatures();
