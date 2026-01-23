@@ -1138,7 +1138,7 @@ void doRedisplayCurvatures() {
 	psPrimalMesh->addFaceVectorQuantity("D2 (2nd princ. direction)", D2);
 }
 
-void doRedisplayNormalAsColors() {
+void doRedisplayNormalAsColorsAbsolute() {
 	normalVisibilityColors.clear();
 	normalIIColors.clear();
 	normalVisibilityColors.reserve(visibility_normals.size());
@@ -1154,9 +1154,9 @@ void doRedisplayNormalAsColors() {
 	for (const auto &n: mitra_normals) {
 		normalMitraColors.push_back(0.5f * (n + 1.0f));
 	}
-	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors", normalVisibilityColors);
-	psPrimalMesh->addVertexColorQuantity("Normals II as colors", normalIIColors);
-	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors", normalMitraColors);
+	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors (absolute)", normalVisibilityColors);
+	psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
+	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
 
 	if (!true_normals.empty()) {
 		normalTrueColors.clear();
@@ -1164,8 +1164,31 @@ void doRedisplayNormalAsColors() {
 		for (const auto &n: true_normals) {
 			normalTrueColors.push_back(0.5f * (n + 1.0f));
 		}
-		psPrimalMesh->addVertexColorQuantity("Normals true as colors", normalTrueColors);
+		psPrimalMesh->addVertexColorQuantity("Normals true as colors (absolute)", normalTrueColors);
 		psPrimalMesh->addVertexVectorQuantity("Normals true", true_normals);
+	}
+}
+
+void doRedisplayNormalAsColorsRelativeFor(const std::vector<RealVector> &normals, std::string method) {
+	glm::mat4 M = polyscope::view::getCameraViewMatrix();
+	std::vector< glm::vec3 > colors( normals.size() );
+	for ( auto i = 0; i < normals.size(); i++ )
+	{
+		const auto& n = normals[ i ];
+		glm::vec4 wn( n[0], n[1], n[2], 0.0 );
+		glm::vec4 vn = M * wn;
+		glm::vec3 c( vn[ 0 ]*0.5 + 0.5, vn[ 1 ]*0.5 + 0.5, fabs(vn[ 2 ])*0.5 + 0.5 );
+		colors[ i ] = c;
+	}
+	psPrimalMesh->addVertexColorQuantity("Normals " + method + " as colors (relative)", colors);
+}
+
+void doRedisplayNormalAsColorsRelative() {
+	doRedisplayNormalAsColorsRelativeFor(visibility_normals, "visibility");
+	doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
+	doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
+	if (!true_normals.empty()) {
+		doRedisplayNormalAsColorsRelativeFor(true_normals, "true");
 	}
 }
 
@@ -1425,7 +1448,8 @@ void myCallback() {
 		Time = trace.endBlock();
 		computeMitraNormals();
 		reorientVisibilityNormals();
-		doRedisplayNormalAsColors();
+		doRedisplayNormalAsColorsAbsolute();
+		doRedisplayNormalAsColorsRelative();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
@@ -1489,6 +1513,12 @@ void myCallback() {
 	}
 	// Add a slider for Polyhedra::digitization_gridstep_distance (default 1.0f, can vary from 0.5f to 5.0f)
 	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.5f, 5.0f);
+
+
+	// Shortcuts
+	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
+		doRedisplayNormalAsColorsRelative();
+	}
 }
 
 void testIntersection() {
