@@ -1,0 +1,128 @@
+
+\newcommand{\CBh}[2]{\ensuremath{\partial_{#1} {#2}}}
+\newcommand{\DBh}[2]{\ensuremath{\Delta_{#1} {#2}}}
+\newcommand{\DTwo}[2]{\ensuremath{D_{2}\left( #1, #2 \right)}}
+\newcommand{\DInf}[2]{\ensuremath{D_{\infty}\left( #1, #2 \right)}}
+
+\paragraph*{Introduction, useful notations and properties.}
+The visibility normal estimator can be defined for different sizes $k$
+of stars. Therefore, for such a given size $k$, we denote by
+$\vec{n}^k_V(p)$ the \emph{$k$-visibility normal at point $p$}.
+The objective of this section is to demonstrate under which conditions
+the $k$-visibility normal estimation is a multigrid convergent normal
+estimator.
+
+We restrict our study to the digitizations of compact subsets $X$ of
+$\R^d$, whose topological boundary $\partial X$ has positive reach
+greater than $\rho > 0$.  Let $h > 0$ be the digitization grid step
+and let $X_h := X \cap \Z^d$ be the Gauss digitization of $X$ with
+step $h$. Seeing the set $X_h$ as the union of hypercubes with edge
+length $h$ and centered on points of $X_h$, we call its topological
+boundary the {\em digitized boundary} $\CBh{h}{X}$ of $X$ of step
+$h$. The intersection of $\CBh{h}{X}$ with $(h(\Z+\frac{1}{2}))^d$ is
+denoted by $\DBh{h}{X}$ and its elements are called the {\em digital
+  pointels} of $\CBh{h}{X}$. They correspond to the digital sets $Z$
+of the previous sections, and we study the visibility between pointels
+of $\DBh{h}{X}$ within its $k$-Star.
+
+
+Finally let $\xi$ be the orthogonal projector of $\R^d$ onto $\partial
+X$, which is well defined for any point within the reach of $\partial
+X$. In fact we only require points to be locally within the reach of
+$\partial X$, so staying at distance below the \emph{local feature
+size} (see \cite{amenta:2001-cgta}) is enough, but would require more
+care in the theorem formulation and proofs. The following lemma will be useful.
+
+\begin{lemma}{\cite{Lachaud:2016-jmiv}}
+  \label{lem-hausdorff-close}
+  Let $h$ be smaller than $\frac{2\rho}{\sqrt{d}}$.
+  Let $p \in \CBh{h}{X}$. Then the point $p' := \xi(p)$ is at
+  Euclidean distance from $p$ lesser or equal to
+  $\frac{\sqrt{d}}{2}h$. Moreover $p'$ is the point of $\partial X$
+  that is closest to $p$, and $(pp')$ is aligned with the normal of
+  $\partial X$ at $p'$.
+\end{lemma}
+
+\paragraph*{Geometric properties on digitized boundary.}
+The following theorem shows that the vector joining distant enough
+points of the digitized boundary tend to be orthogonal to the smooth
+boundary of $X$.
+\begin{theorem}
+  Let $h$ the gridstep be a positive number smaller than $h_0 :=
+  \frac{2\rho}{\sqrt{d}}$. Let $p, q \in \DBh{h}{X}$ with $p \neq q$. It holds that:
+  \begin{align}
+    \label{eq-pq-dot-n-upper-bound}
+    |\vec{pq} \cdot \vn| \Le \sqrt{d}h + \frac{(1+\sqrt{d})^2}{2}
+    \frac{\|\vec{pq}\|^2}{\rho} + O\left(
+    \frac{\|\vec{pq}\|^4}{\rho^3} \right),
+  \end{align}
+  where $\vn$ is the normal of $\partial X$ at $\xi(q)$. 
+\end{theorem}
+\begin{proof}
+  Since $h \le h_0$, both $p$ and $q$ are within the reach of
+  $\partial X$ and have unique projection onto it. Let $p'=\xi(p)$,
+  $q'=\xi(q)$. We consider the plane $P$ tangent to $\partial X$ at
+  $q'$, with normal $\vec{n}$. Finally we denote by $p''$ the
+  projection of $p'$ onto $P$. We have
+  \begin{align*}
+    | \vec{pq} \cdot \vn | & = | \vec{pp'} \cdot \vn  +  \vec{p'p''} \cdot \vn  + \vec{p''q'} \cdot \vn  +  \vec{q'q} \cdot \vn | \\
+    & \quad \text{(By linearity of scalar product)}\\
+    & \Le | \vec{pp'} \cdot \vn | + | \vec{p'p''} \cdot \vn | + |\vec{p''q'} \cdot \vn | + | \vec{q'q} \cdot \vn | \\
+    & \quad \text{(by triangular inequality)} \\
+    & \Le \| \vec{pp'} \| + \| \vec{p'p''} \| + 0 + \| \vec{q'q} \| \\
+    & \quad \text{(since $\vec{p''q'}$ is parallel to $P$)}\\
+    & \Le \sqrt{d}h + \| \vec{p'p''} \|. \\
+    & \quad \text{(using \RefLemma{lem-hausdorff-close} twice)}
+  \end{align*}
+  Since $\partial X$ has positive reach greater than $\rho$, we know
+  that $\partial X$ is sandwiched between two balls tangent to $P$ at
+  $q'$. Their centers are $q' \pm \rho \vec{n}$. Let $c$ be the center
+  of the ball that is on the same side of $P$ as $p'$, and let us
+  denote $r$ the projection of $p'$ onto the line going through both
+  ball centers (and $q$ and $q'$). From the sandwich property, $p'$
+  cannot lie in any of these balls so $\| \vec{p'c} \| \Ge
+  \rho$. Besides it holds that
+  \begin{align*}
+    \| \vec{p'c} \|^2 & = \| \vec{{p'}r} \|^2 + \| \vec{rc} \|^2 \\
+    & \quad \text{(By Pythagoras theorem)} \\
+    & = \| \vec{p''q'} \|^2 + \| \vec{rq'} +\vec{q'c} \|^2 \\
+    & \quad \text{(by construction of $p''$ and $r$)} \\
+    & = \| \vec{p''q'} \|^2 + ( \rho - \|\vec{p'p''}\|)^2. \\
+    & \quad \text{(since $\vec{rq'}$ and $\vec{q'c}$ are aligned and $\vec{p'p''}=\vec{rq'}$)}
+  \end{align*}
+  With the lower bound $\| \vec{p'c} \| \Ge \rho$, it entails (with Taylor expansion):
+  \begin{align*}
+    \|\vec{p'p''}\| & \Le \rho - \sqrt{\rho^2 - \|\vec{p''q'} \|^2} \\
+    & = \frac{1}{2}\frac{\|\vec{p''q'} \|^2}{\rho} + O \left( \frac{\|\vec{p''q'} \|^4}{\rho^3} \right).
+  \end{align*}
+  Now $\|\vec{p''q'} \| \Le \| \vec{p'q'} \| = \| \vec{p'p} + \vec{pq}
+  + \vec{qq'} \| \Le \sqrt{d}h+\|\vec{pq}\| \Le
+  (1+\sqrt{d})\|\vec{pq}\|$, the last inequality coming from the fact
+  that $p \neq q$, so $1 \Le \frac{\|\vec{pq}\|}{h}$. We obtain:
+  \begin{align*}
+    \|\vec{p'p''}\| \Le \frac{(1+\sqrt{d})^2}{2}\frac{\|\vec{pq} \|^2}{\rho} + O \left( \frac{\|\vec{pq} \|^4}{\rho^3} \right).
+  \end{align*}
+  We conclude since we established above $| \vec{pq} \cdot \vn | \Le
+  \sqrt{d}h + \| \vec{p'p''} \|$.
+\end{proof}
+
+In order that the line $(pq)$ be at most orthogonal to the normal of
+the smooth boundary, points $p$ and $q$ should not be too close
+(otherwise there is a strong uncertainty on their positions) nor too
+far away (the normal vector may vary too much). This is explicited in
+the following corollary, which is immediate by dividing
+\Equ{eq-pq-dot-n-upper-bound} by $\|\vec{pq}\|$.
+\begin{corollary}
+  \label{cor1}
+  Let $\alpha$ be the angle between $\vec{pq}$ and $\vec{n}$. Then
+  \begin{align*}
+    |\cos \alpha|
+    % = \frac{|\vec{pq} \cdot \vn|}{\|\vec{pq}\|}
+    \Le  \sqrt{d} \frac{h}{\|\vec{pq}\|} + \frac{(1+\sqrt{d})^2}{2}
+    \frac{\|\vec{pq}\|}{\rho} + O\left(
+    \frac{\|\vec{pq}\|}{\rho} \right)^3 \!\!.
+  \end{align*}
+  To minimize this value, it is optimal to choose pairs of points $(p,q)$ such that $\|\vec{pq}\|=\Theta(\sqrt{h})$. In this case, we derive $|\cos \alpha| \Le \Theta(\sqrt{h}) + O(\sqrt{h})^3$. 
+\end{corollary}
+
+
