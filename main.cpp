@@ -223,7 +223,7 @@ public:
 	void set(const Point &offset, const Intervals &value, const size_t vectorIdx) {
 		auto p = offset / 2;
 		for (auto &interval: value) {
-			for (int i = interval.first/2; i <= interval.second/2; i++) {
+			for (int i = interval.first / 2; i <= interval.second / 2; i++) {
 				p[mainAxis] = i;
 				auto pointIdx = this->getPointIdx(p);
 				if (pointIdx == pointsSize) continue;
@@ -505,8 +505,8 @@ void computeVisibilityOmp(int radius, const Parameters &params = ComputeVisibili
 		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
 			for (const auto &interval: p.second) {
 				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
-					Point pt = p.first/2;
-					pt[axis] = i/2;
+					Point pt = p.first / 2;
+					pt[axis] = i / 2;
 					figLatticePoints.emplace_back(pt);
 				}
 			}
@@ -585,8 +585,8 @@ void computeVisibilityOmpGPU(int radius, const Parameters &params = ComputeVisib
 		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
 			for (const auto &interval: p.second) {
 				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
-					Point pt = p.first/2;
-					pt[axis] = i/2;
+					Point pt = p.first / 2;
+					pt[axis] = i / 2;
 					figLatticePoints.emplace_back(pt);
 				}
 			}
@@ -646,7 +646,7 @@ void testNStarOfShape(int n) {
 	auto shapeLattice = getNStarOfShape(n, getLargeAxis());
 	std::cout << "Lattice size after " << n << " stars: " << shapeLattice.size() << std::endl;
 	// show in polyscope
-	auto points = shapeLattice.toPointRange();/*
+	auto points = shapeLattice.toPointRange(); /*
 	std::vector<RealPoint> vp;
 	embedPointels(points, vp);
 	for (auto &p: vp) {
@@ -684,8 +684,8 @@ void computeVisibility(int radius, const Parameters &params = ComputeVisibilityP
 		if (p.first[axises_idx[1]] % 2 == 0 && p.first[axises_idx[2]] % 2 == 0) {
 			for (const auto &interval: p.second) {
 				for (auto i = interval.first + 1; i <= interval.second; i += 2) {
-					Point pt = p.first/2;
-					pt[axis] = i/2;
+					Point pt = p.first / 2;
+					pt[axis] = i / 2;
 					figLatticePoints.emplace_back(pt);
 				}
 			}
@@ -980,7 +980,7 @@ void computeVisibilityDirectionToSharpFeatures() {
 }
 
 double sigma = -1;
-int mitra_radius = (int) 4./gridstep;
+int mitra_radius = (int) 4. / gridstep;
 double minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
@@ -998,9 +998,9 @@ void computeMitraNormals() {
 	mitra_normals.reserve(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
 	for (const auto &pointel: pointels) {
-	// 1. Get all the points in the ball of mitra_radius
-	// 2. Compute the centroid of these points
-	// 3. Compute the covariance matrix of these points
+		// 1. Get all the points in the ball of mitra_radius
+		// 2. Compute the centroid of these points
+		// 3. Compute the covariance matrix of these points
 		std::vector<Point> neighbors;
 		RealPoint centroid(0, 0, 0);
 		for (auto point_idx: kdTree.pointsInBall(pointel, mitra_radius)) {
@@ -1097,7 +1097,6 @@ void reorientVisibilityNormals() {
 }
 
 
-
 void computeCurvaturesFor(std::vector<RealVector> &normals) {
 	primal_surface->setVertexNormals(normals.cbegin(), normals.cend());
 	primal_surface->computeFaceNormalsFromVertexNormals();
@@ -1173,14 +1172,13 @@ void doRedisplayNormalAsColorsAbsolute() {
 
 void doRedisplayNormalAsColorsRelativeFor(const std::vector<RealVector> &normals, std::string method) {
 	glm::mat4 M = polyscope::view::getCameraViewMatrix();
-	std::vector< glm::vec3 > colors( normals.size() );
-	for ( auto i = 0; i < normals.size(); i++ )
-	{
-		const auto& n = normals[ i ];
-		glm::vec4 wn( n[0], n[1], n[2], 0.0 );
+	std::vector<glm::vec3> colors(normals.size());
+	for (auto i = 0; i < normals.size(); i++) {
+		const auto &n = normals[i];
+		glm::vec4 wn(n[0], n[1], n[2], 0.0);
 		glm::vec4 vn = M * wn;
-		glm::vec3 c( vn[ 0 ]*0.5 + 0.5, vn[ 1 ]*0.5 + 0.5, fabs(vn[ 2 ])*0.5 + 0.5 );
-		colors[ i ] = c;
+		glm::vec3 c(vn[0] * 0.5 + 0.5, vn[1] * 0.5 + 0.5, fabs(vn[2]) * 0.5 + 0.5);
+		colors[i] = c;
 	}
 	psPrimalMesh->addVertexColorQuantity("Normals " + method + " as colors (relative)", colors);
 }
@@ -1200,7 +1198,7 @@ auto olddgd = Polyhedra::digitization_gridstep_distance;
 void computeL2looErrorsNormals() {
 	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
 		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << " (old was "
-		          << olddgd << ")" << std::endl;
+			<< olddgd << ")" << std::endl;
 		auto params = SHG3::parametersShapeGeometry();
 		auto pTC = new TangencyComputer<KSpace>(K);
 		pTC->init(pointels.cbegin(), pointels.cend(), true);
@@ -1391,6 +1389,34 @@ void testDistancePlan() {
 	}
 }
 
+void testNearestPoint() {
+	Parameters params = SH3::defaultParameters()
+	                    | SHG3::defaultParameters()
+	                    | SHG3::parametersGeometryEstimation();
+	std::vector<RealPoint> points;
+	// Compute the nearest point on polyhedra for each pointel of the shape
+	int maxIter = params["projectionMaxIter"].as<int>();
+	double accuracy = params["projectionAccuracy"].as<double>();
+	double gamma = params["projectionGamma"].as<double>();
+	for (const auto &pointel: pointels) {
+		points.push_back(polyhedra->nearestPoint((pointel - 0.5) * gridstep, maxIter, accuracy, gamma));
+	}
+	// Display the points in polyscope
+	// polyscope::registerPointCloud("Nearest points", points);
+	// for all points, compute the gradient
+	std::vector<RealVector> gradients;
+	for (const auto &point: points) {
+		gradients.push_back(polyhedra->gradient(point));
+	}
+	// Display the gradients as colors
+	std::vector<glm::vec3> colors;
+	for (const auto &grad: gradients) {
+		colors.push_back(glm::vec3(0.5f * (grad[0] + 1.0f), 0.5f * (grad[1] + 1.0f), 0.5f * (grad[2] + 1.0f)));
+	}
+	psPrimalMesh->addVertexColorQuantity("Gradients nearest points", colors)->setEnabled(true);
+	psPrimalMesh->addVertexVectorQuantity("Gradients nearest points vectors", gradients);
+}
+
 void myCallback() {
 	std::string visibilityFilename;
 	// Select a vertex with the mouse
@@ -1459,7 +1485,7 @@ void myCallback() {
 		computeL2looErrorsNormals();
 		Time = trace.endBlock();
 	}
-	const char *items[] = { "Visibility normals", "Mitra normals", "II normals", "CTriv" };
+	const char *items[] = {"Visibility normals", "Mitra normals", "II normals", "CTriv"};
 	static int item_current = 0;
 	ImGui::Combo("Normals to use for curv.", &item_current, items, IM_ARRAYSIZE(items));
 	if (ImGui::Button("Compute Curvatures")) {
@@ -1516,7 +1542,7 @@ void myCallback() {
 		testNStarOfShape(nStarTest);
 	}
 	// Add a selector for the weighting function used for normal estimation
-	const char *weightSelectorItems[] = { "Gaussian", "No Weight" };
+	const char *weightSelectorItems[] = {"Gaussian", "No Weight"};
 	static int weightCurrentItem = 0;
 	ImGui::Combo("Weighter", &weightCurrentItem, weightSelectorItems, IM_ARRAYSIZE(weightSelectorItems));
 	if (weightCurrentItem == 0) {
@@ -1524,9 +1550,12 @@ void myCallback() {
 	} else {
 		weighter = noWeight;
 	}
-	// Add a slider for Polyhedra::digitization_gridstep_distance (default 1.0f, can vary from 0.5f to 5.0f)
-	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.5f, 5.0f);
+	// Add a slider for Polyhedra::digitization_gridstep_distance (default 0.2, can vary from 0.05 to 1)
+	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.05f, 1.0f);
 
+	if (ImGui::Button("TEST NEAREST POINT")) {
+		testNearestPoint();
+	}
 
 	// Shortcuts
 	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
@@ -1648,7 +1677,8 @@ int gpuRun(int argc, char *argv[]) {
 	               "method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 	app.add_flag("--noFurtherComputation", noFurtherComputation,
 	             "if set, no computation after generating the shape");
-	app.add_option("--nstar", nstar, "number of stars to use in visibility computation (default 1, will do every star from 1 to nstar)");
+	app.add_option("--nstar", nstar,
+	               "number of stars to use in visibility computation (default 1, will do every star from 1 to nstar)");
 	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
 
 	CLI11_PARSE(app, argc, argv)
@@ -1957,6 +1987,12 @@ int main(int argc, char *argv[]) {
 			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
+			// polyhedra = CountedPtr(new Polyhedra::PolyhedronShape(std::vector<Polyhedra::Plane>(), {
+			// 	                                                      Polyhedra::Ellipsoid{
+			// 		                                                      {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 1,
+			// 		                                                      5, 1
+			// 	                                                      }
+			//                                                       }, gridstep));
 			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial, gridstep);
 			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
 			std::cout << "Digitization done." << std::endl;
