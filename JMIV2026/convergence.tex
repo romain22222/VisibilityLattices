@@ -127,7 +127,7 @@ the following corollary, which is immediate by dividing
 
 \noindent\textbf{Distance between visible points.}
 
-\begin{lemma}\label{lem-segment-is-close-to-X}
+\begin{lemma}\label{lem-segment-is-close-to-dX}
   Let $a,b$ be points of $\partial X$, where the straight line segment
   $\lbrack ab \rbrack$ has length $l$. If $l \Le 2\rho$ then $\max_{y
     \in \lbrack ab \rbrack} d(y, \partial X) \Le \frac{l^2}{4\rho}$,
@@ -156,4 +156,46 @@ the following corollary, which is immediate by dividing
   $x=\rho-\sqrt{\rho^2-\frac{l^2}{4}}$. To conclude, one can check
   easily that $x \Le \frac{l^2}{4\rho}$ if, and only if, $l \Le
   2\rho$.
+\end{proof}
+
+\begin{theorem}\label{thm-distance-pq-to-dX}
+  Let $p,q$ be two pointels of $\DBh{h}{X}$. If $\| \vec{pq}\|\Le
+  \sqrt{\alpha h} - \sqrt{d}h$, then the segment $\lbrack p q
+  \rbrack$ stays close to $\CBh{h}{X}$ and more precisely:
+  \begin{align*}
+    \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) \Le (\sqrt{d}+\frac{\alpha}{4\rho})h.
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  Let $a=\xi(p)$ and $b=\xi(p)$ the (unique) projections of $a$ and
+  $b$ onto $\partial X$. Then, by triangular inequality,
+  \begin{align*}
+    \max_{r \in \lbrack p q \rbrack} d( r, \CBh{h}{X})
+    \Le & \max_{r \in \lbrack p q \rbrack} d( r, \lbrack a b \rbrack )
+     + \max_{s \in \lbrack a b \rbrack} d( s, \partial X ) \\
+    & + \max_{x \in \partial X} d( x, \CBh{h}{X} ).
+  \end{align*}
+  For the first term, we can write $r=(1-\lambda)p+\lambda q$, for
+  some $\lambda \in \lbrack 0,1 \rbrack$. Let $s=(1-\lambda)a+\lambda
+  b$. It is clearly a point of segment $\lbrack a b \rbrack$. We have:
+  \begin{align*}
+    d(r,s) & = \| (1-\lambda)p+\lambda q - ((1-\lambda)a+\lambda b) \| \\
+    & \Le (1-\lambda)\|p-a\| + \lambda \|q-b\| \Le \frac{\sqrt{d}}{2}h,
+  \end{align*}
+  where the last inequality derives from
+  \RefLemma{lem-hausdorff-close}.
+
+  For the second term,
+  \RefLemma{lem-segment-is-close-to-dX} induces
+  \begin{align*}
+    \max_{s \in \lbrack a b \rbrack} d( s, \partial X ) &\Le \frac{\|\vec{ab}\|^2}{4\rho}.
+  \end{align*}
+  But $\|\vec{ab}\| \Le \|\vec{pq}\| + \|\vec{pa}\| + \|\vec{qb}\| \Le
+  \| \vec{pq}\| + \sqrt{d}h \Le \sqrt{\alpha h}$, using
+  \RefLemma{lem-hausdorff-close} and the hypothesis on the distance of
+  $p$ to $q$. The second term is thus bounded by $\frac{\alpha
+    h}{4\rho}$.
+
+  The last term is bounded by $\frac{\sqrt{d}}{2}h$
+  (\RefLemma{lem-hausdorff-close} again), and the conclusion follows.
 \end{proof}
