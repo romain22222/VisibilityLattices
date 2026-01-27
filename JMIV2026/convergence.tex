@@ -127,3 +127,33 @@ the following corollary, which is immediate by dividing
 
 \noindent\textbf{Distance between visible points.}
 
+\begin{lemma}\label{lem-segment-is-close-to-X}
+  Let $a,b$ be points of $\partial X$, where the straight line segment
+  $\lbrack ab \rbrack$ has length $l$. If $l \Le 2\rho$ then $\max_{y
+    \in \lbrack ab \rbrack} d(y, \partial X) \Le \frac{l^2}{4\rho}$,
+  where $d(y,Z):=\inf_{z \in Z} \| y-z\|$.
+\end{lemma}
+\begin{proof}
+  We recall that, since $\partial X$ has positive reach greater than
+  $\rho$, it means that around point $a$, $\partial X$ has an empty
+  intersection with the open ball of radius $\rho$ tangent to $a$
+  (inside and outside). Therefore the distance $\max_{y \in \lbrack ab
+    \rbrack} d(y, \partial X)$ cannot exceed the distance of a chord
+  of length $l=\| \vec{ab}\|$ to a sphere of radius $\rho$, hence the
+  circle of radius $\rho$ in the plane containing $a$, $b$ and the
+  sphere center. By an abuse of notation, denoting $a$ and $b$ also
+  the extremeties of this chord, $m$ its middle point, $c$ the center
+  of the circle, and $p$ the closest point to $m$ on the circle, our
+  objective is to determine the distance $x:=\| \vec{mp}\|$. Using the
+  fact that $(cm)$ is orthogonal to $(ab)$, Pythagoras theorem implies
+  $\|\vec{am}\|^2 + \|\vec{mc}\|^2 = \|\vec{ac}\|^2$. Substituting by
+  $x$, $l$ and $\rho$ gives
+  \begin{align*}
+    \frac{l^2}{4}+(\rho-x)^2 = \rho^2 &
+    \quad \Rightarrow \quad 4x^2 - 8 \rho x + l^2 = 0.
+  \end{align*}
+  Since $l \Le 2\rho$ by hypothesis, the solution to this equation is
+  $x=\rho-\sqrt{\rho^2-\frac{l^2}{4}}$. To conclude, one can check
+  easily that $x \Le \frac{l^2}{4\rho}$ if, and only if, $l \Le
+  2\rho$.
+\end{proof}
