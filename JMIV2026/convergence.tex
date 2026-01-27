@@ -49,7 +49,8 @@ points of the digitized boundary tend to be orthogonal to the smooth
 boundary of $X$.
 \begin{theorem}
   Let $h$ the gridstep be a positive number smaller than $h_0 :=
-  \frac{2\rho}{\sqrt{d}}$. Let $p, q \in \DBh{h}{X}$ with $p \neq q$. It holds that:
+  \frac{2\rho}{\sqrt{d}}$. Let $p, q$ be two pointels of
+  $\DBh{h}{X}$. It holds that:
   \begin{align}
     \label{eq-pq-dot-n-upper-bound}
     |\vec{pq} \cdot \vn| \Le \sqrt{d}h + \frac{(1+\sqrt{d})^2}{2}
@@ -114,7 +115,7 @@ the following corollary, which is immediate by dividing
 \Equ{eq-pq-dot-n-upper-bound} by $\|\vec{pq}\|$.
 \begin{corollary}
   \label{cor1}
-  Let $\alpha$ be the angle between $\vec{pq}$ and $\vec{n}$. Then
+  For $p \neq q$, let $\alpha$ be the angle between $\vec{pq}$ and $\vec{n}$. Then we have:
   \begin{align*}
     |\cos \alpha|
     % = \frac{|\vec{pq} \cdot \vn|}{\|\vec{pq}\|}
@@ -125,7 +126,9 @@ the following corollary, which is immediate by dividing
   To minimize this value, it is optimal to choose pairs of points $(p,q)$ such that $\|\vec{pq}\|=\Theta(\sqrt{h})$. In this case, we derive $|\cos \alpha| \Le \Theta(\sqrt{h}) + O(\sqrt{h})^3$. 
 \end{corollary}
 
-\noindent\textbf{Distance between visible points.}
+\noindent\textbf{Distance between visible points.}  This subsection
+proves that the average distance between $k$-visible pointels is some
+$\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
 
 \begin{lemma}\label{lem-segment-is-close-to-dX}
   Let $a,b$ be points of $\partial X$, where the straight line segment
@@ -160,8 +163,8 @@ the following corollary, which is immediate by dividing
 
 \begin{theorem}\label{thm-distance-pq-to-dX}
   Let $p,q$ be two pointels of $\DBh{h}{X}$. If $\| \vec{pq}\|\Le
-  \sqrt{\alpha h} - \sqrt{d}h$, then the segment $\lbrack p q
-  \rbrack$ stays close to $\CBh{h}{X}$ and more precisely:
+  \sqrt{\alpha h} - \sqrt{d}h$, then the segment $\lbrack p q \rbrack$
+  stays close to $\CBh{h}{X}$ and more precisely:
   \begin{align*}
     \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) \Le (\sqrt{d}+\frac{\alpha}{4\rho})h.
   \end{align*}
@@ -198,4 +201,73 @@ the following corollary, which is immediate by dividing
 
   The last term is bounded by $\frac{\sqrt{d}}{2}h$
   (\RefLemma{lem-hausdorff-close} again), and the conclusion follows.
+\end{proof}
+
+\begin{theorem}
+  Assume $\alpha:=4\rho(k-\sqrt{d})$ is positive. Then, for any
+  gridstep $h$, $0< h < \min(\frac{\alpha}{d}, 2\rho)$, there exists a
+  constant $\beta >0 $ such that any two pointels of $\DBh{h}{X}$ at
+  distance less than $\min(\beta \sqrt{h},2\rho)$ are $k$-visible.
+  Furthermore the average distance between $k$-visible pointels of
+  $\DBh{h}{X}$ is greater than $\Omega(\sqrt{h})$ for small enough
+  $h$. 
+\end{theorem}
+\begin{proof}
+  Two pointels $p$ and $q$ are $k$-visible in $\DBh{h}{X}$ iff the
+  segment $\lbrack p q \rbrack$ lies within the $k$-star of
+  $\DBh{h}{X}$. Recalling that the realization in $\R^d$ of
+  $\kStar{\DBh{h}{X}}{k}$ is exactly $\CBh{h}{X} \oplus k\rbrack -h, h
+  \lbrack^d$ ($\oplus$ is the Minkowski sum), a sufficient condition
+  is that
+  \begin{align*}
+    \max_{r \in \lbrack p q \rbrack} d(r,\DBh{h}{X}) \Le kh.
+  \end{align*}
+  Now let us fix $\beta:=\sqrt{\alpha}-\sqrt{dh}$. From $h <
+  \frac{\alpha}{d}$, we have $\beta > 0$. If $\|\vec{pq}\| \Le \beta
+  \sqrt{h}$, then $\|\vec{pq}\| \Le \alpha \sqrt{h} - \sqrt{d}h$.
+  \RefTheorem{thm-distance-pq-to-dX} then implies
+  \begin{align*}
+    \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) & \Le (\sqrt{d}+\frac{\alpha}{\
+      4\rho})h \\
+    & \Le \frac{4\rho\sqrt{d}+4\rho(k-\sqrt{d})}{4\rho}h\\
+    & = kh,
+  \end{align*}
+  so $q$ is $k$-visible from $p$ in $\DBh{h}{X}$.
+
+  We study now the average distance between $k$-visible pointels (in
+  $\DBh{h}{X}$).  Let $p$ be any pointel of $\DBh{h}{X}$.  Let $V(p)$
+  by the $k$-visible pointels  from $p$, whose cardinal
+  is denoted by $N(p)$. We subdivide $V(p)$ into three disjoint sets:
+  $V_1(p)$ contains the $k$-visible pointels at distance less than
+  $\beta \sqrt{h}/2$ (a non-empty set), $V_2(p)$ the ones at distance between $\beta
+  \sqrt{h}/2$  and $\beta \sqrt{h}$ (a non-empty
+  set), and $V_3(p)$ the remaining ones (which can be empty). Their
+  respective cardinals are denoted by $N_i(p)$, $i\in \{1,2,3\}$.
+
+  The average distance $D(p)$ of $k$-visible points from $p$ can be computed as:
+  \begin{align*}
+    D(p) & = \frac{1}{N(p)} \sum_{q \in V(p)} \|\vec{pq}\| \\
+    & =\frac{1}{N(p)}  \left( \sum_{q \in V_1(p)} \hspace{-2mm}\|\vec{pq}\|
+    + \hspace{-2mm} \sum_{q \in V_2(p)} \hspace{-2mm}\|\vec{pq}\| + \hspace{-2mm} \sum_{q \in V_3(p)} \hspace{-2mm} \|\vec{pq}\|
+    \right)\\
+    & \Ge \frac{1}{N(p)} \left( N_2(p) \frac{\beta\sqrt{h}}{2} + N_3(p) \beta\sqrt{h} \right),
+  \end{align*}
+  by lower bounding the first term by $0$ and the third term by the
+  minimal distance $\beta\sqrt{h}$. Now, since $\partial X$ is smooth
+  and looks locally like a plane, the number of pointels of
+  $\DBh{h}{X}$ in a ball centered at $p$ with radius $R$ is
+  proportional to $R^{d-1} / h^{d-1}$. It coincides with the number of
+  $k$-visible pointels from $p$ for $R = \beta \sqrt{h}$, since all
+  these pointels are $k$-visible from $p$.  It follows that
+  $N_1(p)+N_2(p) \approx c N_2(p)$, with $c=\frac{2^{d}}{2^d-2}$ ($2$ in
+  $2$D, $4/3$ in $3$D).  Inserting into the previous inequality gives:
+  \begin{align*}
+    D(p) & \Ge \frac{1}{c
+      N_2(p)+N_3(p)} \left(\frac{N_2(p)}{2}+N_3(p) \right) \beta\sqrt{h}\\
+    & \Ge \frac{\beta}{2c}\sqrt{h}.
+  \end{align*}
+  We can conclude that the average distance $D(p)$ of $k$-visible
+  points from $p$ is greater than $\Omega(\sqrt{h})$, since the last
+  bound is valid for $c \Ge 1/2$, which is clearly the case for
+  arbitrary dimension $d$.
 \end{proof}
