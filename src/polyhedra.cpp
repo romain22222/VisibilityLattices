@@ -76,20 +76,20 @@ namespace Polyhedra {
 	}
 
 	Orientation PolyhedronShape::planeOrientation(const RealPoint &p) const {
-		Orientation planeOrientation = DGtal::INSIDE;
+		Orientation o = DGtal::INSIDE;
 
 		// 1. Plans → toujours intersection
 		for (const auto &pl: myPlanes) {
 			double d = planeDistance(pl, p, digitization_gridstep);
 			if (d > eps) {
-				planeOrientation = DGtal::OUTSIDE;
+				o = DGtal::OUTSIDE;
 				break;
 			}
-			if (std::abs(d) <= eps) planeOrientation = DGtal::ON;
+			if (std::abs(d) <= eps) o = DGtal::ON;
 		}
 		if (myPlanes.empty())
-			planeOrientation = DGtal::OUTSIDE;
-		return planeOrientation;
+			o = DGtal::OUTSIDE;
+		return o;
 	}
 
 	Orientation PolyhedronShape::orientation(const RealPoint &p) const {
@@ -151,7 +151,6 @@ namespace Polyhedra {
 	RealVector PolyhedronShape::gradient(const RealPoint &p) const {
 		// First check for ellipsoids
 		// Then check plane orientations, if outside -> keep gradient of ellipsoid, else if any gradient of ellipsoid : ambiguous, else keep plane gradient
-		return orientation(p) == DGtal::OUTSIDE ? RealVector(1, 1, 1) : -RealVector(1, 1, 1);
 		RealVector grad(0, 0, 0);
 		int count = 0;
 		for (const auto &el: myEllipsoids) {
@@ -162,11 +161,14 @@ namespace Polyhedra {
 			if (count >= 2)
 				break;
 		}
-		if (count > 1 || (count == 1 && planeOrientation(p/digitization_gridstep) == DGtal::ON)) {
+		if (count > 1) {
 			return RealVector(0, 0, 0); // ambiguous gradient
 		}
 		if (count == 1) {
-			return grad;
+			// for each plane, check if outside
+			for (const auto &pl: myPlanes)
+				if (planeDistance(pl, p, digitization_gridstep) > digitization_gridstep_distance + eps)
+					return grad; // keep ellipsoid gradient
 		}
 		for (const auto &pl: myPlanes) {
 			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {

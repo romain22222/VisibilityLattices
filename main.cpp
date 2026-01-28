@@ -1195,28 +1195,19 @@ void doRedisplayNormalAsColorsRelative() {
 
 auto olddgd = Polyhedra::digitization_gridstep_distance;
 
+void computeTrueNormalsPolyhedra() {
+	true_normals.clear();
+	for (const auto &pointel: pointels) {
+		true_normals.push_back(polyhedra->gradient((pointel - 0.5) * gridstep));
+	}
+	for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
+}
+
 void computeL2looErrorsNormals() {
 	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
 		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << " (old was "
 			<< olddgd << ")" << std::endl;
-		auto params = SHG3::parametersShapeGeometry();
-		auto pTC = new TangencyComputer<KSpace>(K);
-		pTC->init(pointels.cbegin(), pointels.cend(), true);
-		params("r-radius", iiRadius);
-		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);;
-		for (auto &n: true_normals) n = RealVector::zero;
-		for (auto k = 0; k < surfels.size(); k++) {
-			const auto &surf = surfels[k];
-			const auto cells0 = SH3::getPrimalVertices(K, surf);
-			for (const auto &c0: cells0) {
-				const auto p = K.uCoords(c0);
-				const auto idx = pTC->index(p);
-				if (surfel_true_normals[k].norm() != 0) {
-					true_normals[idx] += surfel_true_normals[k];
-				}
-			}
-		}
-		for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
+		computeTrueNormalsPolyhedra();
 		olddgd = gridstep;
 	}
 	//	std::cout << "Computing L2 and Loo errors" << std::endl;
@@ -1398,15 +1389,15 @@ void testNearestPoint() {
 	int maxIter = params["projectionMaxIter"].as<int>();
 	double accuracy = params["projectionAccuracy"].as<double>();
 	double gamma = params["projectionGamma"].as<double>();
-	for (const auto &pointel: pointels) {
-		points.push_back(polyhedra->nearestPoint((pointel - 0.5) * gridstep, maxIter, accuracy, gamma));
-	}
+	/*for (const auto &pointel: pointels) {
+		points.push_back(polyhedra->nearestPoint((pointel - 0.5) * gridstep, accuracy, maxIter, gamma));
+	}*/
 	// Display the points in polyscope
 	// polyscope::registerPointCloud("Nearest points", points);
 	// for all points, compute the gradient
 	std::vector<RealVector> gradients;
-	for (const auto &point: points) {
-		gradients.push_back(polyhedra->gradient(point));
+	for (const auto &pointel: pointels) {
+		gradients.push_back(polyhedra->gradient((pointel - 0.5) * gridstep));
 	}
 	// Display the gradients as colors
 	std::vector<glm::vec3> colors;
@@ -1794,18 +1785,19 @@ int gpuRun(int argc, char *argv[]) {
 				const auto idx = pTC->index(p);
 				trivial_normals[idx] += surfel_trivial_normals[k];
 				ii_normals[idx] += surfel_ii_normals[k];
-				if (Polyhedra::isPolyhedron(polynomial)) {
-					if (surfel_true_normals[k].norm() != 0) {
-						true_normals[idx] += surfel_true_normals[k];
-					}
-				} else if (is_polynomial) {
+				if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 					true_normals[idx] += surfel_true_normals[k];
 				}
 			}
 		}
 		for (auto &n: trivial_normals) n /= n.norm();
 		for (auto &n: ii_normals) n /= n.norm();
-		for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
+		if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+			for (auto &n: true_normals)
+				if (n.norm() != 0) n /= n.norm();
+		} else {
+			computeTrueNormalsPolyhedra();
+		}
 		computeMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
 		trace.endBlock();
@@ -1972,10 +1964,10 @@ int main(int argc, char *argv[]) {
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
 		if (!Polyhedra::isPolyhedron(polynomial)) {
-			params("polynomial", polynomial);
 			params("gridstep", gridstep);
 			params("minAABB", minAABB);
 			params("maxAABB", maxAABB);
+			params("polynomial", polynomial);
 			params("offset", 1.0);
 			params("closed", 1);
 			implicit_shape = SH3::makeImplicitShape3D(params);
@@ -2064,19 +2056,19 @@ int main(int argc, char *argv[]) {
 			const auto idx = pTC->index(p);
 			trivial_normals[idx] += surfel_trivial_normals[k];
 			ii_normals[idx] += surfel_ii_normals[k];
-			if (Polyhedra::isPolyhedron(polynomial)) {
-				if (surfel_true_normals[k].norm() != 0) {
-					true_normals[idx] += surfel_true_normals[k];
-				}
-			} else if (is_polynomial) {
+			if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 				true_normals[idx] += surfel_true_normals[k];
 			}
 		}
 	}
 	for (auto &n: trivial_normals) n /= n.norm();
 	for (auto &n: ii_normals) n /= n.norm();
-	for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
-
+	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+		for (auto &n: true_normals)
+			if (n.norm() != 0) n /= n.norm();
+	} else {
+		computeTrueNormalsPolyhedra();
+	}
 	primal_surface->vertexNormals() = trivial_normals;
 
 	if (sigmaTmp != -1.0) {
