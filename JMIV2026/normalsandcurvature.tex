@@ -30,7 +30,7 @@ touching the point $p$.
 \paragraph{Experimental validation.}
 Figure~\ref{fig:normals-estimation} shows an example
 of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
-and the Mitra estimator~\cite{mitra:2003-acm}.
+and the PCA estimator~\cite{mitra:2003-acm}.
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
 normals computed on a digital surface with respect to the normals computed
@@ -239,43 +239,34 @@ $E_{\max}$.
     \centering
     \begin{tabular}{|c||c|c|c|}
         \hline
-        Shape    & II & Mitra & Ours \\
+        Shape & II & PCA & Ours \\
         \hline
-        \hline
-        Cps      &    &       &      \\
-        \hline
-        \raisebox{6mm}{With cube edges} &
-        \formatImageFigNormalesShow{cps-IIN-flat-edge} &
-        \formatImageFigNormalesShow{cps-Mitra-flat-edge} &
-        \formatImageFigNormalesShow{cps-VN-flat-edge} \\
-        \hline
-        \raisebox{6mm}{Flat (no shading)} &
+        \raisebox{6mm}{Cps} &
         \formatImageFigNormalesShow{cps-IIN-flat} &
         \formatImageFigNormalesShow{cps-Mitra-flat} &
         \formatImageFigNormalesShow{cps-VN-flat} \\
         \hline
-        Filigree &    &       &      \\
-        \hline
-        \raisebox{6mm}{With cube edges} &
-        \formatImageFigNormalesShow{filigree-IIN-flat-edge} &
-        \formatImageFigNormalesShow{filigree-Mitra-flat-edge} &
-        \formatImageFigNormalesShow{filigree-VN-flat-edge} \\
-        \hline
-        \raisebox{6mm}{Flat (no shading)} &
+        \raisebox{6mm}{Filigree} &
         \formatImageFigNormalesShow{filigree-IIN-flat} &
         \formatImageFigNormalesShow{filigree-Mitra-flat} &
         \formatImageFigNormalesShow{filigree-VN-flat} \\
         \hline
+        \raisebox{6mm}{Dragon} &
+        \formatImageFigNormalesShow{dragon-IIN-flat} &
+        \formatImageFigNormalesShow{dragon-Mitra-flat} &
+        \formatImageFigNormalesShow{dragon-VN-flat} \\
+        \hline
     \end{tabular}
     \caption{Examples of normals computed on a cps, then on a
     filigree as a color map. First set displays II normals, second set
-    uses the Mitra algorithm, and last set uses our visibility algorithm
+    uses the PCA algorithm, and last set uses our visibility algorithm
     to compute them. The normals are colored according to their
     orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
     The bottom images are the smooth version of the top ones. ``Integral
-    Invariant normals'' are computed using a radius of $r=4.5$, Mitra with
+    Invariant normals'' are computed using a radius of $r=4.5$, PCA with
     a discrete radius of 4 (empirical), while our normal estimator are
-    computed using a deviation of $\sigma=4$, and so a radius of $r=2\sigma=8$}
+    computed using a deviation of $\sigma=4$, and so a radius of $r=2\sigma=8$,
+        with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
 \end{figure*}
 
@@ -352,7 +343,7 @@ $\sigma=4$) while the result is visually indistinguishable.
             \begin{tabular}{|c||c|c|c|c|}
                 \hline
                 %\backslashbox{}{}
-                & II & CTriv & Mitra & Ours \\ \hline \hline
+                & II & CTriv & PCA & Ours \\ \hline \hline
                 \raisebox{\raiseboxsize}{$\kappa_1$} &
                 \MyZoom{pictures/figCurvDisplay/d20-256-II-K1} &
                 \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K1}&
@@ -382,12 +373,13 @@ $\sigma=4$) while the result is visually indistinguishable.
     Thingi10K database at resolution $256^3$. This estimator is
     parameterized by an input normal estimator: first column by
     ``Integral Invariant normals'' (radius $r=6$), second column
-    by ``Convolved Trivial normals'' (radius $k=6$), third by ``Mitra Normals`` (radius $r=4$),fourth
-    column by our presented normal estimator (deviation
-        $\sigma=4$, radius $r=2\sigma=8$). Per row are displayed the
-        estimated curvatures in order: first and second principal
-        curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
-        Gaussian curvature $G$. The range of curvature between deep
-        blue and deep red is $\lbrack -0.2, 0.2 \rbrack$ with white
-        color equal to $0$.}
+    by ``Convolved Trivial normals'' (radius $k=6$), third by
+    ``PCA Normals`` (radius $r=4$),fourth column by our presented
+    normal estimator (deviation $\sigma=4$, radius $r=2\sigma=8$,
+    with a star of 1 and with a weighted kernel.). Per row are
+    displayed the estimated curvatures in order: first and second
+    principal curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
+    Gaussian curvature $G$. The range of curvature between deep
+    blue and deep red is $\lbrack -0.2, 0.2 \rbrack$ with white
+    color equal to $0$.}
 \end{figure*}
