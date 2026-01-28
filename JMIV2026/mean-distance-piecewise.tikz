@@ -28,7 +28,7 @@
                 y=mean_distance,
                 col sep=comma,
                 color=cyan,
-                mark=circle
+                mark=circle,
             ] {./graphDataMeanDist/tetrahedron_2.txt}
             % WIP HERE 2 other shapes
             \addplot[
@@ -36,7 +36,7 @@
                 thick,
                 domain=0.0625:1,
                 samples=100,
-            ] {5*x^(-0.5)}; % WIP
+            ] {5*x^(-0.5)}
         \end{axis} \\
         \begin{axis}[
             hide axis,

@@ -16,7 +16,6 @@
             xmode=log,
             log ticks with fixed point,
         ]
-
             \addplot[
                 color=cyan,
             ] coordinates {
@@ -61,17 +60,17 @@
                 column sep=15pt,
             }
         ]
-            \addlegendimage{color=cyan, thick};
-            \addlegendentry{sphere9};
-            \addlegendimage{color=red, thick};
-            \addlegendentry{goursat};
-            \addlegendimage{color=violet, thick};
-            \addlegendentry{torus};
-            \addlegendimage{color=MyGreen, thick};
-            \addlegendentry{leopold};
-            \addlegendimage{color=yellow!80!black, thick};
-            \addlegendentry{rcube};
-            \addlegendimage{color=black, thick};
+            \addlegendimage{color=cyan, thick}
+            \addlegendentry{sphere9}
+            \addlegendimage{color=red, thick}
+            \addlegendentry{goursat}
+            \addlegendimage{color=violet, thick}
+            \addlegendentry{torus}
+            \addlegendimage{color=MyGreen, thick}
+            \addlegendentry{leopold}
+            \addlegendimage{color=yellow!80!black, thick}
+            \addlegendentry{rcube}
+            \addlegendimage{color=black, thick}
             \addlegendentry{$\Theta\left(\sqrt{h}\right)$} %%=\sqrt{\frac{1}{x}}$}
 
         \end{axis}

@@ -352,7 +352,7 @@
             \addlegendimage{only marks, mark=*, color=blue, mark size=3pt}
             \addlegendentry{Radius 30}
 
-            \addlegendimage{color=black,thick};
+            \addlegendimage{color=black,thick}
             \addlegendentry{$0.01\times x\sqrt{x}$}
         \end{axis}
     \end{tabular}
