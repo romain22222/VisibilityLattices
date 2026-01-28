@@ -271,3 +271,15 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
   bound is valid for $c \Ge 1/2$, which is clearly the case for
   arbitrary dimension $d$.
 \end{proof}
+
+\textbf{Convergence of visibility normals.} We slightly simplify here
+the definition of the $k$-visibility normal $\vec{n}_k(p)$ at point $p$
+by removing the weights and by centering the tensor matrix at point
+$p$. Let $V_p^k$ be the $k$-visible points in $\DBh{h}{X}$ from $p$,
+whose distance does not exceed some $K\sqrt{h}$, for $K$ a chosen
+constant ($K=\sqrt{\rho}$ is a reasonnable choice). We have
+\begin{align*}
+  A(p) & := \frac{1}{|V_p^k|}\sum_{q \in V_p^k} \frac{\vec{pq}}{\| \vec{pq} \|} \otimes \frac{\vec{pq}}{\| \vec{pq} \|},
+\end{align*}
+and $\vec{n}_k(p)$ is the last eigenvector of $A(p)$ (corresponding to
+the largest eigenvalue).
