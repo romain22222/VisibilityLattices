@@ -1,0 +1,60 @@
+\begin{tikzpicture}
+    \centering
+    \begin{tabular}{c}
+        \begin{axis}[
+            width=0.9\columnwidth,
+%            height=0.5\textwidth,
+%            legend columns=3,
+        %xlabel={Gridstep},
+            ylabel={Mean distance},
+            x dir=reverse,
+%            legend pos=north west,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymax=50,
+            ymode=log,
+            xmode=log,
+            log ticks with fixed point,
+        ]
+            \addplot[
+                color=cyan,
+            ] coordinates {
+            }
+            \addplot[
+                color=red,
+            ] coordinates {
+            }
+            \addplot[
+                color=MyGreen,
+            ] coordinates {
+            }
+            \addplot[
+                color=black,
+                thick,
+                domain=0.0625:1,
+                samples=100,
+            ] {5*x^(-0.5)}; % WIP
+        \end{axis} \\
+        \begin{axis}[
+            hide axis,
+            xmin=0, xmax=1,
+            ymin=0, ymax=1,
+            legend columns=2,
+            legend style={
+                at={(0.2,-0.2)},
+                anchor=north,
+                draw=none,
+                column sep=15pt,
+            }
+        ]
+            \addlegendimage{color=cyan}
+            \addlegendentry{Tetrahedron}
+            \addlegendimage{color=red}
+            \addlegendentry{Cubesphere}
+            \addlegendimage{color=MyGreen}
+            \addlegendentry{2 Ellipsoids}
+            \addlegendimage{color=black,thick}
+            \addlegendentry{$WIP HERE$}
+        \end{axis}
+    \end{tabular}
+\end{tikzpicture}
