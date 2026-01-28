@@ -18,21 +18,17 @@ namespace Polyhedra {
 	typedef ShortcutsGeometry<KSpace> SHG3;
 	typedef std::pair<RealPoint, double> Plane;
 
-	struct Ellipse {
+	struct Ellipsoid {
 		RealPoint center;
-		RealVector u; // axe 1 (unitaire)
-		RealVector v; // axe 2 (unitaire)
-		double a; // demi-grand axe
-		double b; // demi-petit axe
+		RealVector u;
+		RealVector v;
+		RealVector w;
+		double a;
+		double b;
+		double c;
 	};
 
-	enum class EllipseCombinationMode {
-		INTERSECTION,
-		UNION
-	};
-
-
-	inline float digitization_gridstep_distance = 1.0f;
+	inline float digitization_gridstep_distance = 0.2f;
 
 	double planeDistance(const Plane &plane, const RealPoint &p, double gridstep);
 
@@ -46,24 +42,26 @@ namespace Polyhedra {
 
 	private:
 		std::vector<Plane> myPlanes;
-		std::vector<Ellipse> myEllipses;
-		EllipseCombinationMode ellipseMode = EllipseCombinationMode::UNION;
+		std::vector<Ellipsoid> myEllipsoids;
 		double digitization_gridstep;
 
 	public:
 		PolyhedronShape(const std::vector<Plane> &planes, double gridstep);
 
 		PolyhedronShape(const std::vector<Plane> &planes,
-		                const std::vector<Ellipse> &ellipses,
-		                EllipseCombinationMode mode,
+		                const std::vector<Ellipsoid> &ellipsoids,
 		                double gridstep);
 
 
 		std::vector<Plane> getPlanes() const;
 
-		double implicitDistance(const RealPoint &p) const;
+		Orientation planeOrientation(const RealPoint &p) const;
 
 		Orientation orientation(const RealPoint &p) const;
+
+		RealPoint totalCorrectionPlane(double gamma, const RealPoint &x) const;
+
+		RealPoint totalCorrectionEllipsoid(double gamma, const RealPoint &x) const;
 
 		RealPoint nearestPoint(RealPoint x,
 		                       double accuracy,
@@ -81,7 +79,7 @@ namespace Polyhedra {
 		double gaussianCurvature(const RealPoint &p) const;
 	};
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, int d = 1.0);
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, double d = 1.0);
 
 	typedef sgf::ShapeNormalVectorFunctor<PolyhedronShape> NormalFunctor;
 
