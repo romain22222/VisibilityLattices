@@ -203,8 +203,12 @@ measured the (discrete) average visibility distance along digitization
 of smooth shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows
 a law proportionnal to $\sqrt{h}$. As shown in the next section, for
 real 3d images, a maximal radius below 10 is sufficient for normal and
-curvature estimation.
-
+curvature estimation. Finally, we have measured the same average
+visibility distance on 3 piecewise smooth shapes (Figure~\ref{fig:meanvisibility-gridstep-piecewise}).
+It shows that the average visibility distance still decreases with the
+gridstep, but proportionally to
+% $h^{?}$ WIP
+for the three shapes.
 
 \begin{figure}[t]
   \centering
@@ -223,4 +227,10 @@ curvature estimation.
   \centering
   \input{mean-distance.tikz}
   \caption{\label{fig:meanvisibility-gridstep} Mean distance of visibility as a function of the gridstep $h$ (see text).}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \input{mean-distance-piecewise.tikz}
+    \caption{\label{fig:meanvisibility-gridstep-piecewise} Mean distance of visibility as a function of the gridstep $h$ for 3 piecewise smooth shapes (see text).}
 \end{figure}

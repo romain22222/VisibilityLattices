@@ -33,12 +33,18 @@ of our normals compared to normals computed with the integral invariant (II) est
 and the PCA estimator~\cite{mitra:2003-acm}.
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
-normals computed on a digital surface with respect to the normals computed
-on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different digital surfaces (ellipsoid,
+normals computed on a digital smooth surface with respect to the normals computed
+on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different digital smooth surfaces (ellipsoid,
 goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
 estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
 $E_{\max}$.
+
+Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shape
+(tetrahedron, cubesphere and 2 ellipsoids union). In order to capture the behavior of the normal estimators,
+we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
+% Result extrapolation
+% Result convergence rates
 
 \begin{figure}
     \centering
@@ -269,6 +275,137 @@ $E_{\max}$.
         with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
 \end{figure*}
+
+% WIP
+\begin{figure}
+    \centering
+    \begin{tabular}{c}
+        \begin{tikzpicture}
+            \centering
+            \begin{axis}[
+                width=0.53\columnwidth,
+                xlabel={Gridstep},
+                ylabel={RMSE error},
+                x dir=reverse,
+                legend pos=north east,
+                ymajorgrids=true,
+                grid style=dashed,
+                ymode=log,
+                xmode=log,
+                log ticks with fixed point,
+            ]
+                \addplot[
+                    color=cyan,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=red,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=MyGreen,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=black,
+                    thick,
+                    domain=0.1:1,
+                    samples=200,
+                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
+            \end{axis}
+        \end{tikzpicture} \\
+        \begin{tikzpicture}
+            \centering
+            \begin{axis}
+                [
+                width=0.53\columnwidth,
+                xlabel={Gridstep},
+                ylabel={$E_{\max}$ error},
+                x dir=reverse,
+                legend pos=north east,
+                ymajorgrids=true,
+                grid style=dashed,
+                ymode=log,
+                xmode=log,
+                log ticks with fixed point,
+                ]
+                \addplot[
+                    color=cyan,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=red,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=MyGreen,
+                    mark=halfcircle
+                ] coordinates {
+                };
+
+                \addplot[
+                    color=black,
+                    thick,
+                    domain=0.1:1,
+                    samples=200,
+                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
+            \end{axis}
+        \end{tikzpicture} \\
+        \begin{tikzpicture}
+            \begin{axis}[
+                hide axis,
+                xmin=0, xmax=1,
+                ymin=0, ymax=1,
+                legend columns=3,
+                legend style={
+                    at={(0.5,-0.2)},
+                    anchor=north,
+                    draw=none,
+                    column sep=15pt,
+                }
+            ]
+                \addlegendimage{mark=halfcircle}
+                \addlegendentry{VN}
+                \addlegendimage{color=cyan}
+                \addlegendentry{tetrahedron}
+                \addlegendimage{color=red}
+                \addlegendentry{cubesphere}
+                \addlegendimage{color=MyGreen}
+                \addlegendentry{2 ellipsoids union}
+
+            \end{axis}
+        \end{tikzpicture}
+    \end{tabular}
+    \caption{Error RMSE and $E_{\max}$ as a function of grid resolution on
+    piecewise smooth shapes, ignoring points closer than $2h$ to singularities.}
+    \label{fig:errors-normals-piecewise}
+\end{figure}
+
+% WIP
+\begin{figure}
+    % 3 pictures side by side, with a name under each, singularities in red
+    \centering
+    \begin{tabular}{c c c}
+        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/tetrahedron-singularities} &
+        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/cubesphere-singularities} &
+        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/2ellipsoidsunion-singularities} \\
+        Tetrahedron & Cubesphere & 2 Ellipsoids Union \\
+    \end{tabular}
+    \caption{Singularities (in red) of the piecewise smooth shapes used to
+    compute the errors in Figure~\ref{fig:errors-normals-piecewise}.
+    All 3 shapes are digitized at gridstep $h=0.25$.}
+    \label{fig:singularities-showcase}
+\end{figure}
 
 %% Then, to compute the curvatures, we use the Corrected Normal Current
 %% estimator~\cite{lachaud:2022-dcg} which are based on the normals computed
