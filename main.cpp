@@ -100,7 +100,7 @@ std::vector<double> K1;
 std::vector<double> K2;
 std::vector<RealVector> D1;
 std::vector<RealVector> D2;
-float MaxCurv = 0.2;
+float MaxCurv = 0.1;
 
 // Parameters
 int VisibilityRadius = 10;
@@ -1548,6 +1548,7 @@ void myCallback() {
 		testNearestPoint();
 	}
 
+	ImGui::InputFloat("MinMaxCurv", &MaxCurv, 0.01f, 1.0f);
 	// Shortcuts
 	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
 		doRedisplayNormalAsColorsRelative();
