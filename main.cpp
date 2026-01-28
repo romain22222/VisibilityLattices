@@ -2066,7 +2066,7 @@ int main(int argc, char *argv[]) {
 	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 		for (auto &n: true_normals)
 			if (n.norm() != 0) n /= n.norm();
-	} else {
+	} else if (Polyhedra::isPolyhedron(polynomial)) {
 		computeTrueNormalsPolyhedra();
 	}
 	primal_surface->vertexNormals() = trivial_normals;
