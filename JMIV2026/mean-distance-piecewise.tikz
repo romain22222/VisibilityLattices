@@ -16,18 +16,21 @@
             xmode=log,
             log ticks with fixed point,
         ]
-            \addplot[
+            \addplot table[
+                x=gridstep,
+                y=mean_distance,
+                col sep=comma,
                 color=cyan,
-            ] coordinates {
-            }
-            \addplot[
-                color=red,
-            ] coordinates {
-            }
-            \addplot[
-                color=MyGreen,
-            ] coordinates {
-            }
+                mark=triangle,
+            ] {./graphDataMeanDist/tetrahedron_1.txt}
+            \addplot table[
+                x=gridstep,
+                y=mean_distance,
+                col sep=comma,
+                color=cyan,
+                mark=circle
+            ] {./graphDataMeanDist/tetrahedron_2.txt}
+            % WIP HERE 2 other shapes
             \addplot[
                 color=black,
                 thick,
@@ -53,6 +56,10 @@
             \addlegendentry{Cubesphere}
             \addlegendimage{color=MyGreen}
             \addlegendentry{2 Ellipsoids}
+            \addlegendimage{only marks, color=black, mark=triangle}
+            \addlegendentry{Star_1}
+            \addlegendimage{only marks, color=black, mark=circle}
+            \addlegendentry{Star_2}
             \addlegendimage{color=black,thick}
             \addlegendentry{$WIP HERE$}
         \end{axis}
