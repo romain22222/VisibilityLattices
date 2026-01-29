@@ -41,7 +41,7 @@ rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
 $E_{\max}$.
 
 Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shape
-(tetrahedron, cubesphere and 2 ellipsoids union). In order to capture the behavior of the normal estimators,
+(tetrahedron, cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
 we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
 % Result extrapolation
 % Result convergence rates
@@ -50,11 +50,11 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
     \centering
     \begin{tabular}{c}
         \begin{tikzpicture}
-            \centering
             \begin{axis}[
-                width=0.53\columnwidth,
+                width=0.9\columnwidth,
                 xlabel={Gridstep},
                 ylabel={RMSE error},
+                ylabel style={inner sep=0pt},
                 x dir=reverse,
                 legend pos=north east,
                 ymajorgrids=true,
@@ -127,12 +127,12 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
-            \centering
             \begin{axis}
                 [
-                width=0.53\columnwidth,
+                width=0.9\columnwidth,
                 xlabel={Gridstep},
                 ylabel={$E_{\max}$ error},
+                ylabel style={inner sep=0pt},
                 x dir=reverse,
                 legend pos=north east,
                 ymajorgrids=true,
@@ -206,10 +206,11 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
         \end{tikzpicture} \\
         \begin{tikzpicture}
             \begin{axis}[
+                width=0.9\columnwidth,
                 hide axis,
                 xmin=0, xmax=1,
                 ymin=0, ymax=1,
-                legend columns=3,
+                legend columns=2,
                 legend style={
                     at={(0.5,-0.2)},
                     anchor=north,
@@ -284,12 +285,10 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
 
 % WIP
 \begin{figure}
-    \centering
     \begin{tabular}{c}
         \begin{tikzpicture}
-            \centering
             \begin{axis}[
-                width=0.53\columnwidth,
+                width=0.9\columnwidth,
                 xlabel={Gridstep},
                 ylabel={RMSE error},
                 x dir=reverse,
@@ -327,10 +326,9 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
-            \centering
             \begin{axis}
                 [
-                width=0.53\columnwidth,
+                width=0.9\columnwidth,
                 xlabel={Gridstep},
                 ylabel={$E_{\max}$ error},
                 x dir=reverse,
@@ -369,10 +367,11 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
         \end{tikzpicture} \\
         \begin{tikzpicture}
             \begin{axis}[
+                width=0.9\columnwidth,
                 hide axis,
                 xmin=0, xmax=1,
                 ymin=0, ymax=1,
-                legend columns=3,
+                legend columns=2,
                 legend style={
                     at={(0.5,-0.2)},
                     anchor=north,
@@ -380,14 +379,14 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                     column sep=15pt,
                 }
             ]
-                \addlegendimage{mark=halfcircle}
+                \addlegendimage{mark=halfcircle, only marks}
                 \addlegendentry{VN}
                 \addlegendimage{color=cyan}
                 \addlegendentry{tetrahedron}
                 \addlegendimage{color=red}
                 \addlegendentry{cubesphere}
                 \addlegendimage{color=MyGreen}
-                \addlegendentry{2 ellipsoids union}
+                \addlegendentry{double ellipsoid}
 
             \end{axis}
         \end{tikzpicture}
