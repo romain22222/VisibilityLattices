@@ -1192,6 +1192,22 @@ void doRedisplayNormalAsColorsRelative() {
 	}
 }
 
+void displaySingularities() {
+	if (!Polyhedra::isPolyhedron(polynomial)) {
+		std::cout << "Singularities display is only available for polyhedra." << std::endl;
+		return;
+	}
+	std::vector<RealVector> singularities_as_colors;
+	for (const auto &pointel: pointels) {
+		if (polyhedra->isASingularity((pointel - 0.5) * gridstep)) {
+			singularities_as_colors.push_back(RealVector(1.0, 0.0, 0.0));
+		} else {
+			singularities_as_colors.push_back(RealVector(1.0, 1.0, 1.0));
+		}
+	}
+	psPrimalMesh->addVertexColorQuantity("Singularities", singularities_as_colors)->setEnabled(true);
+}
+
 
 auto olddgd = Polyhedra::digitization_gridstep_distance;
 
@@ -1549,6 +1565,11 @@ void myCallback() {
 	}
 
 	ImGui::InputFloat("MinMaxCurv", &MaxCurv, 0.01f, 1.0f);
+
+	if (ImGui::Button("Display Singularities")) {
+		displaySingularities();
+	}
+
 	// Shortcuts
 	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
 		doRedisplayNormalAsColorsRelative();
@@ -1631,8 +1652,8 @@ int gpuRun(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	int minAABB = -10;
-	int maxAABB = 10;
+	int minAABB = -80;
+	int maxAABB = 80;
 	bool listP = false;
 	bool computeCurvaturesFlag = false;
 	bool computeNormalsFlag = false;
@@ -1895,8 +1916,8 @@ int main(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	int minAABB = -10;
-	int maxAABB = 10;
+	int minAABB = -80;
+	int maxAABB = 80;
 	int VisibilityRadiusTmp = -1;
 	bool listP = false;
 	bool gpuRunFlag = false;

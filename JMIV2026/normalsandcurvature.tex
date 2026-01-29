@@ -392,20 +392,21 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
 \end{figure}
 
 % WIP
-%\begin{figure}
-%    % 3 pictures side by side, with a name under each, singularities in red
-%    \centering
-%    \begin{tabular}{c c c}
-%        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/tetrahedron-singularities} &
-%        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/cubesphere-singularities} &
-%        \includegraphics[width=0.3\textwidth]{pictures/figSingularitiesShowcase/2ellipsoidsunion-singularities} \\
-%        Tetrahedron & Cubesphere & 2 Ellipsoids Union \\
-%    \end{tabular}
-%    \caption{Singularities (in red) of the piecewise smooth shapes used to
-%    compute the errors in Figure~\ref{fig:errors-normals-piecewise}.
-%    All 3 shapes are digitized at gridstep $h=0.25$.}
-%    \label{fig:singularities-showcase}
-%\end{figure}
+\begin{figure}
+    % 3 pictures side by side, with a name under each, singularities in red
+    \centering
+    \begin{tabular}{c c}
+        \multicolumn{2}{c}{\includegraphics[width=0.3\columnwidth]{pictures/singularities/tetrahedronS}} \\
+        \multicolumn{2}{c}{Tetrahedron} \\
+        \includegraphics[width=0.3\columnwidth]{pictures/singularities/cubesphereS} &
+        \includegraphics[width=0.3\columnwidth]{pictures/singularities/double_ellipsoidS} \\
+        Cubesphere & 2 Ellipsoids Union \\
+    \end{tabular}
+    \caption{Singularities (in red) of the piecewise smooth shapes used to
+    compute the errors in Figure~\ref{fig:errors-normals-piecewise}.
+    All 3 shapes are digitized at gridstep $h=0.25$.}
+    \label{fig:singularities-showcase}
+\end{figure}
 
 %% Then, to compute the curvatures, we use the Corrected Normal Current
 %% estimator~\cite{lachaud:2022-dcg} which are based on the normals computed

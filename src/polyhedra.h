@@ -70,6 +70,8 @@ namespace Polyhedra {
 
 		RealVector gradient(const RealPoint &p) const;
 
+		bool isASingularity(const RealPoint &p) const;
+
 		int countIntersections(const RealPoint &p) const;
 
 		void principalCurvatures(const RealPoint &p, double &k1, double &k2) const;

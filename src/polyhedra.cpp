@@ -184,6 +184,30 @@ namespace Polyhedra {
 		return grad;
 	}
 
+	bool PolyhedronShape::isASingularity(const RealPoint &p) const {
+		int count = 0;
+		for (const auto &el: myEllipsoids) {
+			if (std::abs(ellipsoidDistance(el, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+				count++;
+			}
+			if (count >= 2)
+				return true;
+		}
+		if (count == 1) {
+			// for each plane, check if outside
+			for (const auto &pl: myPlanes)
+				if (planeDistance(pl, p, digitization_gridstep) > digitization_gridstep_distance + eps)
+					return false; // keep ellipsoid gradient
+		}
+		for (const auto &pl: myPlanes) {
+			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+				count++;
+			}
+			if (count >= 2)
+				return true;
+		}
+		return false;
+	}
 
 	int PolyhedronShape::countIntersections(const RealPoint &p) const {
 		auto intersectingPlanes = 0;
