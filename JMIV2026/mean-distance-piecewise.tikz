@@ -1,67 +1,83 @@
 \begin{tikzpicture}
-    \centering
-    \begin{tabular}{c}
-        \begin{axis}[
-            width=0.9\columnwidth,
+    \begin{axis}[
+        width=0.9\columnwidth,
 %            height=0.5\textwidth,
 %            legend columns=3,
-        %xlabel={Gridstep},
-            ylabel={Mean distance},
-            x dir=reverse,
+    %xlabel={Gridstep},
+        ylabel={Mean distance},
+        x dir=reverse,
 %            legend pos=north west,
-            ymajorgrids=true,
-            grid style=dashed,
-            ymax=50,
-            ymode=log,
-            xmode=log,
-            log ticks with fixed point,
-        ]
-            \addplot table[
-                x=gridstep,
-                y=mean_distance,
-                col sep=comma,
-                color=cyan,
-                mark=triangle,
-            ] {./graphDataMeanDist/tetrahedron_1.txt}
-            \addplot table[
-                x=gridstep,
-                y=mean_distance,
-                col sep=comma,
-                color=cyan,
-                mark=circle,
-            ] {./graphDataMeanDist/tetrahedron_2.txt}
-            % WIP HERE 2 other shapes
-            \addplot[
-                color=black,
-                thick,
-                domain=0.0625:1,
-                samples=100,
-            ] {5*x^(-0.5)}
-        \end{axis} \\
-        \begin{axis}[
-            hide axis,
-            xmin=0, xmax=1,
-            ymin=0, ymax=1,
-            legend columns=2,
-            legend style={
-                at={(0.2,-0.2)},
-                anchor=north,
-                draw=none,
-                column sep=15pt,
-            }
-        ]
-            \addlegendimage{color=cyan}
-            \addlegendentry{Tetrahedron}
-            \addlegendimage{color=red}
-            \addlegendentry{Cubesphere}
-            \addlegendimage{color=MyGreen}
-            \addlegendentry{2 Ellipsoids}
-            \addlegendimage{only marks, color=black, mark=triangle}
-            \addlegendentry{Star_1}
-            \addlegendimage{only marks, color=black, mark=circle}
-            \addlegendentry{Star_2}
-            \addlegendimage{color=black,thick}
-            \addlegendentry{$WIP HERE$}
-        \end{axis}
-    \end{tabular}
+        ymajorgrids=true,
+        grid style=dashed,
+        ymax=50,
+        ymode=log,
+        xmode=log,
+        log ticks with fixed point,
+    ]
+        \addplot [
+            color=cyan,
+            mark=triangle*,
+            only marks
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/tetrahedron_1.txt};
+        \addplot [
+            color=cyan,
+            mark=square,
+            only marks,
+            fill=none
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/tetrahedron_2.txt};
+        % WIP HERE 2 other shapes
+        \addplot[
+            color=black,
+            thick,
+            domain=0.0625:1,
+            samples=100,
+        ] {5*x^(-1/2)};
+        \addplot[
+            color=blue,
+            thick,
+            domain=0.0625:1,
+            samples=100,
+        ] {5*x^(-2/3)};
+        \addplot[
+            color=orange,
+            thick,
+            domain=0.0625:1,
+            samples=100,
+        ] {3*x^(-3/2)};
+    \end{axis}
+    \begin{axis}[
+        hide axis,
+        xmin=0, xmax=1,
+        ymin=0, ymax=1,
+        legend columns=2,
+        legend style={
+            at={(0.2,-0.2)},
+            anchor=north,
+            draw=none,
+            column sep=15pt,
+        }
+    ]
+        \addlegendimage{color=cyan}
+        \addlegendentry{Tetrahedron}
+        \addlegendimage{color=red}
+        \addlegendentry{Cubesphere}
+        \addlegendimage{color=MyGreen}
+        \addlegendentry{2 Ellipsoids}
+        \addlegendimage{only marks, color=black, mark=triangle*}
+        \addlegendentry{$Star_1$}
+        \addlegendimage{only marks, color=black, mark=square}
+        \addlegendentry{$Star_2$}
+        \addlegendimage{color=black,thick}
+        \addlegendentry{$\mathcal{O}(h^{-1/2})$}
+        \addlegendimage{color=blue,thick}
+        \addlegendentry{$\mathcal{O}(h^{-2/3})$}
+    \end{axis}
 \end{tikzpicture}
