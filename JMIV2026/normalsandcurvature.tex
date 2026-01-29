@@ -241,38 +241,44 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
     \includegraphics[width=0.26\textwidth]{./pictures/figNormalesDisplay/#1}%
 }
 
+\newcommand{\nameDisplayFigNormal}[1]{\raisebox{18mm}{#1}}
+
 \begin{figure*}
     \centering
     \begin{tabular}{|c||c|c|c|}
         \hline
         Shape & II & PCA & Ours \\
         \hline
-        \raisebox{6mm}{Cps} &
+        \nameDisplayFigNormal{Cps} &
         \formatImageFigNormalesShow{cps-IIN-flat} &
         \formatImageFigNormalesShow{cps-Mitra-flat} &
         \formatImageFigNormalesShow{cps-VN-flat} \\
         \hline
-        \raisebox{6mm}{Dragon} &
+        \nameDisplayFigNormal{Dragon} &
         \formatImageFigNormalesShow{dragon-IIN-flat} &
         \formatImageFigNormalesShow{dragon-Mitra-flat} &
         \formatImageFigNormalesShow{dragon-VN-flat} \\
         \hline
-        \raisebox{6mm}{Filigree} &
+        \nameDisplayFigNormal{Filigree} &
         \formatImageFigNormalesShow{filigree-IIN-flat} &
         \formatImageFigNormalesShow{filigree-Mitra-flat} &
         \formatImageFigNormalesShow{filigree-VN-flat} \\
         \hline
+        \raisebox{9mm}{Tie Fighter} &
+        \formatImageFigNormalesShow{tie-IIN-flat} &
+        \formatImageFigNormalesShow{tie-Mitra-flat} &
+        \formatImageFigNormalesShow{tie-VN-flat} \\
+        \hline
     \end{tabular}
-    \caption{Examples of normals computed on a cps, then on a
-    filigree as a color map. First set displays II normals, second set
+    \caption{Examples of normals computed on several shapes
+    as a color map. First set displays II normals, second set
     uses the PCA algorithm, and last set uses our visibility algorithm
     to compute them. The normals are colored according to their
     orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
-    The bottom images are the smooth version of the top ones. ``Integral
-    Invariant normals'' are computed using a radius of $r=4.5$, PCA with
-    a discrete radius of 4 (empirical), while our normal estimator are
-    computed using a deviation of $\sigma=4$, and so a radius of $r=2\sigma=8$,
-        with a star of 1 and with a weighted kernel.}
+    ``Integral Invariant normals`` are computed using a radius of
+        $r=4.5$, PCA with a discrete radius of 4 (empirical), while our
+        normal estimator are computed using a deviation of $\sigma=4$, and so a
+        radius of $r=2\sigma=8$, with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
 \end{figure*}
 
@@ -298,19 +304,19 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                     color=cyan,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=red,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=black,
@@ -339,19 +345,19 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                     color=cyan,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=red,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
                 ] coordinates {
-                };
+                    };
 
                 \addplot[
                     color=black,
@@ -514,10 +520,10 @@ $\sigma=4$) while the result is visually indistinguishable.
     by ``Convolved Trivial normals'' (radius $k=6$), third by
     ``PCA Normals`` (radius $r=4$),fourth column by our presented
     normal estimator (deviation $\sigma=4$, radius $r=2\sigma=8$,
-    with a star of 1 and with a weighted kernel.). Per row are
-    displayed the estimated curvatures in order: first and second
-    principal curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
-    Gaussian curvature $G$. The range of curvature between deep
-    blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
-    color equal to $0$.}
+        with a star of 1 and with a weighted kernel.). Per row are
+        displayed the estimated curvatures in order: first and second
+        principal curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
+        Gaussian curvature $G$. The range of curvature between deep
+        blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
+        color equal to $0$.}
 \end{figure*}
