@@ -3,6 +3,7 @@
 \newcommand{\DBh}[2]{\ensuremath{\Delta_{#1} {#2}}}
 \newcommand{\DTwo}[2]{\ensuremath{D_{2}\left( #1, #2 \right)}}
 \newcommand{\DInf}[2]{\ensuremath{D_{\infty}\left( #1, #2 \right)}}
+\newcommand{\TR}[1]{\ensuremath{{#1}^{\mkern-1.5mu\mathsf{T}}}}
 
 \noindent\textbf{Introduction, useful notations and properties.}
 The visibility normal estimator can be defined for different sizes $k$
@@ -204,6 +205,7 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
 \end{proof}
 
 \begin{theorem}
+  \label{thm-k-visibility-distance}
   Assume $\alpha:=4\rho(k-\sqrt{d})$ is positive. Then, for any
   gridstep $h$, $0< h < \min(\frac{\alpha}{d}, 2\rho)$, there exists a
   constant $\beta >0 $ such that any two pointels of $\DBh{h}{X}$ at
@@ -272,14 +274,72 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
   arbitrary dimension $d$.
 \end{proof}
 
-\textbf{Convergence of visibility normals.} We slightly simplify here
-the definition of the $k$-visibility normal $\vec{n}_k(p)$ at point $p$
-by removing the weights and by centering the tensor matrix at point
-$p$. Let $V_p^k$ be the $k$-visible points in $\DBh{h}{X}$ from $p$,
-whose distance does not exceed some $K\sqrt{h}$, for $K$ a chosen
-constant ($K=\sqrt{\rho}$ is a reasonnable choice). We have
+\textbf{Convergence of visibility normals.}  Let $V$ be a subset of
+points of $\DBh{h}{X}$, whose distances lie in the interval $\lbrack
+K_1 \sqrt{h}, K_2 \sqrt{h} \rbrack$, for $0< K_1 <K_2$ arbitrary
+constants, and $N$ be the cardinal of $V$.  We define the
+\emph{$V$-tangent matrix} as the symmetric positive definite matrix
 \begin{align*}
-  A(p) & := \frac{1}{|V_p^k|}\sum_{q \in V_p^k} \frac{\vec{pq}}{\| \vec{pq} \|} \otimes \frac{\vec{pq}}{\| \vec{pq} \|},
+  A(p) & := \frac{1}{N}\sum_{q \in V} \frac{\vec{pq}}{\| \vec{pq} \|}
+  \otimes \frac{\vec{pq}}{\| \vec{pq} \|}.
 \end{align*}
-and $\vec{n}_k(p)$ is the last eigenvector of $A(p)$ (corresponding to
-the largest eigenvalue).
+The \emph{$V$-normal $\vec{n}_V(p)$} is the last eigenvector of $A(p)$
+(corresponding to the smallest eigenvalue). Note that we have not
+required yet for $V$ to contain visible points from $p$.
+
+\begin{lemma}
+  \label{lem-nAn-le-h}
+  Let $\vn$ be the normal of $\partial X$ at $\xi(p)$.
+  %% Assume $\alpha:=4\rho(k-\sqrt{d})$ is positive.
+  Then, for any gridstep $h$
+  smaller than $\frac{2\rho}{\sqrt{d}}$, the tensor $A(p)$ follows
+  \begin{align*}
+    0 \Le \TR{\vn} A(p) \vn \Le O(h).
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  We develop $\TR{\vn} A(p) \vn$ as:
+  \begin{align*}
+    \TR{\vn} A(p) \vn & = \TR{\vn} \left( \frac{1}{N}\sum_{q \in V} \frac{\vec{pq}}{\| \vec{pq} \|} \otimes \frac{\vec{pq}}{\| \vec{pq} \|} \right) \vn \\
+    & = \frac{1}{N} \sum_{q \in V} \left( \vn \cdot \frac{ \vec{p q} }{\|\vec{p q}\|} \right)^2\\
+    & \Le \frac{1}{N} \sum_{q \in V} \left(O(\sqrt{h})\right)^2 = O(h),
+  \end{align*}
+  where the last inequality is a direct consequence of Corollary~\ref{cor1} (with the hypotheses of \RefTheorem{thm-k-visibility-distance}).
+  %% We subdivide the $k$-visible points from $p$ into two subsets:
+  %% $V_1$ contains the $k$-visible pointels at distance between $K_1
+  %% \sqrt{h}$ and $\beta \sqrt{h}$ (a non-empty set), $V_2$ the ones at
+  %% distance between $\beta \sqrt{h}$ and $K_2 \sqrt{h}$. Their
+  %% respective cardinals are denoted by $N_1$ and $N_2$, and $N=N_1+N_2
+  %% > 0$ (see proof of \RefTheorem{thm-k-visibility-distance}). We bound
+  %% the two terms using Corollary~\ref{cor1}:
+  %% \begin{align*}
+  %% \frac{1}{N}\sum_{q \in V_1} \left( \vn \cdot \frac{ \vec{p q} }{\|\vec{p q}\|\
+  %% } \right)^2 & \Le \frac{N_1}{N}\left(O(\sqrt{h})\right)^2 \\
+  %% \frac{1}{N}\sum_{q \in V_2} \left( \vn \cdot \frac{ \vec{p q} }{\|\vec{p q}\|\
+  %% } \right)^2 & \Le \frac{N_2}{N}\left(O(\sqrt{h})\right)^2.
+  %% \end{align*}
+  %% Both terms are bounded by $O(h)$, which proves the upper bound. The
+  %% lower bound is true since $A(p)$ is SPD.
+\end{proof}
+
+We slightly simplify here
+the definition of the $k$-visibility normal $\vec{n}_k(p)$ at point
+$p$ by removing the weights and by centering the tensor matrix at
+point $p$. Let $V$ be the set of $k$-visible points in $\DBh{h}{X}$
+from $p$, whose distances lie in the interval $\lbrack K_1 \sqrt{h},
+K_2 \sqrt{h} \rbrack$. From a theoretical perspective, constants $K_1$
+and $K_2$ should satisfy $0 < K_1 < \beta < K_2$. The value $\beta$ is
+chosen according to \RefTheorem{thm-k-visibility-distance} as
+$2\sqrt{k - \sqrt{d}}\sqrt{\rho} -\sqrt{dh}$. From a practical point
+of view, we sort the $k$-visible points from $p$ according to their
+distance to $p$, and we simply keep the half of the points whose
+distance are closest to the median distance.
+
+
+
+%% \begin{remark}
+%%   Constants for $O$ notations are respectively:
+%%   $\frac{\sqrt{d}}{K_1}+(1+\sqrt{d})^2\sqrt{\frac{k-\sqrt{d}}{\rho}}$
+%%   and
+%%   $\frac{\sqrt{d}}{2\sqrt{\rho(k-\sqrt{d})}}+\frac{K_2(1+\sqrt{d})^2}{2\rho}$.
+%% \end{remark}

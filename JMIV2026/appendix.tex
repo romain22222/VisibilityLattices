@@ -1,0 +1,93 @@
+\section{Useful results of linear algebra}
+
+For self-containedness, we provide elementary proofs of some
+properties of matrices built using tensored unit vectors.  Let
+$(\vu_i)_{i=1, \ldots, N}$ be a family of $d$-dimensional unit vectors
+of $\R^d$.  Let $M$ be the square matrix of order $d$ defined as:
+\begin{align}
+  M := \frac{1}{N}\sum_{i=1}^N \vu_i \otimes \vu_i =
+  \frac{1}{N}\sum_{i=1}^N \vu_i \TR{\vu_i}.
+\end{align}
+It is obvious that $M$ is a real symmetric matrix. Matrix $M$ is
+therefore diagonalizable as $V \Lambda \TR{V}$. Matrix $V$ is an
+orthogonal matrix whose column vectors $\vv_1, \ldots, \vv_d$ are
+called {\em eigenvectors} of $M$, while $\Lambda$ is a diagonal matrix
+whose diagonal elements $\lambda_1, \ldots, \lambda_d$ are real values
+called {\em eigenvalues} of $M$. We choose to order them in decreasing
+order ($\lambda_1 \Ge \ldots \Ge \lambda_d$).
+
+From now on, we choose $V$ as the orthonormal basis of $\R^d$.  For a
+vector $\vn$, its $j$-th component is then denoted by $n_j$, and for a
+vector $\vu_i$, it is denoted by $u_{i,j}$.
+
+\begin{lemma}
+  Eigenvalues follow  $\forall j \in \{1,\ldots,d\}, 0 \Le
+  \lambda_j \Le 1$ and $\sum_{j=1}^d \lambda_j = 1$.
+\end{lemma}
+\begin{proof}
+  Let $\vn$ be an arbitrary vector. On one side we have
+  \begin{align*}
+    \TR{\vn} M \vn = \TR{\vn} V \Lambda \TR{V} \vn = \sum_{j=1}^d
+    \lambda_j (\vn \cdot \vv_j)^2 = \sum_{j=1}^d \lambda_j \vn_j^2.
+  \end{align*}
+  On the other side we have
+  \begin{align*}
+    \TR{\vn} M \vn = \frac{1}{N}\sum_{i=1}^N \TR{\vn} \vu_i \TR{\vu_i}
+    \vn = \frac{1}{N}\sum_{i=1}^N (\vn \cdot \vu_i)^2.
+  \end{align*}
+  Choosing $\vn = \vv_k$ for all $k \in \{1,\ldots,d\}$, we get on the
+  one hand $\sum_{j=1}^d \lambda_j \vn_j^2 = \lambda_k$ and on the
+  other hand $\frac{1}{N}\sum_{i=1}^N (\vn \cdot \vu_i)^2 =
+  \frac{1}{N} \sum_{i=1}^N u_{i,k}^2$. It follows:
+  \begin{align*}
+    \lambda_k = \frac{1}{N} \sum_{i=1}^N u_{i,k}^2.
+  \end{align*}
+  It already holds that $\lambda_k \Ge 0$. Since the $\vu_i$ are unit
+  vectors, then $u_{i,k}^2 \Le 1$, which entails $\lambda_k \Le
+  1$. Finally, suming up the eigenvalues give
+  \begin{align*}
+    \sum_{k=1}^d \lambda_k & = \sum_{k=1}^d \frac{1}{N} \sum_{i=1}^N u_{i,k}^2 = \frac{1}{N} \sum_{i=1}^N \sum_{k=1}^d u_{i,k}^2 \\
+    & = \frac{1}{N} \sum_{i=1}^N \| \vu_i \|^2 = \frac{1}{N} \sum_{i=1}^N 1 = 1.
+  \end{align*}
+\end{proof}
+
+We can now establish that a vector $\vn$ that induces a small $M$-norm
+implies that the last eigenvector of $M$ is close to $\vn$.
+\begin{lemma}
+  \label{lem-eigenvalues}
+Assume there is a unit vector $\vn$ such that $\TR{\vn} M \vn \Le
+\epsilon$ for some positive number $\epsilon$, then $\lambda_d \Le
+\epsilon$. Furthermore, if $\lambda_{d-1} \neq \lambda_d$, the $d$-th
+component of $\vn$ is close to 1:
+\begin{align*}
+  n_d^2 \Ge 1 - \frac{\epsilon}{\lambda_{d-1} -\lambda_d}.
+\end{align*}
+\end{lemma}
+\begin{proof}
+  We use first the fact that $\TR{\vn} M \vn = \sum_{j=1}^d \lambda_j
+  \vn_j^2$ (see proof above). Then
+  \begin{align*}
+    \sum_{j=1}^d \lambda_j \vn_j^2& \Le \epsilon \\
+    \Leftrightarrow\quad \sum_{j=1}^{d-1} \lambda_j \vn_j^2 + \lambda_d \left(1 - \sum_{j=1}^{d-1} \vn_j^2 \right) & \Le \epsilon && \text{($\|\vn\|^2 = 1$)}\\
+    \Leftrightarrow\quad \lambda_d + \sum_{j=1}^{d-1} (\lambda_j - \lambda_d) \vn_j^2 & \Le \epsilon && \text{(reordering)}\\
+    \Rightarrow \lambda_d & \Le \epsilon, 
+  \end{align*}
+  since every $\lambda_j - \lambda_d \Ge 0$. To establish the second relation, we use the relation above:
+  \begin{align*}
+    \lambda_d + \sum_{j=1}^{d-1} (\lambda_j - \lambda_d) \vn_j^2 & \Le
+    \epsilon \\
+    \Rightarrow~~ \lambda_d + \sum_{j=1}^{d-1} (\lambda_{d-1} - \lambda_d) \vn_j^2 & \Le
+    \epsilon && \text{($\lambda_j \Ge \lambda_{d-1}$)} \\
+    \Leftrightarrow~~ \lambda_d + (\lambda_{d-1} - \lambda_d)(1-n_d^2) & \Le
+    \epsilon && \text{($\|\vn\|^2=1$)} \\
+    \Leftrightarrow~~ 1 -\frac{\epsilon - \lambda_d}{\lambda_{d-1} - \lambda_d} &\Le n_d^2 && \text{(reordering)}.
+  \end{align*}
+  The second relation holds since $\epsilon - \lambda_d \Le \epsilon$.
+\end{proof}
+Let $\alpha$ be the angle between $\vn$ and $\vv_d$. The following corollary is then immediate since $n_d^2=(\vn \cdot \vv_d)^2=\cos^2\alpha$:
+\begin{corollary}
+  \label{cor2}
+  If $\TR{\vn} M \vn \Le \epsilon$, we have $|\alpha| \Le
+  \sqrt{\frac{\epsilon}{\lambda_{d-1} -\lambda_d}} + O(\epsilon^{\frac{3}{2}})$.
+\end{corollary}
+
