@@ -23,24 +23,29 @@
     can check that $\Star{K}=\Star{\|K\|}$, so these definitions are
     sound.
 
+    The \emph{$k$-star} of a cell $\sigma$ is the subcomplex
+    $\kStar{\sigma}{k} \coloneqq \Star{\Cl{\kStar{\sigma}{k-1}}}$, with the base case
+    $\kStar{\sigma}{1} \coloneqq \Star{\sigma}$.
+
     %% A cell $\sigma$ is a face of another cell $\tau$ whenever $\sigma$
     %% is a subset of the topological closure $\bar{\tau}$ of $\tau$,
     %% written $\sigma \preccurlyeq \tau$.  Given any subcomplex K of
     %% $\mathcal{C}^d$, the star $Star(K)$ of K is $\{\tau \in
     %% \mathcal{C}^d, s.t.\ \exists\sigma \in K,\sigma \preccurlyeq
     %% \tau\}$.
-    \begin{definition}[Visibility]
+    \begin{definition}[k-Visibility]
       Let $Z \subset \Z^d$ be a digital set. Two digital points $p$
-      and $q$ are \emph{visible in $Z$} if and only if the straight
-      segment $[p, q]$ is included in $\Star{Z}$, i.e., $\Star{[p, q]}
-      \subseteq \Star{Z}$.
+      and $q$ are \emph{k-visible in $Z$} if and only if the straight
+      segment $[p, q]$ is included in $\kStar{Z}{k}$, i.e., $\Star{[p, q]}
+      \subseteq \StarK{Z}{k}$.
     \end{definition}
-    This definition corresponds to the concept of tangency presented
+    This definition for $k=1$ corresponds to the concept of tangency presented
     in~\cite{lachaud:2022-jmiv}, limited to pairs of points. One can
     check that $p$ and $q$ must belong to $Z$ to be visible.
     Figure~\ref{fig:visibility-2d} illustrates what is considered
-    visible or not on some examples.
-
+    visible or not on some examples for $k=1$ (i.e. for $\Starop_1$).
+    During the rest of the paper, unless otherwise specified, we
+    consider visibility with $k=1$.
 
     % Examples of visibility in 2D
     \begin{figure}[t]
