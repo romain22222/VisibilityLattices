@@ -17,3 +17,4 @@ cmake-build-*
 /shapes/**.vol
 /visibilities/**.vis
 /JMIV2026/out
+/rawExperiments/**
