@@ -15,7 +15,7 @@
         log ticks with fixed point,
     ]
         \addplot [
-            color=cyan,
+            color=red,
             mark=triangle*,
             only marks
         ] table [
@@ -24,8 +24,8 @@
         col sep=comma
         ] {./graphDataMeanDist/tetrahedron_1.txt};
         \addplot [
-            color=cyan,
-            mark=square,
+            color=MyGreen,
+            mark=triangle,
             only marks,
             fill=none
         ] table [
@@ -33,19 +33,50 @@
         y=mean_distance,
         col sep=comma
         ] {./graphDataMeanDist/tetrahedron_2.txt};
-        % WIP HERE 2 other shapes
-        \addplot[
-            color=black,
-            thick,
-            domain=0.0625:1,
-            samples=100,
-        ] {5*x^(-1/2)};
+        \addplot [
+            color=red,
+            mark=square*,
+            only marks
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/cubesphere_1.txt};
+        \addplot [
+            color=MyGreen,
+            mark=square,
+            only marks,
+            fill=none
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/cubesphere_2.txt};
+        \addplot [
+            color=red,
+            mark=*,
+            only marks
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/double_ellipsoid_1.txt};
+        \addplot [
+            color=MyGreen,
+            mark=o,
+            only marks,
+            fill=none
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/double_ellipsoid_2.txt};
         \addplot[
             color=blue,
             thick,
             domain=0.0625:1,
             samples=100,
-        ] {5*x^(-2/3)};
+        ] {3*x^(-1)};
         \addplot[
             color=orange,
             thick,
@@ -65,19 +96,19 @@
             column sep=15pt,
         }
     ]
-        \addlegendimage{color=cyan}
-        \addlegendentry{Tetrahedron}
-        \addlegendimage{color=red}
-        \addlegendentry{Cubesphere}
-        \addlegendimage{color=MyGreen}
-        \addlegendentry{2 Ellipsoids}
         \addlegendimage{only marks, color=black, mark=triangle*}
+        \addlegendentry{Tetrahedron}
+        \addlegendimage{only marks, color=black, mark=square*}
+        \addlegendentry{Cubesphere}
+        \addlegendimage{only marks, color=black, mark=*}
+        \addlegendentry{2 Ellipsoids}
+        \addlegendimage{color=red}
         \addlegendentry{$Star_1$}
-        \addlegendimage{only marks, color=black, mark=square}
+        \addlegendimage{color=MyGreen}
         \addlegendentry{$Star_2$}
-        \addlegendimage{color=black,thick}
-        \addlegendentry{$\mathcal{O}(h^{-1/2})$}
         \addlegendimage{color=blue,thick}
-        \addlegendentry{$\mathcal{O}(h^{-2/3})$}
+        \addlegendentry{$\mathcal{O}(h^{-1})$}
+        \addlegendimage{color=orange,thick}
+        \addlegendentry{$\mathcal{O}(h^{-3/2})$}
     \end{axis}
 \end{tikzpicture}
