@@ -1783,6 +1783,8 @@ int gpuRun(int argc, char *argv[]) {
 
 
 	trace.beginBlock("Computing digital points and primal surface");
+	trace.info() << "Gridstep: " << gridstep << std::endl;
+	std::cout << "Gridstep: " << gridstep << std::endl;
 	// Build digital surface
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
@@ -1861,7 +1863,7 @@ int gpuRun(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5 * pow(gridstep, -0.5);
+		sigma = 5. * pow(gridstep, -0.5);
 	}
 	minus2SigmaSquare = -2 * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -1895,7 +1897,7 @@ int gpuRun(int argc, char *argv[]) {
 			return 1;
 		}
 		Time = trace.endBlock();
-		computeMeanDistanceVisibility();
+		// computeMeanDistanceVisibility();
 		if (computeNormalsFlag) {
 			trace.beginBlock("Compute visibilities Normals");
 			computeVisibilityNormals();
