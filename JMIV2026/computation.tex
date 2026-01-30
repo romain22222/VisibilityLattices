@@ -204,11 +204,11 @@ of smooth shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows
 a law proportionnal to $\sqrt{h}$. As shown in the next section, for
 real 3d images, a maximal radius below 10 is sufficient for normal and
 curvature estimation. Finally, we have measured the same average
-visibility distance on 3 piecewise smooth shapes (Figure~\ref{fig:meanvisibility-gridstep-piecewise}).
-It shows that the average visibility distance still decreases with the
-gridstep, but proportionally to
-% $h^{?}$ WIP
-for the three shapes.
+visibility distance on 3 piecewise smooth shapes with different $\Starop_1$ (Figure~\ref{fig:meanvisibility-gridstep-piecewise}).
+We can observe several regimes: for polyhedra, the average visibility is proportionnal to $h^{-3/2}$ whatever $\Starop$ we use;
+for other shapes, the average visibility is proportionnal to $h^{-2/3}$ for $\Starop_1$ but to $h^{-3/2}$ for $\Starop_2$. Above a
+certain gridstep, we think the visibility is limited by the maximal visibility size we use to compute it (the limitation is computed
+as proportional to $h^{-1/2}$).
 
 \begin{figure}[t]
   \centering
