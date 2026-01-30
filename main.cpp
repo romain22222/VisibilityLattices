@@ -993,6 +993,13 @@ double noWeight(double _) {
 
 auto weighter = wSig;
 
+enum CenterPointChoice {
+	CENTROID,
+	ITSELF
+};
+
+auto centerPointChoice = CenterPointChoice::CENTROID;
+
 void computeMitraNormals() {
 	mitra_normals.clear();
 	mitra_normals.reserve(pointels.size());
@@ -1034,19 +1041,29 @@ void computeVisibilityNormals() {
 	for (const auto &pointel: pointels) {
 		std::vector<Point> visibles;
 		RealPoint centroid(0, 0, 0);
-		double total_w = 0.0;
-		for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
-			auto tmp = kdTree.position(point_idx);
-			if (visibility.isVisible(pointel, tmp)) {
-				//	&& tmp != pointel) {
-				visibles.push_back(tmp);
-				//				centroid += tmp;
-				const double w = weighter((pointel - tmp).squaredNorm());
-				centroid += w * tmp;
-				total_w += w;
+		if (centerPointChoice == CenterPointChoice::ITSELF) {
+			centroid = pointel;
+			for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
+				auto tmp = kdTree.position(point_idx);
+				if (visibility.isVisible(pointel, tmp)) {
+					visibles.push_back(tmp);
+				}
 			}
+		} else {
+			double total_w = 0.0;
+			for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
+				auto tmp = kdTree.position(point_idx);
+				if (visibility.isVisible(pointel, tmp)) {
+					//	&& tmp != pointel) {
+					visibles.push_back(tmp);
+					//				centroid += tmp;
+					const double w = weighter((pointel - tmp).squaredNorm());
+					centroid += w * tmp;
+					total_w += w;
+				}
+			}
+			centroid /= total_w; // (double) visibles.size();
 		}
-		centroid /= total_w; // (double) visibles.size();
 		Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
 		for (const auto &pt: visibles) {
 			auto diff = pt - centroid;
@@ -1556,6 +1573,15 @@ void myCallback() {
 		weighter = wSig;
 	} else {
 		weighter = noWeight;
+	}
+	ImGui::SameLine();
+	const char *centerPointItems[] = {"Pointel itself", "Centroid of visible points"};
+	static int centerPointChoiceInt = 0;
+	ImGui::Combo("Center point", (int *) &centerPointChoiceInt, centerPointItems, IM_ARRAYSIZE(centerPointItems));
+	if (centerPointChoiceInt == 0) {
+		centerPointChoice = CenterPointChoice::ITSELF;
+	} else {
+		centerPointChoice = CenterPointChoice::CENTROID;
 	}
 	// Add a slider for Polyhedra::digitization_gridstep_distance (default 0.2, can vary from 0.05 to 1)
 	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.05f, 1.0f);
