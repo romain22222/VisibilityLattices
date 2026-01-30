@@ -329,12 +329,12 @@ required yet for $V$ to contain only points that are visible from $p$.
   Assume $\alpha:=4\rho(k-\sqrt{d})$ is positive. Let $h$ be a
   gridstep smaller than $\min(\frac{\alpha}{d}, 2\rho)$. Let
   $\beta:=\sqrt{\alpha}-\sqrt{dh}$. Let $p$ be a digital point of
-  $\DBh{h}{X}$. Let $V$ be the $k$-visible points from $p$ in
+  $\DBh{h}{X}$. Let $V_k$ be the $k$-visible points from $p$ in
   $\DBh{h}{X}$, whose distance to $p$ lies in the interval $\lbrack
   K \sqrt{h}, \beta \sqrt{h} \rbrack$, with $K$ chosen such that
   $0< K< \beta$. Let $\vn$ be the normal of $\partial X$ at
   $\xi(p)$. Then the angle between $\vn$ and the last
-  eigenvector $\vv_d$ of the $V$-tangent matrix $A(p)$ follows:
+  eigenvector $\vv_d$ of the $V_k$-tangent matrix $A(p)$ follows:
   \begin{align}
     \label{eq-alpha-upper-bound}
     \angle (\vv_d, \vn) \Le O\left(\sqrt{\frac{h}{\lambda_{d-1} - \lambda_d}}\right).
@@ -361,19 +361,19 @@ required yet for $V$ to contain only points that are visible from $p$.
   orthogonal to $\vn$), \cite[Lemma~10]{Boissonnat:2019-jact} tells
   that $\forall a,b \in \partial X, d(b, P) \le
   \frac{\|a-b\|^2}{\rho}$. Let $a=\xi(p)$ and $b=\xi(q)$ for $q in
-  V$. Since $\|a-p\|=O(h)$, $\|b-q\|=O(h)$, and
+  V_k$. Since $\|a-p\|=O(h)$, $\|b-q\|=O(h)$, and
   $\|p-q\|=\Theta(\sqrt{h})$, we have first that
   $\|a-b\|=O(\sqrt{h})$. Then it holds that
   \begin{align*}
     d(q, P) \Le \|q-b\| + d(b,P) \Le O(h) + \frac{O(\sqrt{h})^2}{\rho}
     = O(h).
   \end{align*}
-  So any $q \in V$ lies in-between two planes orthogonal to $\vn$
-  around $p$, lying at a distance $O(h)$, hence in $R_h$.
+  So any $q \in V_k$ lies in-between two planes orthogonal to $\vn$
+  around $p$, lying at a distance $O(h)$, hence in the ring $R_h$.
 
   In an orthonormal basis $(\vv_i)_{i=1,\ldots,d}$,
   whose last vector $\vv_d$ is equal to $\vn$, the coordinates of
-  vector $\vec{pq_j}$, $q_j \in V$, follow $(O(\sqrt{h}), \ldots,
+  vector $\vec{pq_j}$, $q_j \in V_k$, follow $(O(\sqrt{h}), \ldots,
   O(\sqrt{h}), O(h))$. Hence, letting
   $\vu_i:=\frac{\vec{pq_j}}{\|\vec{pq_j}\|}$, their coordinates follow
   $(O(1), \ldots, O(1), O(\sqrt{h}))$.  This shows that the last
@@ -394,13 +394,27 @@ required yet for $V$ to contain only points that are visible from $p$.
 \begin{corollary}
   \label{cor-convergence}
   With the hypotheses of \RefTheorem{thm-angle-convergence}, the
-  $k$-visibility normal is a multigrid convergent normal estimator,
+  $V_k$-visibility normal is a multigrid convergent normal estimator,
   with convergence speed in $O(\sqrt{h})$.
-
-  Note that in 2d and 3d, the $k$-visibility normal estimation is
-  convergent for $k \ge 2$. For higher dimensions up to 8d, the
-  $k$-visibility normal estimation is convergent for $k \ge 3$.
 \end{corollary}
+
+\begin{remark}
+  Since $\alpha$ must be positive, the $V_k$-visibility normal estimation is
+  convergent for $k \ge 2$ in $2$d and $3$d. For higher dimensions up to $8$, the
+  $V_k$-visibility normal estimation is convergent for $k \ge 3$.
+\end{remark}
+\begin{remark}
+  In practice, we know only approximately the reach of the shape under
+  study, so choosing constants $K$ and $\beta$ is not handy. Instead,
+  we sort the $V_k$-visible points from $p$ according to their
+  distance to $p$, and we simply keep the half of the points whose
+  distance are closest to the average distance. Since we know that the
+  average distance to $p$ is greater than some $\Omega(\sqrt{h})$
+  (\RefTheorem{thm-k-visibility-distance}), keeping this half is a
+  good approximation of the targeted hypotheses for
+  convergence. Furthermore, it avoids the necessity of setting
+  parameters.
+\end{remark}
 %% We slightly simplify here
 %% the definition of the $k$-visibility normal $\vec{n}_k(p)$ at point
 %% $p$ by removing the weights and by centering the tensor matrix at
