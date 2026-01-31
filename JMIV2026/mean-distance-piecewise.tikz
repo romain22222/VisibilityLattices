@@ -112,7 +112,7 @@
         \addlegendimage{only marks, color=black, mark=square}
         \addlegendentry{Cubesphere}
         \addlegendimage{only marks, color=black, mark=o}
-        \addlegendentry{2 Ellipsoids}
+        \addlegendentry{Ellipsoids}
         \addlegendimage{color=red}
         \addlegendentry{$Star_1$}
         \addlegendimage{color=MyGreen}
