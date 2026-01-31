@@ -302,27 +302,90 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                 \addplot[
                     color=cyan,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/tetrahedron-II.txt};
 
                 \addplot[
                     color=red,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/cubesphere-II.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/double_ellipsoid-II.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/tetrahedron-PCA.txt};
+
+                \addplot[
+                    color=red,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/cubesphere-PCA.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/double_ellipsoid-PCA.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/tetrahedron-VN.txt};
+
+                \addplot[
+                    color=red,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/cubesphere-VN.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorRMSE/double_ellipsoid-VN.txt};
 
                 \addplot[
                     color=black,
                     thick,
                     domain=0.1:1,
                     samples=200,
-                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
+                ] {0.1*x^(2)} node[pos=0.5, anchor=north east] {$h^{2}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -342,27 +405,90 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                 \addplot[
                     color=cyan,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/tetrahedron-II.txt};
 
                 \addplot[
                     color=red,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/cubesphere-II.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
-                ] coordinates {
-                    };
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/double_ellipsoid-II.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/tetrahedron-PCA.txt};
+
+                \addplot[
+                    color=red,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/cubesphere-PCA.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=square
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/double_ellipsoid-PCA.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/tetrahedron-VN.txt};
+
+                \addplot[
+                    color=red,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/cubesphere-VN.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=diamond
+                ] table [
+                    x=gridstep,
+                    y=error,
+                    col sep=comma
+                ] {./graphDataNormalErrorMax/double_ellipsoid-VN.txt};
 
                 \addplot[
                     color=black,
                     thick,
                     domain=0.1:1,
                     samples=200,
-                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
+                ] {0.5*x^(2)} node[pos=0.5, anchor=north east] {$h^{2}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -380,6 +506,10 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                 }
             ]
                 \addlegendimage{mark=halfcircle, only marks}
+                \addlegendentry{II}
+                \addlegendimage{mark=square, only marks}
+                \addlegendentry{PCA}
+                \addlegendimage{mark=diamond, only marks}
                 \addlegendentry{VN}
                 \addlegendimage{color=cyan}
                 \addlegendentry{tetrahedron}
@@ -405,7 +535,7 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
         \multicolumn{2}{c}{Tetrahedron} \\
         \includegraphics[width=0.3\columnwidth]{pictures/singularities/cubesphereS} &
         \includegraphics[width=0.3\columnwidth]{pictures/singularities/double_ellipsoidS} \\
-        Cubesphere & 2 Ellipsoids Union \\
+        Cubesphere & Ellipsoids Union \\
     \end{tabular}
     \caption{Singularities (in red) of the piecewise smooth shapes used to
     compute the errors in Figure~\ref{fig:errors-normals-piecewise}.
