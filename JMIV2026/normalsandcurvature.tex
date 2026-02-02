@@ -303,81 +303,81 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                     color=cyan,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/tetrahedron-II.txt};
 
                 \addplot[
                     color=red,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/cubesphere-II.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/double_ellipsoid-II.txt};
 
                 \addplot[
                     color=cyan,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/tetrahedron-PCA.txt};
 
                 \addplot[
                     color=red,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/cubesphere-PCA.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/double_ellipsoid-PCA.txt};
 
                 \addplot[
                     color=cyan,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/tetrahedron-VN.txt};
 
                 \addplot[
                     color=red,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/cubesphere-VN.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorRMSE/double_ellipsoid-VN.txt};
 
                 \addplot[
@@ -406,81 +406,81 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
                     color=cyan,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/tetrahedron-II.txt};
 
                 \addplot[
                     color=red,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/cubesphere-II.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/double_ellipsoid-II.txt};
 
                 \addplot[
                     color=cyan,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/tetrahedron-PCA.txt};
 
                 \addplot[
                     color=red,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/cubesphere-PCA.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=square
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/double_ellipsoid-PCA.txt};
 
                 \addplot[
                     color=cyan,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/tetrahedron-VN.txt};
 
                 \addplot[
                     color=red,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/cubesphere-VN.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=diamond
                 ] table [
-                    x=gridstep,
-                    y=error,
-                    col sep=comma
+                x=gridstep,
+                y=error,
+                col sep=comma
                 ] {./graphDataNormalErrorMax/double_ellipsoid-VN.txt};
 
                 \addplot[
@@ -601,9 +601,9 @@ $\sigma=4$) while the result is visually indistinguishable.
 
 
 \newcommand{\MyZoom}[1]{%
-    \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=0.8cm,connect spies}]
-    \node[inner sep=0pt] {\pgfimage[width=0.1\textwidth]{#1}};
-    \spy[overlay,blue] on (0.25,-0.15) in node at (-0.4,-0.4);
+    \begin{tikzpicture}[spy using outlines={circle,magnification=1.8,size=2cm,connect spies}]
+    \node[inner sep=0pt] {\pgfimage[width=0.2\linewidth]{#1}};
+    \spy[overlay,blue] on (0.3,-0.18) in node at (-0.7,-0.7);
     \end{tikzpicture}}
 % \newcommand{\MyZoom}[1]{\includegraphics[width=0.3\textwidth]{#1}}
 
@@ -611,35 +611,31 @@ $\sigma=4$) while the result is visually indistinguishable.
 \newcommand{\raiseboxsize}{10mm}
 
 \begin{figure*}
-    \begin{center}
-        \resizebox{!}{0.3\textheight}{%
-            \begin{tabular}{|c||c|c|c|c|}
-                \hline
-                %\backslashbox{}{}
-                & II & CTriv & PCA & Ours \\ \hline \hline
-                \raisebox{\raiseboxsize}{$\kappa_1$} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-II-K1} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K1}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K1}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-VN-K1}\\ \hline
-                \raisebox{\raiseboxsize}{$\kappa_2$} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-II-K2} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K2}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K2}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-VN-K2}\\ \hline
-                \raisebox{\raiseboxsize}{$H$} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-II-H} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-H}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-H}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-VN-H}\\ \hline
-                \raisebox{\raiseboxsize}{$G$} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-II-G} &
-                \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-G}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-G}&
-                \MyZoom{pictures/figCurvDisplay/d20-256-VN-G}\\ \hline
-            \end{tabular}%
-        }
-    \end{center}
+    \centering
+    \begin{tabular}{|c||c|c|c|c|}
+        \hline
+        & II & CTriv & PCA & Ours \\ \hline \hline
+        \raisebox{\raiseboxsize}{$\kappa_1$} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-II-K1} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K1}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K1}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-VN-K1}\\ \hline
+        \raisebox{\raiseboxsize}{$\kappa_2$} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-II-K2} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-K2}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-K2}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-VN-K2}\\ \hline
+        \raisebox{\raiseboxsize}{$H$} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-II-H} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-H}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-H}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-VN-H}\\ \hline
+        \raisebox{\raiseboxsize}{$G$} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-II-G} &
+        \MyZoom{pictures/figCurvDisplay/d20-256-CTriv-G}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-Mitra-G}&
+        \MyZoom{pictures/figCurvDisplay/d20-256-VN-G}\\ \hline
+    \end{tabular}
     \caption{\label{fig:fig-curvatures}Estimation of curvatures using
     Corrected Normal Current estimators \cite{lachaud:2022-dcg}
     with a measure of radius $2$ for the shape ``Dice-20'' of
