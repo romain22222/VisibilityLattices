@@ -997,6 +997,65 @@ double ring(double d2) {
 
 auto weighter = wSig;
 
+enum WeightChoice {
+	NONE,
+	GAUSSIAN,
+	RING
+};
+
+void setWeighter(WeightChoice choice) {
+	if (choice == NONE) {
+		weighter = noWeight;
+	} else if (choice == GAUSSIAN) {
+		weighter = wSig;
+	} else if (choice == RING) {
+		weighter = ring;
+	} else {
+		std::cout << "You forgot to add the weighter here buddy" << std::endl;
+	}
+}
+
+std::vector<WeightChoice> getChosenKernels(const std::string &weightChoices) {
+	std::vector<WeightChoice> choices;
+	std::istringstream ss(weightChoices);
+	std::string token;
+	while (std::getline(ss, token, ',')) {
+		if (token == "gaussian") {
+			choices.push_back(WeightChoice::GAUSSIAN);
+		} else if (token == "ring") {
+			choices.push_back(WeightChoice::RING);
+		} else if (token == "none") {
+			choices.push_back(WeightChoice::NONE);
+		} else {
+			std::cout << "Unknown weight choice or you forgot to put it here buddy: " << token << std::endl;
+		}
+	}
+	std::sort(choices.begin(), choices.end());
+	choices.erase(std::unique(choices.begin(), choices.end()), choices.end());
+	if (choices.empty()) {
+		choices.push_back(WeightChoice::GAUSSIAN);
+	}
+	return choices;
+}
+
+std::string weightChoiceToString(WeightChoice choice) {
+	switch (choice) {
+		case WeightChoice::GAUSSIAN:
+			return "Gaussian";
+		case WeightChoice::RING:
+			return "Ring";
+		case WeightChoice::NONE:
+			return "None";
+		default:
+			return "Unknown";
+	}
+}
+
+static int weightCurrentItem = 1;
+static int centerPointChoiceInt = 0;
+std::vector<double> angle_dev(visibility_normals.size());
+std::vector<double> dummy(visibility_normals.size(), 0.0);
+
 enum CenterPointChoice {
 	CENTROID,
 	ITSELF
@@ -1091,6 +1150,16 @@ RealVector getTrivNormal(size_t idx) {
 	return primal_surface->vertexNormal(idx);
 }
 
+void reorientMitraNormals() {
+	if (!mitra_normals.empty()) {
+		for (int i = 0; i < mitra_normals.size(); ++i) {
+			const auto triv_normal = getTrivNormal(i);
+			if (mitra_normals[i].dot(triv_normal) < 0)
+				mitra_normals[i] = -mitra_normals[i];
+		}
+	}
+}
+
 void reorientVisibilityNormals() {
 	if (visibility_normals.empty()) {
 		computeVisibilityNormals();
@@ -1102,13 +1171,6 @@ void reorientVisibilityNormals() {
 		const auto triv_normal = getTrivNormal(i);
 		if (visibility_normals[i].dot(triv_normal) < 0)
 			visibility_normals[i] = -visibility_normals[i];
-	}
-	if (!mitra_normals.empty()) {
-		for (int i = 0; i < mitra_normals.size(); ++i) {
-			const auto triv_normal = getTrivNormal(i);
-			if (mitra_normals[i].dot(triv_normal) < 0)
-				mitra_normals[i] = -mitra_normals[i];
-		}
 	}
 	if (!noInterface) {
 		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
@@ -1176,7 +1238,7 @@ void doRedisplayNormalAsColorsAbsolute() {
 	for (const auto &n: mitra_normals) {
 		normalMitraColors.push_back(0.5f * (n + 1.0f));
 	}
-	psPrimalMesh->addVertexColorQuantity("Normals visibility as colors (absolute)", normalVisibilityColors);
+	psPrimalMesh->addVertexColorQuantity("Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) + " as colors (absolute)", normalVisibilityColors);
 	psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
 	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
 
@@ -1205,7 +1267,7 @@ void doRedisplayNormalAsColorsRelativeFor(const std::vector<RealVector> &normals
 }
 
 void doRedisplayNormalAsColorsRelative() {
-	doRedisplayNormalAsColorsRelativeFor(visibility_normals, "visibility");
+	doRedisplayNormalAsColorsRelativeFor(visibility_normals, "visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
 	doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
 	doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
 	if (!true_normals.empty()) {
@@ -1240,64 +1302,32 @@ void computeTrueNormalsPolyhedra() {
 	for (auto &n: true_normals) if (n.norm() != 0) n /= n.norm();
 }
 
-void computeL2looErrorsNormals() {
+void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std::string &normalName) {
 	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
 		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << " (old was "
 			<< olddgd << ")" << std::endl;
 		computeTrueNormalsPolyhedra();
 		olddgd = gridstep;
 	}
+
+	angle_dev.clear();
+	angle_dev.resize(normals.size());
+	dummy.resize(normals.size(), 0.0);
 	//	std::cout << "Computing L2 and Loo errors" << std::endl;
-	std::vector<double> angle_dev(visibility_normals.size());
-	std::vector<double> dummy(visibility_normals.size(), 0.0);
-	for (int i = 0; i < visibility_normals.size(); ++i) {
+	for (int i = 0; i < normals.size(); ++i) {
 		if (true_normals[i].norm() == 0) {
 			angle_dev[i] = 0.0;
 			continue;
 		}
-		const auto sp = visibility_normals[i].dot(true_normals[i]);
+		const auto sp = normals[i].dot(true_normals[i]);
 		const auto fxp = std::min(1.0, std::max(-1.0, sp));
 		angle_dev[i] = acos(fxp);
 	}
 	if (!noInterface)
-		psPrimalMesh->addVertexScalarQuantity("Angle deviation visib", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation " + normalName, angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
 			"reds");
-	std::cout << "L2 error normals visib: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-	std::cout << "Loo error normals visib: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
-
-	angle_dev.clear();
-	angle_dev.resize(ii_normals.size());
-	for (int i = 0; i < ii_normals.size(); ++i) {
-		if (true_normals[i].norm() == 0) {
-			angle_dev[i] = 0.0;
-			continue;
-		}
-		const auto sp = ii_normals[i].dot(true_normals[i]);
-		const auto fxp = std::min(1.0, std::max(-1.0, sp));
-		angle_dev[i] = acos(fxp);
-	}
-	if (!noInterface)
-		psPrimalMesh->addVertexScalarQuantity("Angle deviation II", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
-			"reds");
-	std::cout << "L2 error normals II: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-	std::cout << "Loo error normals II: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
-
-	angle_dev.clear();
-	angle_dev.resize(mitra_normals.size());
-	for (int i = 0; i < mitra_normals.size(); ++i) {
-		if (true_normals[i].norm() == 0) {
-			angle_dev[i] = 0.0;
-			continue;
-		}
-		const auto sp = mitra_normals[i].dot(true_normals[i]);
-		const auto fxp = std::min(1.0, std::max(-1.0, sp));
-		angle_dev[i] = acos(fxp);
-	}
-	if (!noInterface)
-		psPrimalMesh->addVertexScalarQuantity("Angle deviation Mitra", angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
-			"reds");
-	std::cout << "L2 error normals Mitra: " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
-	std::cout << "Loo error normals Mitra: " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+	std::cout << "L2 error normals " << normalName << ": " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
+	std::cout << "Loo error normals " << normalName << ": " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
 
 std::vector<double> operator-(const std::vector<double> &lhs, const std::vector<double> &rhs) {
@@ -1501,16 +1531,19 @@ void myCallback() {
 	if (ImGui::Button("Compute Normals")) {
 		trace.beginBlock("Compute visibilities Normals");
 		computeVisibilityNormals();
+		reorientVisibilityNormals();
 		Time = trace.endBlock();
 		computeMitraNormals();
-		reorientVisibilityNormals();
+		reorientMitraNormals();
 		doRedisplayNormalAsColorsAbsolute();
 		doRedisplayNormalAsColorsRelative();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
 		trace.beginBlock("Compute visibilities Normals Errors");
-		computeL2looErrorsNormals();
+		computeL2looErrorsNormals(visibility_normals, "visib " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
+		computeL2looErrorsNormals(ii_normals, "II");
+		computeL2looErrorsNormals(mitra_normals, "Mitra");
 		Time = trace.endBlock();
 	}
 	const char *items[] = {"Visibility normals", "Mitra normals", "II normals", "CTriv"};
@@ -1570,20 +1603,12 @@ void myCallback() {
 		testNStarOfShape(nStarTest);
 	}
 	// Add a selector for the weighting function used for normal estimation
-	const char *weightSelectorItems[] = {"Gaussian", "Ring", "No Weight"};
-	static int weightCurrentItem = 0;
+	const char *weightSelectorItems[] = {"No Weight", "Gaussian", "Ring"};
 	ImGui::Combo("Weighter", &weightCurrentItem, weightSelectorItems, IM_ARRAYSIZE(weightSelectorItems));
-	if (weightCurrentItem == 0) {
-		weighter = wSig;
-	} else if (weightCurrentItem == 1) {
-		weighter = ring;
-	} else {
-		weighter = noWeight;
-	}
+	setWeighter(static_cast<WeightChoice>(weightCurrentItem));
 	ImGui::SameLine();
 	const char *centerPointItems[] = {"Centroid of visible points", "Pointel itself"};
-	static int centerPointChoiceInt = 0;
-	ImGui::Combo("Center point", (int *) &centerPointChoiceInt, centerPointItems, IM_ARRAYSIZE(centerPointItems));
+	ImGui::Combo("Center point", &centerPointChoiceInt, centerPointItems, IM_ARRAYSIZE(centerPointItems));
 	if (centerPointChoiceInt == 0) {
 		centerPointChoice = CenterPointChoice::CENTROID;
 	} else {
@@ -1696,6 +1721,8 @@ int gpuRun(int argc, char *argv[]) {
 	std::string saveVisibilityFilename;
 	std::string saveShapeFilename = "shape.vol";
 	std::string visibComputeMethod = "OMP_GPU";
+	std::string weightChoices = "gaussian";
+
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
 	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
 	app.add_option("-p,--polynomial", polynomial,
@@ -1725,6 +1752,7 @@ int gpuRun(int argc, char *argv[]) {
 	app.add_option("--nstar", nstar,
 	               "number of stars to use in visibility computation (default 1, will do every star from 1 to nstar)");
 	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
+	app.add_option("--weightChoices", weightChoices, "weight choices to compute visibility normals : gaussian, ring, none (default gaussian, you can select several ones using commas without space)");
 
 	CLI11_PARSE(app, argc, argv)
 	if (listP) {
@@ -1855,6 +1883,7 @@ int gpuRun(int argc, char *argv[]) {
 			computeTrueNormalsPolyhedra();
 		}
 		computeMitraNormals();
+		reorientMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
 		trace.endBlock();
 
@@ -1905,13 +1934,20 @@ int gpuRun(int argc, char *argv[]) {
 		Time = trace.endBlock();
 		// computeMeanDistanceVisibility();
 		if (computeNormalsFlag) {
-			trace.beginBlock("Compute visibilities Normals");
-			computeVisibilityNormals();
-			computeMitraNormals();
-			reorientVisibilityNormals();
-			Time = trace.endBlock();
+			std::vector<WeightChoice> chosenKernels = getChosenKernels(weightChoices);
+			for (WeightChoice w: chosenKernels) {
+				setWeighter(w);
+				trace.beginBlock("Compute visibilities Normals with kernel" + w);
+				computeVisibilityNormals();
+				reorientVisibilityNormals();
+				Time = trace.endBlock();
+				if (is_polynomial) {
+					computeL2looErrorsNormals(visibility_normals, "visib " + weightChoiceToString(w));
+				}
+			}
 			if (is_polynomial) {
-				computeL2looErrorsNormals();
+				computeL2looErrorsNormals(ii_normals, "II");
+				computeL2looErrorsNormals(mitra_normals, "Mitra");
 			}
 		}
 		if (computeCurvaturesFlag) {
@@ -1988,8 +2024,9 @@ int main(int argc, char *argv[]) {
 	               "gpuRun only : method to compute visibility: 'CPU', 'OMP', 'OMP_GPU', 'GPU' (default 'OMP_GPU')");
 	app.add_flag("--noFurtherComputation", ignore,
 	             "gpuRun only : if set, no computation after generating the shape");
-	app.add_option("--nstar", ignore, "number of stars to use in visibility computation (default 1)");
+	app.add_option("--nstar", ignore, "gpuRun only : number of stars to use in visibility computation (default 1)");
 	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
+	app.add_option("--weightChoices", _, "gpuRun only : weight choices to compute visibility normals");
 
 	// -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
 	// Parse command line options. Exit on error.
