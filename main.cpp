@@ -1575,13 +1575,13 @@ void myCallback() {
 		weighter = noWeight;
 	}
 	ImGui::SameLine();
-	const char *centerPointItems[] = {"Pointel itself", "Centroid of visible points"};
+	const char *centerPointItems[] = {"Centroid of visible points", "Pointel itself"};
 	static int centerPointChoiceInt = 0;
 	ImGui::Combo("Center point", (int *) &centerPointChoiceInt, centerPointItems, IM_ARRAYSIZE(centerPointItems));
 	if (centerPointChoiceInt == 0) {
-		centerPointChoice = CenterPointChoice::ITSELF;
-	} else {
 		centerPointChoice = CenterPointChoice::CENTROID;
+	} else {
+		centerPointChoice = CenterPointChoice::ITSELF;
 	}
 	// Add a slider for Polyhedra::digitization_gridstep_distance (default 0.2, can vary from 0.05 to 1)
 	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.05f, 1.0f);
@@ -1845,7 +1845,7 @@ int gpuRun(int argc, char *argv[]) {
 		if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 			for (auto &n: true_normals)
 				if (n.norm() != 0) n /= n.norm();
-		} else {
+		} else if (Polyhedra::isPolyhedron(polynomial)) {
 			computeTrueNormalsPolyhedra();
 		}
 		computeMitraNormals();
@@ -1865,7 +1865,7 @@ int gpuRun(int argc, char *argv[]) {
 	} else {
 		sigma = 5. * pow(gridstep, -0.5);
 	}
-	minus2SigmaSquare = -2 * sigma * sigma;
+	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
 		VisibilityRadius = VisibilityRadiusTmp;
 	} else {
@@ -2124,15 +2124,14 @@ int main(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5 * pow(gridstep, -0.5);
+		sigma = 5. * pow(gridstep, -0.5);
 	}
+	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
 		VisibilityRadius = VisibilityRadiusTmp;
 	} else {
 		VisibilityRadius = 2 * static_cast<int>(sigma);
 	}
-	minus2SigmaSquare = -2 * sigma * sigma;
-
 	std::cout << "sigma = " << sigma << std::endl;
 
 
