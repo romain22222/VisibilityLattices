@@ -991,6 +991,10 @@ double noWeight(double _) {
 	return 1.0;
 }
 
+double ring(double d2) {
+	return -exp(d2 / minus2SigmaSquare) * sqrt(d2) / minus2SigmaSquare;
+}
+
 auto weighter = wSig;
 
 enum CenterPointChoice {
@@ -1566,11 +1570,13 @@ void myCallback() {
 		testNStarOfShape(nStarTest);
 	}
 	// Add a selector for the weighting function used for normal estimation
-	const char *weightSelectorItems[] = {"Gaussian", "No Weight"};
+	const char *weightSelectorItems[] = {"Gaussian", "Ring", "No Weight"};
 	static int weightCurrentItem = 0;
 	ImGui::Combo("Weighter", &weightCurrentItem, weightSelectorItems, IM_ARRAYSIZE(weightSelectorItems));
 	if (weightCurrentItem == 0) {
 		weighter = wSig;
+	} else if (weightCurrentItem == 1) {
+		weighter = ring;
 	} else {
 		weighter = noWeight;
 	}
