@@ -484,242 +484,297 @@ good for our estimator.
 
 % WIP
 \begin{figure}
-    \begin{tabular}{c}
-        \begin{tikzpicture}
-            \begin{axis}[
-                width=0.9\columnwidth,
-                xlabel={Gridstep},
-                ylabel={RMSE error},
-                x dir=reverse,
-                legend pos=north east,
-                ymajorgrids=true,
-                grid style=dashed,
-                ymode=log,
-                xmode=log,
-                log ticks with fixed point,
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=0.9\columnwidth,
+            xlabel={Gridstep},
+            ylabel={RMSE error},
+            x dir=reverse,
+            legend pos=north east,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymode=log,
+            xmode=log,
+            log ticks with fixed point,
+        ]
+            \addplot[
+                color=cyan,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/tetrahedron-II.txt};
+
+            \addplot[
+                color=cyan,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/tetrahedron-PCA.txt};
+
+            \addplot[
+                color=cyan,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/tetrahedron-VNG.txt};
+
+            \addplot[
+                color=cyan,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/tetrahedron-VNR.txt};
+
+            \addplot[
+                color=red,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/cubesphere-II.txt};
+
+            \addplot[
+                color=red,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/cubesphere-PCA.txt};
+
+            \addplot[
+                color=red,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/cubesphere-VNG.txt};
+
+            \addplot[
+                color=red,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/cubesphere-VNR.txt};
+
+            \addplot[
+                color=MyGreen,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/double_ellipsoid-II.txt};
+
+            \addplot[
+                color=MyGreen,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/double_ellipsoid-PCA.txt};
+
+            \addplot[
+                color=MyGreen,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNG.txt};
+
+            \addplot[
+                color=MyGreen,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNR.txt};
+
+            \addplot[
+                color=black,
+                thick,
+                domain=0.12:0.4,
+                samples=200,
+            ] {2*x^(3)} node[pos=0.5, anchor=north east] {$h^{3}$};
+        \end{axis}
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        \begin{axis}
+            [
+            width=0.9\columnwidth,
+            xlabel={Gridstep},
+            ylabel={$E_{\max}$ error},
+            x dir=reverse,
+            legend pos=north east,
+            ymajorgrids=true,
+            grid style=dashed,
+            ymode=log,
+            xmode=log,
+            log ticks with fixed point,
             ]
-                \addplot[
-                    color=cyan,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/tetrahedron-II.txt};
+            \addplot[
+                color=cyan,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/tetrahedron-II.txt};
 
-                \addplot[
-                    color=red,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/cubesphere-II.txt};
+            \addplot[
+                color=cyan,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/tetrahedron-PCA.txt};
 
-                \addplot[
-                    color=MyGreen,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/double_ellipsoid-II.txt};
+            \addplot[
+                color=cyan,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNG.txt};
 
-                \addplot[
-                    color=cyan,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/tetrahedron-PCA.txt};
+            \addplot[
+                color=cyan,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNR.txt};
 
-                \addplot[
-                    color=red,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/cubesphere-PCA.txt};
+            \addplot[
+                color=red,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/cubesphere-II.txt};
 
-                \addplot[
-                    color=MyGreen,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/double_ellipsoid-PCA.txt};
+            \addplot[
+                color=red,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/cubesphere-PCA.txt};
 
-                \addplot[
-                    color=cyan,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/tetrahedron-VN.txt};
+            \addplot[
+                color=red,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/cubesphere-VNG.txt};
 
-                \addplot[
-                    color=red,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/cubesphere-VN.txt};
+            \addplot[
+                color=red,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/cubesphere-VNR.txt};
 
-                \addplot[
-                    color=MyGreen,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorRMSE/double_ellipsoid-VN.txt};
+            \addplot[
+                color=MyGreen,
+                mark=halfcircle
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-II.txt};
 
-                \addplot[
-                    color=black,
-                    thick,
-                    domain=0.1:1,
-                    samples=200,
-                ] {0.1*x^(2)} node[pos=0.5, anchor=north east] {$h^{2}$};
-            \end{axis}
-        \end{tikzpicture} \\
-        \begin{tikzpicture}
-            \begin{axis}
-                [
-                width=0.9\columnwidth,
-                xlabel={Gridstep},
-                ylabel={$E_{\max}$ error},
-                x dir=reverse,
-                legend pos=north east,
-                ymajorgrids=true,
-                grid style=dashed,
-                ymode=log,
-                xmode=log,
-                log ticks with fixed point,
-                ]
-                \addplot[
-                    color=cyan,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/tetrahedron-II.txt};
+            \addplot[
+                color=MyGreen,
+                mark=asterisk
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-PCA.txt};
 
-                \addplot[
-                    color=red,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/cubesphere-II.txt};
+            \addplot[
+                color=MyGreen,
+                mark=square
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNG.txt};
 
-                \addplot[
-                    color=MyGreen,
-                    mark=halfcircle
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/double_ellipsoid-II.txt};
+            \addplot[
+                color=MyGreen,
+                mark=diamond
+            ] table [
+            x=gridstep,
+            y=error,
+            col sep=comma
+            ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNR.txt};
 
-                \addplot[
-                    color=cyan,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/tetrahedron-PCA.txt};
+            \addplot[
+                color=black,
+                thick,
+                domain=0.12:0.4,
+                samples=200,
+            ] {5*x^(3)} node[pos=0.2, anchor=south west] {$h^{3}$};
+        \end{axis}
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        \begin{axis}[
+            width=0.9\columnwidth,
+            hide axis,
+            xmin=0, xmax=1,
+            ymin=0, ymax=1,
+            legend columns=2,
+            legend style={
+                at={(0.5,-0.2)},
+                anchor=north,
+                draw=none,
+                column sep=15pt,
+            }
+        ]
+            \addlegendimage{mark=halfcircle, only marks}
+            \addlegendentry{II}
+            \addlegendimage{mark=asterisk, only marks}
+            \addlegendentry{PCA}
+            \addlegendimage{mark=square, only marks}
+            \addlegendentry{VNG}
+            \addlegendimage{mark=diamond, only marks}
+            \addlegendentry{VNR}
+            \addlegendimage{color=cyan}
+            \addlegendentry{tetrahedron}
+            \addlegendimage{color=red}
+            \addlegendentry{cubesphere}
+            \addlegendimage{color=MyGreen}
+            \addlegendentry{double ellipsoid}
 
-                \addplot[
-                    color=red,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/cubesphere-PCA.txt};
-
-                \addplot[
-                    color=MyGreen,
-                    mark=square
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/double_ellipsoid-PCA.txt};
-
-                \addplot[
-                    color=cyan,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/tetrahedron-VN.txt};
-
-                \addplot[
-                    color=red,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/cubesphere-VN.txt};
-
-                \addplot[
-                    color=MyGreen,
-                    mark=diamond
-                ] table [
-                x=gridstep,
-                y=error,
-                col sep=comma
-                ] {./graphDataNormalErrorMax/double_ellipsoid-VN.txt};
-
-                \addplot[
-                    color=black,
-                    thick,
-                    domain=0.1:1,
-                    samples=200,
-                ] {0.5*x^(2)} node[pos=0.5, anchor=north east] {$h^{2}$};
-            \end{axis}
-        \end{tikzpicture} \\
-        \begin{tikzpicture}
-            \begin{axis}[
-                width=0.9\columnwidth,
-                hide axis,
-                xmin=0, xmax=1,
-                ymin=0, ymax=1,
-                legend columns=2,
-                legend style={
-                    at={(0.5,-0.2)},
-                    anchor=north,
-                    draw=none,
-                    column sep=15pt,
-                }
-            ]
-                \addlegendimage{mark=halfcircle, only marks}
-                \addlegendentry{II}
-                \addlegendimage{mark=square, only marks}
-                \addlegendentry{PCA}
-                \addlegendimage{mark=diamond, only marks}
-                \addlegendentry{VN}
-                \addlegendimage{color=cyan}
-                \addlegendentry{tetrahedron}
-                \addlegendimage{color=red}
-                \addlegendentry{cubesphere}
-                \addlegendimage{color=MyGreen}
-                \addlegendentry{double ellipsoid}
-
-            \end{axis}
-        \end{tikzpicture}
-    \end{tabular}
+        \end{axis}
+    \end{tikzpicture}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution on
     piecewise smooth shapes, ignoring points closer than $2h$ to singularities.}
     \label{fig:errors-normals-piecewise}
