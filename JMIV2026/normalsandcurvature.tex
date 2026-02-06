@@ -38,6 +38,19 @@ we only tested on the latter two kernels. We also tested the influence of the st
 which controls how thick the visibility cone is, but we did not see a significant influence
 on the normal estimation, so we kept it to 1 for all the tests.
 
+\begin{figure}
+    \centering
+    \begin{tabular}{cc c}
+        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/uniform} &
+        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/gaussian} &
+        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/ring} \\
+        Uniform & Gaussian & Ring \\
+    \end{tabular}
+    \caption{Normal error of the visibility normals with different kernels. The range of the error between white and deep red is $\lbrack 0, 0.07 \rbrack$ }
+    \label{fig:kernel-showcase}
+\end{figure}
+
+
 \paragraph{Experimental validation.}
 
 Figure~\ref{fig:normals-estimation} shows an example
@@ -483,7 +496,6 @@ it really depends on what kind of shapes we are facing with
     \label{fig:normals-estimation}
 \end{figure*}
 
-% WIP
 \begin{figure}
     \centering
     \begin{tikzpicture}
