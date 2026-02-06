@@ -62,9 +62,6 @@ while the other two estimators are influenced by this geometry. This is particul
 where the normal estimation is very bad near the singularity for the II estimator, while it is
 good for our estimator.
 
-% Result extrapolation
-% Result convergence rates
-
 \begin{figure}
     \centering
     \begin{tabular}{c}
@@ -85,62 +82,151 @@ good for our estimator.
                 \addplot[
                     color=cyan,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0156736)(0.250,0.031503)(0.375,0.0384303)(0.500,0.0441086)(0.625,0.0418896)(0.750,0.0584604)(0.875,0.065503)(1.000,0.0729735)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/ellipsoid-II.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/ellipsoid-PCA.txt};
 
                 \addplot[
                     color=cyan,
                     mark=square
-                ] coordinates {
-                    (0.125,0.00669781)(0.250,0.0120283)(0.375,0.0165559)(0.500,0.0263742)(0.625,0.0270529)(0.750,0.0361097)(0.875,0.0501562)(1.000,0.04348)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/ellipsoid-VNG.txt};
+
                 \addplot[
-                    color=red,
-                    mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0221236)(0.250,0.0317159)(0.375,0.0542242)(0.500,0.0706101)(0.625,0.09481)(0.750,0.134544)(0.875,0.130578)(1.000,0.127371)
-                };
+                    color=cyan,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/ellipsoid-VNR.txt};
 
                 \addplot[
                     color=red,
-                    mark=square
-                ] coordinates {
-                    (0.125,0.0157673)(0.250,0.024652)(0.375,0.0343723)(0.500,0.0463823)(0.625,0.051336)(0.750,0.0763857)(0.875,0.0758734)(1.000,0.0617788)
+                    mark=halfcircle
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/goursat-II.txt};
 
-                };
+                \addplot[
+                    color=red,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/goursat-PCA.txt};
+
+                \addplot[
+                    color=red,
+                    mark=square
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/goursat-VNG.txt};
+
+                \addplot[
+                    color=red,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/goursat-VNR.txt};
+
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0203851)(0.250,0.032289)(0.375,0.0353311)(0.500,0.0568694)(0.625,0.0665957)(0.750,0.106711)(0.875,0.0817172)(1.000,0.104688)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/rcube-II.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/rcube-PCA.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=square
-                ] coordinates {
-                    (0.125,0.0140342)(0.250,0.0229046)(0.375,0.0304815)(0.500,0.0466803)(0.625,0.0559396)(0.750,0.0328143)(0.875,0.100956)(1.000,0.0944342)
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/rcube-VNG.txt};
 
-                };
+                \addplot[
+                    color=MyGreen,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/rcube-VNR.txt};
+
                 \addplot[
                     color=orange,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0106125)(0.250,0.0223176)(0.375,0.032738)(0.500,0.0365776)(0.625,0.0362568)(0.750,0.0181232)(0.875,0.0303189)(1.000,0.0263066)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/sphere9-II.txt};
+
+                \addplot[
+                    color=orange,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/sphere9-PCA.txt};
 
                 \addplot[
                     color=orange,
                     mark=square
-                ] coordinates {
-                    (0.125,0.00364692)(0.250,0.00928532)(0.375,0.0168347)(0.500,0.0231946)(0.625,0.0220619)(0.750,0.0340007)(0.875,0.0533849)(1.000,0.0691569)
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/sphere9-VNG.txt};
 
-                };
+                \addplot[
+                    color=orange,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/L2/sphere9-VNR.txt};
+
                 \addplot[
                     color=black,
                     thick,
-                    domain=0.1:1,
+                    domain=0.1:0.4,
                     samples=200,
                 ] {0.1*x^(0.66)} node[pos=0.2, anchor=south west] {$h^{\frac{2}{3}}$};
             \end{axis}
@@ -156,6 +242,7 @@ good for our estimator.
                 legend pos=north east,
                 ymajorgrids=true,
                 grid style=dashed,
+                ymin=0.01, ymax=0.3,
                 ymode=log,
                 xmode=log,
                 log ticks with fixed point,
@@ -163,62 +250,151 @@ good for our estimator.
                 \addplot[
                     color=cyan,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0586128)(0.250,0.0736204)(0.375,0.114564)(0.500,0.114592)(0.625,0.136021)(0.750,0.152418)(0.875,0.139939)(1.000,0.234379)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/ellipsoid-II.txt};
+
+                \addplot[
+                    color=cyan,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/ellipsoid-PCA.txt};
 
                 \addplot[
                     color=cyan,
                     mark=square
-                ] coordinates {
-                    (0.125,0.0198319)(0.250,0.0370639)(0.375,0.0415253)(0.500,0.0840702)(0.625,0.0623331)(0.750,0.0898241)(0.875,0.133761)(1.000,0.0869342)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/ellipsoid-VNG.txt};
+
                 \addplot[
-                    color=red,
-                    mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0743185)(0.250,0.0810657)(0.375,0.113504)(0.500,0.145859)(0.625,0.256274)(0.750,0.266855)(0.875,0.259101)(1.000,0.274269)
-                };
+                    color=cyan,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/ellipsoid-VNR.txt};
 
                 \addplot[
                     color=red,
-                    mark=square
-                ] coordinates {
+                    mark=halfcircle
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/goursat-II.txt};
 
-                    (0.125,0.02986)(0.250,0.0502663)(0.375,0.0717319)(0.500,0.0846663)(0.625,0.0966577)(0.750,0.123886)(0.875,0.139487)(1.000,0.132201)
-                };
+                \addplot[
+                    color=red,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/goursat-PCA.txt};
+
+                \addplot[
+                    color=red,
+                    mark=square
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/goursat-VNG.txt};
+
+                \addplot[
+                    color=red,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/goursat-VNR.txt};
+
                 \addplot[
                     color=MyGreen,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0670488)(0.250,0.0926269)(0.375,0.0973621)(0.500,0.137059)(0.625,0.155913)(0.750,0.290065)(0.875,0.164799)(1.000,0.317625)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/rcube-II.txt};
+
+                \addplot[
+                    color=MyGreen,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/rcube-PCA.txt};
 
                 \addplot[
                     color=MyGreen,
                     mark=square
-                ] coordinates {
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/rcube-VNG.txt};
 
-                    (0.125,0.0325697)(0.250,0.0486132)(0.375,0.0750567)(0.500,0.0918979)(0.625,0.11031)(0.750,0.0755826)(0.875,0.168386)(1.000,0.174149)
-                };
+                \addplot[
+                    color=MyGreen,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/rcube-VNR.txt};
+
                 \addplot[
                     color=orange,
                     mark=halfcircle
-                ] coordinates {
-                    (0.125,0.0313599)(0.250,0.044124)(0.375,0.0643389)(0.500,0.0684951)(0.625,0.0853552)(0.750,0.0532733)(0.875,0.064386)(1.000,0.0873334)
-                };
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/sphere9-II.txt};
+
+                \addplot[
+                    color=orange,
+                    mark=asterisk
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/sphere9-PCA.txt};
 
                 \addplot[
                     color=orange,
                     mark=square
-                ] coordinates {
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/sphere9-VNG.txt};
 
-                    (0.125,0.0178225)(0.250,0.0373191)(0.375,0.0497523)(0.500,0.0684615)(0.625,0.0536034)(0.750,0.0618511)(0.875,0.129302)(1.000,0.12792)
-                };
+                \addplot[
+                    color=orange,
+                    mark=diamond
+                ] table [
+                x=gridstep,
+                y=error,
+                col sep=comma
+                ] {./graphDataNormals/smooth/Loo/sphere9-VNR.txt};
+
                 \addplot[
                     color=black,
                     thick,
-                    domain=0.1:1,
+                    domain=0.1:0.4,
                     samples=200,
                 ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
             \end{axis}
@@ -238,9 +414,13 @@ good for our estimator.
                 }
             ]
                 \addlegendimage{mark=halfcircle}
-                \addlegendentry{VN}
+                \addlegendentry{$II$}
+                \addlegendimage{mark=asterisk}
+                \addlegendentry{$PCA$}
                 \addlegendimage{mark=square}
-                \addlegendentry{II}
+                \addlegendentry{$VN_G$}
+                \addlegendimage{mark=diamond}
+                \addlegendentry{$VN_R$}
                 \addlegendimage{color=cyan}
                 \addlegendentry{ellipsoid}
                 \addlegendimage{color=red}
@@ -545,7 +725,6 @@ good for our estimator.
     \label{fig:errors-normals-piecewise}
 \end{figure}
 
-% WIP
 \begin{figure}
     % 3 pictures side by side, with a name under each, singularities in red
     \centering
