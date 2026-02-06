@@ -10,10 +10,8 @@ multigrid convergent along digitization of smooth shapes. However,
 since the computation window is limited by the visibility, it
 better approximates the geometry near sharp or salient features.
 
-More precisely, we choose a Gaussian function
-$\Kernel{x}\coloneqq e^{-\frac{x^2}{2\sigma^2}}$ as a weight kernel. Let
-$V_p$ be the set of visible points from the point $p$. Let $c_p$
-be the weighted centroid of the visible points around $p$,
+Let $V_p$ be the set of visible points from the point $p$.
+Let $c_p$ be the weighted centroid of the visible points around $p$,
 i.e. $c_p \coloneqq \frac{\sum_{q \in V_p} \Kernel{\|q-p\|}q}{\sum_{q \in
 V_p} \Kernel{\|q-p\|}}$. We form the weighted covariance matrix
 $\mathcal{V}_p$ of the points $V_p$ as:
@@ -25,11 +23,23 @@ as the last eigenvector of the covariance matrix $\mathcal{V}_p$
 of the visible points, corresponding to its smallest
 eigenvalue. Its orientation is chosen to point in the same
 direction as the average of the trivial normals to the surfels
-touching the point $p$.
+touching the point $p$. Note that the kernel $\Kernel{\cdot}$ can be chosen
+to be any positive function.
+
+In practice, we chose to test 3 different kernels: a Gaussian kernel $\Kernel{x} = e^{-\frac{x^2}{2\sigma^2}}$,
+a uniform kernel $\Kernel{x} = \mathbbm{1}_{x \leq 2\sigma}$, and a ring kernel
+$\Kernel{x} = \frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$. In~\ref{fig:kernel-showcase},
+we see that the Uniform kernel makes a lot more errors than the other two,
+while the Gaussian and Ring kernels have similar errors, so for the normal error tests
+we only tested on the latter two kernels. We also tested the influence of the star parameter,
+which controls how thick the visibility cone is, but we did not see a significant influence
+on the normal estimation, so we kept it to 1 for all the tests.
 
 \paragraph{Experimental validation.}
+
 Figure~\ref{fig:normals-estimation} shows an example
-of our normals compared to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
+of our normals computed with both kernels compared
+to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
 and the PCA estimator~\cite{mitra:2003-acm}.
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
@@ -38,11 +48,20 @@ on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different 
 goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
 estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
-$E_{\max}$.
+$E_{\max}$. The ring kernel seems to be TODO CHECK (better/worse) than the Gaussian kernel,
+but they have the same convergence rates, which indicates that the choice of the kernel
+does not influence the convergence of the normal estimator, but only the constant in front of the error.
 
 Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shape
 (tetrahedron, cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
 we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
+We see that the RMSE of our estimator is much better than the II estimator and slightly better than the PCA
+estimator, while the $E_{\max}$ is much better than both. This is due to the fact that our estimator is
+aware of the salient features, so it is not influenced by the geometry on the other side of the features,
+while the other two estimators are influenced by this geometry. This is particularly visible on TODO CHECK (SHAPE),
+where the normal estimation is very bad near the singularity for the II estimator, while it is
+good for our estimator.
+
 % Result extrapolation
 % Result convergence rates
 
