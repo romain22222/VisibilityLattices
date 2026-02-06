@@ -26,10 +26,13 @@ direction as the average of the trivial normals to the surfels
 touching the point $p$. Note that the kernel $\Kernel{\cdot}$ can be chosen
 to be any positive function.
 
-In practice, we chose to test 3 different kernels: a Gaussian kernel $\Kernel{x} = e^{-\frac{x^2}{2\sigma^2}}$,
-a uniform kernel $\Kernel{x} = \mathbbm{1}_{x \leq 2\sigma}$, and a ring kernel
-$\Kernel{x} = \frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$. In~\ref{fig:kernel-showcase},
-we see that the Uniform kernel makes a lot more errors than the other two,
+In practice, we chose to test 3 different kernels. First, the Uniform kernel ($\Kernel{x} = \mathbbm{1}_{x \leq 2\sigma}$)
+aims at weighting everything the same, whatever its distance to p. The Gaussian kernel
+($\Kernel{x} = e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting closer data more than further ones, arguing closer data
+represents better the information than further one. Finally, the Ring kernel
+($\Kernel{x} = \frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting data in middle range more
+than the rest, trying to extrapolate the tangential information of the visibility instead of
+its proximity. In~\ref{fig:kernel-showcase}, we see that the Uniform kernel makes a lot more errors than the other two,
 while the Gaussian and Ring kernels have similar errors, so for the normal error tests
 we only tested on the latter two kernels. We also tested the influence of the star parameter,
 which controls how thick the visibility cone is, but we did not see a significant influence
@@ -48,19 +51,17 @@ on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different 
 goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
 estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
-$E_{\max}$. The ring kernel seems to be TODO CHECK (better/worse) than the Gaussian kernel,
+$E_{\max}$. The ring kernel seems to be slightly worse than the Gaussian kernel,
 but they have the same convergence rates, which indicates that the choice of the kernel
 does not influence the convergence of the normal estimator, but only the constant in front of the error.
 
 Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shape
 (tetrahedron, cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
 we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
-We see that the RMSE of our estimator is much better than the II estimator and slightly better than the PCA
-estimator, while the $E_{\max}$ is much better than both. This is due to the fact that our estimator is
-aware of the salient features, so it is not influenced by the geometry on the other side of the features,
-while the other two estimators are influenced by this geometry. This is particularly visible on TODO CHECK (SHAPE),
-where the normal estimation is very bad near the singularity for the II estimator, while it is
-good for our estimator.
+We see that the RMSE and $E_{\max}$ are much better than both II and PCA, with a convergence rate of $h^3$,
+while both II and PCA stop converging after a certain threshold (here around h=0.2). It however doesn't seem
+to have a better kernel between the ring and the gaussian kernel, sometimes one is better than the other, but
+it really depends on what kind of shapes we are facing with
 
 \begin{figure}
     \centering
@@ -226,9 +227,9 @@ good for our estimator.
                 \addplot[
                     color=black,
                     thick,
-                    domain=0.1:0.4,
+                    domain=0.12:0.4,
                     samples=200,
-                ] {0.1*x^(0.66)} node[pos=0.2, anchor=south west] {$h^{\frac{2}{3}}$};
+                ] {0.1*x^(0.66)} node[pos=0.4, anchor=south west, yshift=10pt] {$h^{\frac{2}{3}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -394,9 +395,9 @@ good for our estimator.
                 \addplot[
                     color=black,
                     thick,
-                    domain=0.1:0.4,
+                    domain=0.12:0.4,
                     samples=200,
-                ] {0.1*x^(0.5)} node[pos=0.5, anchor=north east] {$h^{\frac{1}{2}}$};
+                ] {0.1*x^(0.5)} node[pos=0.01, anchor=north east] {$h^{\frac{1}{2}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
