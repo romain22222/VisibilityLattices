@@ -61,15 +61,23 @@
     shapes with smooth boundary, their formulation intrinsically
     smoothes features, e.g.\ in contrast with the method of
     Mar{ê}ch{é} \emph{et al.}~\cite{mareche:2024-ispr}, whose
-    convergence is not established. We propose here a normal estimator
-    defined as the most orthogonal vector to the cone of visibility at
-    the point of interest. Visibility is high in smooth regions and
-    the induced visibility vectors are good approximations of tangent
-    vectors. On the contrary the visibility is blocked at sharp
-    features, so the normal vector is not influenced by the
-    geometry on the other side of the features. We demonstrate the
-    superiority of this normal estimator for estimating curvatures
-    along digital surfaces with sharp features.
+    convergence is not established.
+
+    Covariance-based normal estimation methods, commonly used for point clouds (e.g.\ \cite{mitra:2003-acm}),
+    constitute another popular approach. These methods rely on local covariance analysis and are theoretically
+    justified under assumptions of Gaussian noise. However, such assumptions do not hold for digitized shapes,
+    whose geometry comes from deterministic grid sampling rather than stochastic perturbations. This mismatch
+    makes the application of covariance-based estimators to digital surfaces theoretically less grounded and
+    practically less reliable, motivating the need for methods tailored to digital geometry.
+
+    We propose here a normal estimator defined as the most orthogonal
+    vector to the cone of visibility at the point of interest.
+    Visibility is high in smooth regions and the induced visibility
+    vectors are good approximations of tangent vectors. On the contrary
+    the visibility is blocked at sharp features, so the normal vector
+    is not influenced by the geometry on the other side of the features.
+    We demonstrate the superiority of this normal estimator for estimating
+    curvatures along digital surfaces with sharp features.
 
     Note that our algorithm for computing visibility is in fact much
     more general. The same algorithm could be used to recognize if any
