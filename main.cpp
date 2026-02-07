@@ -1160,6 +1160,14 @@ void reorientMitraNormals() {
 	}
 }
 
+void reorientIINormals() {
+	for (int i = 0; i < ii_normals.size(); ++i) {
+		const auto triv_normal = getTrivNormal(i);
+		if (ii_normals[i].dot(triv_normal) < 0)
+			ii_normals[i] = -ii_normals[i];
+	}
+}
+
 void reorientVisibilityNormals() {
 	if (visibility_normals.empty()) {
 		computeVisibilityNormals();
@@ -1320,8 +1328,15 @@ void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std
 			continue;
 		}
 		const auto sp = normals[i].dot(true_normals[i]);
+		const auto antiSp = normals[i].dot(-true_normals[i]);
 		const auto fxp = std::min(1.0, std::max(-1.0, sp));
-		angle_dev[i] = acos(fxp);
+		const auto fxm = std::min(1.0, std::max(-1.0, antiSp));
+		angle_dev[i] = std::min(acos(fxp), acos(fxm));
+		if (angle_dev[i] > 0.1) {
+			std::cout << "Large angle deviation for normal " << normalName << " at index " << i
+				<< ": " << angle_dev[i] << " radians, " << angle_dev[i] * 180.0 / M_PI << " degrees" << std::endl;
+			std::cout << "Normal: " << normals[i] << ", True normal: " << true_normals[i] << std::endl;
+		}
 	}
 	if (!noInterface)
 		psPrimalMesh->addVertexScalarQuantity("Angle deviation " + normalName, angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
@@ -1819,6 +1834,7 @@ int gpuRun(int argc, char *argv[]) {
 	trace.beginBlock("Computing digital points and primal surface");
 	trace.info() << "Gridstep: " << gridstep << std::endl;
 	std::cout << "Gridstep: " << gridstep << std::endl;
+	trace.info() << "Shape: " << (is_polynomial ? polynomial : filename) << std::endl;
 	// Build digital surface
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
@@ -1882,10 +1898,14 @@ int gpuRun(int argc, char *argv[]) {
 		} else if (Polyhedra::isPolyhedron(polynomial)) {
 			computeTrueNormalsPolyhedra();
 		}
-		computeMitraNormals();
-		reorientMitraNormals();
+		// computeMitraNormals();
+		// reorientMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
+		reorientIINormals();
 		trace.endBlock();
+		// computeL2looErrorsNormals(mitra_normals, "Mitra");
+		computeL2looErrorsNormals(ii_normals, "II");
+		return 0;
 
 		if (computeCurvaturesFlag) {
 			trace.beginBlock("Initialize CNC for curvature computation");
@@ -2163,6 +2183,7 @@ int main(int argc, char *argv[]) {
 		computeTrueNormalsPolyhedra();
 	}
 	primal_surface->vertexNormals() = trivial_normals;
+	reorientIINormals();
 
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
