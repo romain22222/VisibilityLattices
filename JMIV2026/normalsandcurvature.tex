@@ -98,7 +98,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/ellipsoid-II.txt};
 
@@ -107,7 +107,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/ellipsoid-PCA.txt};
 
@@ -116,7 +116,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/ellipsoid-VNG.txt};
 
@@ -125,7 +125,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/ellipsoid-VNR.txt};
 
@@ -134,7 +134,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/goursat-II.txt};
 
@@ -143,7 +143,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/goursat-PCA.txt};
 
@@ -152,7 +152,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/goursat-VNG.txt};
 
@@ -161,7 +161,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/goursat-VNR.txt};
 
@@ -170,7 +170,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/rcube-II.txt};
 
@@ -179,7 +179,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/rcube-PCA.txt};
 
@@ -188,7 +188,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/rcube-VNG.txt};
 
@@ -197,7 +197,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/rcube-VNR.txt};
 
@@ -206,7 +206,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/sphere9-II.txt};
 
@@ -215,7 +215,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/sphere9-PCA.txt};
 
@@ -224,7 +224,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/sphere9-VNG.txt};
 
@@ -233,7 +233,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/L2/sphere9-VNR.txt};
 
@@ -242,7 +242,7 @@ it really depends on what kind of shapes we are facing with
                     thick,
                     domain=0.12:0.4,
                     samples=200,
-                ] {0.1*x^(0.66)} node[pos=0.4, anchor=south west, yshift=10pt] {$h^{\frac{2}{3}}$};
+                ] {0.02*x^(1.66)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{\frac{5}{3}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -256,7 +256,7 @@ it really depends on what kind of shapes we are facing with
                 legend pos=north east,
                 ymajorgrids=true,
                 grid style=dashed,
-                ymin=0.01, ymax=0.3,
+%                ymin=0.01, ymax=0.3,
                 ymode=log,
                 xmode=log,
                 log ticks with fixed point,
@@ -266,7 +266,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-II.txt};
 
@@ -275,7 +275,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-PCA.txt};
 
@@ -284,7 +284,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNG.txt};
 
@@ -293,7 +293,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNR.txt};
 
@@ -302,7 +302,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-II.txt};
 
@@ -311,7 +311,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-PCA.txt};
 
@@ -320,7 +320,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-VNG.txt};
 
@@ -329,7 +329,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-VNR.txt};
 
@@ -338,7 +338,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-II.txt};
 
@@ -347,7 +347,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-PCA.txt};
 
@@ -356,7 +356,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-VNG.txt};
 
@@ -365,7 +365,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-VNR.txt};
 
@@ -374,7 +374,7 @@ it really depends on what kind of shapes we are facing with
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-II.txt};
 
@@ -383,7 +383,7 @@ it really depends on what kind of shapes we are facing with
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-PCA.txt};
 
@@ -392,7 +392,7 @@ it really depends on what kind of shapes we are facing with
                     mark=square
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-VNG.txt};
 
@@ -401,7 +401,7 @@ it really depends on what kind of shapes we are facing with
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y=error,
+                y expr=\thisrow{error}*\thisrow{gridstep},
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-VNR.txt};
 
@@ -410,7 +410,7 @@ it really depends on what kind of shapes we are facing with
                     thick,
                     domain=0.12:0.4,
                     samples=200,
-                ] {0.1*x^(0.5)} node[pos=0.01, anchor=north east] {$h^{\frac{1}{2}}$};
+                ] {0.4*x^(1.5)} node[pos=0.2, anchor=south west] {$h^{\frac{3}{2}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -499,7 +499,8 @@ it really depends on what kind of shapes we are facing with
 \begin{figure}
     \centering
     \begin{tikzpicture}
-        \begin{axis}[
+        \begin{axis}
+            [
             width=0.9\columnwidth,
             xlabel={Gridstep},
             ylabel={RMSE error},
@@ -510,13 +511,13 @@ it really depends on what kind of shapes we are facing with
             ymode=log,
             xmode=log,
             log ticks with fixed point,
-        ]
+            ]
             \addplot[
                 color=cyan,
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/tetrahedron-II.txt};
 
@@ -525,7 +526,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/tetrahedron-PCA.txt};
 
@@ -534,7 +535,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/tetrahedron-VNG.txt};
 
@@ -543,7 +544,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/tetrahedron-VNR.txt};
 
@@ -552,7 +553,7 @@ it really depends on what kind of shapes we are facing with
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/cubesphere-II.txt};
 
@@ -561,7 +562,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/cubesphere-PCA.txt};
 
@@ -570,7 +571,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/cubesphere-VNG.txt};
 
@@ -579,7 +580,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/cubesphere-VNR.txt};
 
@@ -588,7 +589,7 @@ it really depends on what kind of shapes we are facing with
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-II.txt};
 
@@ -597,7 +598,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-PCA.txt};
 
@@ -606,7 +607,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNG.txt};
 
@@ -615,7 +616,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNR.txt};
 
@@ -624,7 +625,7 @@ it really depends on what kind of shapes we are facing with
                 thick,
                 domain=0.12:0.4,
                 samples=200,
-            ] {2*x^(3)} node[pos=0.5, anchor=north east] {$h^{3}$};
+            ] {0.6*x^(4)} node[pos=0.5, anchor=north east] {$h^{4}$};
         \end{axis}
     \end{tikzpicture}
     \begin{tikzpicture}
@@ -646,7 +647,7 @@ it really depends on what kind of shapes we are facing with
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-II.txt};
 
@@ -655,7 +656,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-PCA.txt};
 
@@ -664,7 +665,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNG.txt};
 
@@ -673,7 +674,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNR.txt};
 
@@ -682,7 +683,7 @@ it really depends on what kind of shapes we are facing with
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/cubesphere-II.txt};
 
@@ -691,7 +692,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/cubesphere-PCA.txt};
 
@@ -700,7 +701,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/cubesphere-VNG.txt};
 
@@ -709,7 +710,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/cubesphere-VNR.txt};
 
@@ -718,7 +719,7 @@ it really depends on what kind of shapes we are facing with
                 mark=halfcircle
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-II.txt};
 
@@ -727,7 +728,7 @@ it really depends on what kind of shapes we are facing with
                 mark=asterisk
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-PCA.txt};
 
@@ -736,7 +737,7 @@ it really depends on what kind of shapes we are facing with
                 mark=square
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNG.txt};
 
@@ -745,7 +746,7 @@ it really depends on what kind of shapes we are facing with
                 mark=diamond
             ] table [
             x=gridstep,
-            y=error,
+            y expr=\thisrow{error}*\thisrow{gridstep},
             col sep=comma
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNR.txt};
 
@@ -754,7 +755,7 @@ it really depends on what kind of shapes we are facing with
                 thick,
                 domain=0.12:0.4,
                 samples=200,
-            ] {5*x^(3)} node[pos=0.2, anchor=south west] {$h^{3}$};
+            ] {5*x^(4)} node[pos=0.2, anchor=south west] {$h^{4}$};
         \end{axis}
     \end{tikzpicture}
     \begin{tikzpicture}

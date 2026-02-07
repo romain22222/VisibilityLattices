@@ -9,7 +9,7 @@
 %            legend pos=north west,
         ymajorgrids=true,
         grid style=dashed,
-        ymax=50,
+%        ymax=50,
         ymode=log,
         xmode=log,
         log ticks with fixed point,
@@ -84,16 +84,16 @@
             color=blue,
             semithick,
             dashed,
-            domain=0.0625:1,
+            domain=0.1:0.4,
             samples=100,
-        ] {3*x^(-1)};
+        ] {6*x^(-1/2)};
         \addplot[
             color=orange,
             semithick,
             dashed,
-            domain=0.0625:1,
+            domain=0.1:0.4,
             samples=100,
-        ] {3*x^(-3/2)};
+        ] {3*x^(-3/2/2)};
     \end{axis}
     \begin{axis}[
         hide axis,
