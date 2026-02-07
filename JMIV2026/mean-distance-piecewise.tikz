@@ -93,7 +93,7 @@
             dashed,
             domain=0.1:0.4,
             samples=100,
-        ] {3*x^(-3/2/2)};
+        ] {3*x^(-3/4)};
     \end{axis}
     \begin{axis}[
         hide axis,
@@ -118,8 +118,8 @@
         \addlegendimage{color=MyGreen}
         \addlegendentry{$Star_2$}
         \addlegendimage{color=blue,semithick,dashed}
-        \addlegendentry{$\mathcal{O}(h^{-1})$}
+        \addlegendentry{$\mathcal{O}(h^{-1/2})$}
         \addlegendimage{color=orange,semithick,dashed}
-        \addlegendentry{$\mathcal{O}(h^{-3/2})$}
+        \addlegendentry{$\mathcal{O}(h^{-3/4})$}
     \end{axis}
 \end{tikzpicture}
