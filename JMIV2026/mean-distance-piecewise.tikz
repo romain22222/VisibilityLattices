@@ -118,8 +118,8 @@
         \addlegendimage{color=MyGreen}
         \addlegendentry{$Star_2$}
         \addlegendimage{color=blue,semithick,dashed}
-        \addlegendentry{$\mathcal{O}(h^{-1/2})$}
+        \addlegendentry{$\mathcal{O}\left(h^{-\frac{1}{2}}\right)$}
         \addlegendimage{color=orange,semithick,dashed}
-        \addlegendentry{$\mathcal{O}(h^{-3/4})$}
+        \addlegendentry{$\mathcal{O}\left(h^{-\frac{3}{4}}\right)$}
     \end{axis}
 \end{tikzpicture}
