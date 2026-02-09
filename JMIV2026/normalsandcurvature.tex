@@ -286,7 +286,7 @@ the singularity.
                     thick,
                     domain=0.12:0.4,
                     samples=200,
-                ] {0.02*x^(1.66)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{\frac{5}{3}}$};
+                ] {0.02*x^(0.66)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{\frac{5}{3}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
@@ -310,7 +310,7 @@ the singularity.
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-II.txt};
 
@@ -319,7 +319,7 @@ the singularity.
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-PCA.txt};
 
@@ -328,7 +328,7 @@ the singularity.
                     mark=square
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNG.txt};
 
@@ -337,7 +337,7 @@ the singularity.
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNR.txt};
 
@@ -346,7 +346,7 @@ the singularity.
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-II.txt};
 
@@ -355,7 +355,7 @@ the singularity.
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-PCA.txt};
 
@@ -364,7 +364,7 @@ the singularity.
                     mark=square
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-VNG.txt};
 
@@ -373,7 +373,7 @@ the singularity.
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/goursat-VNR.txt};
 
@@ -382,7 +382,7 @@ the singularity.
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-II.txt};
 
@@ -391,7 +391,7 @@ the singularity.
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-PCA.txt};
 
@@ -400,7 +400,7 @@ the singularity.
                     mark=square
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-VNG.txt};
 
@@ -409,7 +409,7 @@ the singularity.
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/rcube-VNR.txt};
 
@@ -418,7 +418,7 @@ the singularity.
                     mark=halfcircle
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-II.txt};
 
@@ -427,7 +427,7 @@ the singularity.
                     mark=asterisk
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-PCA.txt};
 
@@ -436,7 +436,7 @@ the singularity.
                     mark=square
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-VNG.txt};
 
@@ -445,7 +445,7 @@ the singularity.
                     mark=diamond
                 ] table [
                 x=gridstep,
-                y expr=\thisrow{error}*\thisrow{gridstep},
+                y=error,
                 col sep=comma
                 ] {./graphDataNormals/smooth/Loo/sphere9-VNR.txt};
 
@@ -454,7 +454,7 @@ the singularity.
                     thick,
                     domain=0.12:0.4,
                     samples=200,
-                ] {0.4*x^(1.5)} node[pos=0.2, anchor=south west] {$h^{\frac{3}{2}}$};
+                ] {0.4*x^(0.5)} node[pos=0.2, anchor=south west] {$h^{\frac{3}{2}}$};
             \end{axis}
         \end{tikzpicture} \\
         \begin{tikzpicture}
