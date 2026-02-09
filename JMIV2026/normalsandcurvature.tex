@@ -32,24 +32,66 @@ aims at weighting everything the same, whatever its distance to p. The Gaussian 
 represents better the information than further one. Finally, the Ring kernel
 ($\Kernel{x} = \frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting data in middle range more
 than the rest, trying to extrapolate the tangential information of the visibility instead of
-its proximity. In~\ref{fig:kernel-showcase}, we see that the Uniform kernel makes a lot more errors than the other two,
+its proximity. In~\ref{fig:errors-normals-showcase-ellipsoids}, we see that the Uniform kernel makes a lot more errors than the other two,
 while the Gaussian and Ring kernels have similar errors, so for the normal error tests
 we only tested on the latter two kernels. We also tested the influence of the star parameter,
 which controls how thick the visibility cone is, but we did not see a significant influence
 on the normal estimation, so we kept it to 1 for all the tests.
 
-\begin{figure}
+\newcommand{\formatImageFigNormalesScale}[1]{%
+    \includegraphics[width=0.33\columnwidth]{./pictures/figNormalesScale/#1}%
+}
+\colorlet{MyLG}{gray!20}
+\begin{figure*}
     \centering
-    \begin{tabular}{cc c}
-        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/uniform} &
-        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/gaussian} &
-        \includegraphics[width=0.25\columnwidth]{pictures/kernelShowcase/ring} \\
-        Uniform & Gaussian & Ring \\
+    \begin{tabular}{|c||c|c|c|c|}
+        \hline
+        $h$ & 0.4 & 0.3 & 0.2 & 0.1 \\
+        \hline
+        \hline
+        \rowcolor{MyLG}
+        $II$ &
+        \formatImageFigNormalesScale{4s/ellipsoids-II} &
+        \formatImageFigNormalesScale{3s/ellipsoids-II} &
+        \formatImageFigNormalesScale{2s/ellipsoids-II} &
+        \formatImageFigNormalesScale{1s/ellipsoids-II} \\
+        \hline
+        \rowcolor{MyLG}
+        $PCA$ &
+        \formatImageFigNormalesScale{4s/ellipsoids-Mitra} &
+        \formatImageFigNormalesScale{3s/ellipsoids-Mitra} &
+        \formatImageFigNormalesScale{2s/ellipsoids-Mitra} &
+        \formatImageFigNormalesScale{1s/ellipsoids-Mitra} \\
+        \hline
+        \rowcolor{MyLG}
+        $VN_U$ &
+        \formatImageFigNormalesScale{4s/ellipsoids-VNU} &
+        \formatImageFigNormalesScale{3s/ellipsoids-VNU} &
+        \formatImageFigNormalesScale{2s/ellipsoids-VNU} &
+        \formatImageFigNormalesScale{1s/ellipsoids-VNU} \\
+        \hline
+        \rowcolor{MyLG}
+        $VN_G$ &
+        \formatImageFigNormalesScale{4s/ellipsoids-VNG} &
+        \formatImageFigNormalesScale{3s/ellipsoids-VNG} &
+        \formatImageFigNormalesScale{2s/ellipsoids-VNG} &
+        \formatImageFigNormalesScale{1s/ellipsoids-VNG} \\
+        \hline
+        \rowcolor{MyLG}
+        $VN_R$ &
+        \formatImageFigNormalesScale{4s/ellipsoids-VNR} &
+        \formatImageFigNormalesScale{3s/ellipsoids-VNR} &
+        \formatImageFigNormalesScale{2s/ellipsoids-VNR} &
+        \formatImageFigNormalesScale{1s/ellipsoids-VNR} \\
+        \hline
     \end{tabular}
-    \caption{Normal error of the visibility normals with different kernels. The range of the error between white and deep red is $\lbrack 0, 0.07 \rbrack$ }
-    \label{fig:kernel-showcase}
-\end{figure}
-
+    \caption{Normal error on the ellipsoids shape for different methods and different gridsteps.
+    VN stands for Visibility Normal, and the subscript stands for the kernel used (Uniform, Gaussian or Ring).
+    The error is colored from white (0) to red (0.1). II normals are computed using a radius of
+    $r=4.5$, PCA with a discrete radius of 4 (empirical), while our
+    normal estimator are computed using a deviation of $\sigma=5h^{-\frac{1}{2}}$, with a star of 1 and with a weighted kernel.}
+    \label{fig:errors-normals-showcase-ellipsoids}
+\end{figure*}
 
 \paragraph{Experimental validation.}
 
@@ -74,7 +116,9 @@ we ignore the points that are closer than $2h$ to the singularities of the shape
 We see that the RMSE and $E_{\max}$ are much better than both II and PCA, with a convergence rate of $h^3$,
 while both II and PCA stop converging after a certain threshold (here around h=0.2). It however doesn't seem
 to have a better kernel between the ring and the gaussian kernel, sometimes one is better than the other, but
-it really depends on what kind of shapes we are facing with
+it really depends on what kind of shapes we are facing with. We can also notice that the singularity zone on the ellipsoids
+might be a bit too small for smaller gridsteps, since the error shown in~\ref{fig:errors-normals-showcase-ellipsoids} seems to accumulate around
+the singularity.
 
 \begin{figure}
     \centering
