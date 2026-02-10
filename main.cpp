@@ -980,7 +980,7 @@ void computeVisibilityDirectionToSharpFeatures() {
 }
 
 double sigma = -1;
-int mitra_radius = (int) 4. / gridstep;
+float mitra_radius = -1;
 double minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
@@ -1246,7 +1246,9 @@ void doRedisplayNormalAsColorsAbsolute() {
 	for (const auto &n: mitra_normals) {
 		normalMitraColors.push_back(0.5f * (n + 1.0f));
 	}
-	psPrimalMesh->addVertexColorQuantity("Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) + " as colors (absolute)", normalVisibilityColors);
+	psPrimalMesh->addVertexColorQuantity(
+		"Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) +
+		" as colors (absolute)", normalVisibilityColors);
 	psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
 	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
 
@@ -1275,7 +1277,9 @@ void doRedisplayNormalAsColorsRelativeFor(const std::vector<RealVector> &normals
 }
 
 void doRedisplayNormalAsColorsRelative() {
-	doRedisplayNormalAsColorsRelativeFor(visibility_normals, "visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
+	doRedisplayNormalAsColorsRelativeFor(visibility_normals,
+	                                     "visibility " + weightChoiceToString(
+		                                     static_cast<WeightChoice>(weightCurrentItem)));
 	doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
 	doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
 	if (!true_normals.empty()) {
@@ -1339,8 +1343,9 @@ void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std
 		}
 	}
 	if (!noInterface)
-		psPrimalMesh->addVertexScalarQuantity("Angle deviation " + normalName, angle_dev)->setMapRange({0.0, 0.1})->setColorMap(
-			"reds");
+		psPrimalMesh->addVertexScalarQuantity("Angle deviation " + normalName, angle_dev)->setMapRange({0.0, 0.1})->
+			setColorMap(
+				"reds");
 	std::cout << "L2 error normals " << normalName << ": " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
 	std::cout << "Loo error normals " << normalName << ": " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
 }
@@ -1512,7 +1517,7 @@ void myCallback() {
 		}
 	}
 	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
-	ImGui::SliderInt("mitra radius", &mitra_radius, 1, 20);
+	ImGui::SliderFloat("mitra radius", &mitra_radius, 1, 20);
 	if (ImGui::Button("Visibility")) {
 		computeVisibilityWithPointShow(pointel_idx);
 	}
@@ -1556,7 +1561,8 @@ void myCallback() {
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
 		trace.beginBlock("Compute visibilities Normals Errors");
-		computeL2looErrorsNormals(visibility_normals, "visib " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
+		computeL2looErrorsNormals(visibility_normals,
+		                          "visib " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
 		computeL2looErrorsNormals(ii_normals, "II");
 		computeL2looErrorsNormals(mitra_normals, "Mitra");
 		Time = trace.endBlock();
@@ -1737,6 +1743,7 @@ int gpuRun(int argc, char *argv[]) {
 	std::string saveShapeFilename = "shape.vol";
 	std::string visibComputeMethod = "OMP_GPU";
 	std::string weightChoices = "gaussian";
+	float mitra_radius_tmp = -1.0;
 
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
 	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
@@ -1766,8 +1773,9 @@ int gpuRun(int argc, char *argv[]) {
 	             "if set, no computation after generating the shape");
 	app.add_option("--nstar", nstar,
 	               "number of stars to use in visibility computation (default 1, will do every star from 1 to nstar)");
-	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
-	app.add_option("--weightChoices", weightChoices, "weight choices to compute visibility normals : gaussian, ring, none (default gaussian, you can select several ones using commas without space)");
+	app.add_option("--mitraRadius", mitra_radius_tmp, "radius used for Mitra normal computation (default 4/gridstep)");
+	app.add_option("--weightChoices", weightChoices,
+	               "weight choices to compute visibility normals : gaussian, ring, none (default gaussian, you can select several ones using commas without space)");
 
 	CLI11_PARSE(app, argc, argv)
 	if (listP) {
@@ -1827,6 +1835,21 @@ int gpuRun(int argc, char *argv[]) {
 		return 0;
 	}
 
+
+	if (sigmaTmp != -1.0) {
+		sigma = sigmaTmp;
+	} else {
+		sigma = 5. * pow(gridstep, -0.5);
+	}
+	minus2SigmaSquare = -2. * sigma * sigma;
+	if (VisibilityRadiusTmp > 0) {
+		VisibilityRadius = VisibilityRadiusTmp;
+	} else {
+		VisibilityRadius = 2 * static_cast<int>(sigma);
+	}
+	std::cout << "sigma = " << sigma << std::endl;
+	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (3.5 / sqrt(gridstep));
+
 	std::vector<std::vector<std::size_t> > primal_faces;
 	std::vector<RealPoint> primal_positions;
 
@@ -1839,6 +1862,7 @@ int gpuRun(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
+	params("gridstep", gridstep);
 	if (Polyhedra::isPolyhedron(polynomial)) {
 		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
 	} else if (is_polynomial) {
@@ -1898,12 +1922,12 @@ int gpuRun(int argc, char *argv[]) {
 		} else if (Polyhedra::isPolyhedron(polynomial)) {
 			computeTrueNormalsPolyhedra();
 		}
-		// computeMitraNormals();
-		// reorientMitraNormals();
+		computeMitraNormals();
+		reorientMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
 		reorientIINormals();
 		trace.endBlock();
-		// computeL2looErrorsNormals(mitra_normals, "Mitra");
+		computeL2looErrorsNormals(mitra_normals, "Mitra");
 		computeL2looErrorsNormals(ii_normals, "II");
 		return 0;
 
@@ -1914,19 +1938,6 @@ int gpuRun(int argc, char *argv[]) {
 		}
 	}
 
-
-	if (sigmaTmp != -1.0) {
-		sigma = sigmaTmp;
-	} else {
-		sigma = 5. * pow(gridstep, -0.5);
-	}
-	minus2SigmaSquare = -2. * sigma * sigma;
-	if (VisibilityRadiusTmp > 0) {
-		VisibilityRadius = VisibilityRadiusTmp;
-	} else {
-		VisibilityRadius = 2 * static_cast<int>(sigma);
-	}
-	std::cout << "sigma = " << sigma << std::endl;
 
 
 	// Ready to choose program
@@ -2027,6 +2038,7 @@ int main(int argc, char *argv[]) {
 	app.add_flag("--noInterface", noInterface, "desactivate the interface and use the visibility OMP algorithm");
 	app.add_option("--IIradius", iiRadius, "radius used for ii normal computation");
 	double sigmaTmp = -1.0;
+	float mitra_radius_tmp = -1.0;
 	app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
 	app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
 
@@ -2045,7 +2057,7 @@ int main(int argc, char *argv[]) {
 	app.add_flag("--noFurtherComputation", ignore,
 	             "gpuRun only : if set, no computation after generating the shape");
 	app.add_option("--nstar", ignore, "gpuRun only : number of stars to use in visibility computation (default 1)");
-	app.add_option("--mitraRadius", mitra_radius, "radius used for Mitra normal computation (default 4/gridstep)");
+	app.add_option("--mitraRadius", mitra_radius_tmp, "radius used for Mitra normal computation (default 4/gridstep)");
 	app.add_option("--weightChoices", _, "gpuRun only : weight choices to compute visibility normals");
 
 	// -p "x^2+y^2+2*z^2-x*y*z+z^3-100" -g 0.5
@@ -2117,12 +2129,27 @@ int main(int argc, char *argv[]) {
 	std::vector<std::vector<std::size_t> > primal_faces;
 	std::vector<RealPoint> primal_positions;
 
+	if (sigmaTmp != -1.0) {
+		sigma = sigmaTmp;
+	} else {
+		sigma = 5. * pow(gridstep, -0.5);
+	}
+	minus2SigmaSquare = -2. * sigma * sigma;
+	if (VisibilityRadiusTmp > 0) {
+		VisibilityRadius = VisibilityRadiusTmp;
+	} else {
+		VisibilityRadius = 2 * static_cast<int>(sigma);
+	}
+	std::cout << "sigma = " << sigma << std::endl;
+	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (3.5 / sqrt(gridstep));
+
 
 	trace.beginBlock("Computing digital points and primal surface");
 	// Build digital surface
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
+	params("gridstep", gridstep);
 	if (Polyhedra::isPolyhedron(polynomial)) {
 		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
 	} else if (is_polynomial) {
@@ -2185,18 +2212,6 @@ int main(int argc, char *argv[]) {
 	primal_surface->vertexNormals() = trivial_normals;
 	reorientIINormals();
 
-	if (sigmaTmp != -1.0) {
-		sigma = sigmaTmp;
-	} else {
-		sigma = 5. * pow(gridstep, -0.5);
-	}
-	minus2SigmaSquare = -2. * sigma * sigma;
-	if (VisibilityRadiusTmp > 0) {
-		VisibilityRadius = VisibilityRadiusTmp;
-	} else {
-		VisibilityRadius = 2 * static_cast<int>(sigma);
-	}
-	std::cout << "sigma = " << sigma << std::endl;
 
 
 	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
