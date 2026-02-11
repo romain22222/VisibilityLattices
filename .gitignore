@@ -18,3 +18,5 @@ cmake-build-*
 /visibilities/**.vis
 /JMIV2026/out
 /rawExperiments/**
+/outputGenerator/**
+shape.vol
