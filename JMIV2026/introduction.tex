@@ -1,13 +1,12 @@
-    Visibility is a fundamental concept in computational geometry and
-    digital topology, with applications ranging from computer vision
-    (occlusions), geometric modeling (feature detection,
-    geodesics) to computer graphics (path tracing,
-    shadowmap). Visibility within polygons in the plane has been
-    extensively studied in the litterature~\cite{ghosh:2007-book} and
-    is still studied in higher dimensional
-    spaces~\cite{orourke:2017-book}. The general problem has a high
-    complexity. For instance, the 3d visibility complex between $n$
-    spheres and occluding spheres has a complexity
+    Visibility is a fundamental concept in computational geometry,
+    with applications ranging from computer vision (occlusions),
+    geometric modeling (feature detection, geodesics) to computer
+    graphics (path tracing, shadowmap). Visibility within polygons in
+    the plane has been extensively studied in the
+    litterature~\cite{ghosh:2007-book} and is still studied in higher
+    dimensional spaces~\cite{orourke:2017-book}. The general problem
+    has a high complexity. For instance, the 3d visibility complex
+    between $n$ spheres and occluding spheres has a complexity
     $O(n^4)$~\cite{durand:2002-tog}. Exact 3d visibility between
     polygons and occluding polygons is often cast into 5d Plücker
     space~\cite{nirenstein:2002-ewr}, which nicely represents 3d lines
@@ -32,7 +31,7 @@
     problem: given a digital set $X \subset \Z^d$, two points $p,q$ of
     $X$ are \emph{visible} whenever the Euclidean straight line
     segment $\lbrack p,q \rbrack$ is never at chessboard distance
-    ($\infty$-distance) greater or equal to $1$ from $X$. It is
+    ($L_\infty$-distance) greater or equal to $1$ from $X$. It is
     equivalent to the \emph{cotangency} of $p$ and $q$ in $X$, as
     formalized in~\cite{lachaud:2021-dgmm,lachaud:2022-jmiv}, and can
     be viewed as an inclusion problem between sets of lattice points
@@ -47,52 +46,65 @@
     testing all sought directions within a given range, and is
     parallelized straightforwardly.
 
-    We focus on solving efficiently this problem because it is crucial
-    in computing geometric normals along digital surfaces that are
-    aware of salient features. Indeed, 2d discrete tangent estimators
-    based on tangency or discrete line segments have proven to be both
-    sensitive to sharp corners and multigrid convergent on the
-    boundary of digitized smooth shapes~\cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}.
-    Many ad hoc methods have been proposed for tangent plane or normal
-    estimation on 3d digital surfaces
+    We focus on solving efficiently this problem because we can use
+    visibility to define geometric tangents and normals along digital
+    surfaces that are aware of salient features. Indeed, 2d discrete
+    tangent estimators based on digital straight line segment
+    recognition have proven to be both sensitive to sharp corners and
+    multigrid convergent on the boundary of digitized smooth
+    shapes~\cite{feschet:1999-dgci,lachaud:2007-ivc,nguyen:2011-pr}.
+    In 3d, many ad hoc methods have been proposed for tangent plane or
+    normal estimation on digital surfaces
     (e.g. \cite{fourey:2009-cg,charrier:2011-iwcia,Cuel:2014-dgci,Lachaud:2017-lnm,mareche:2024-ispr}).
     If two of these methods~\cite{Cuel:2014-dgci,Lachaud:2017-lnm}
-    have been shown to be multigrid convergent on digitization of
+    have been shown to be multigrid convergent on digitizations of
     shapes with smooth boundary, their formulation intrinsically
-    smoothes features, e.g.\ in contrast with the method of
-    Mar{ê}ch{é} \emph{et al.}~\cite{mareche:2024-ispr}, whose
-    convergence is not established.
+    smoothes features and requires a user-given parameter (the radius
+    of computation). In contrast, the method of
+    Mar{\^e}ch{\'e} \emph{et al.}~\cite{mareche:2024-ispr} takes into
+    account sharp features, but its convergence is not yet
+    established.
 
-    Covariance-based normal estimation methods, commonly used for point clouds (e.g.\ \cite{mitra:2003-acm}),
-    constitute another popular approach. These methods rely on local covariance analysis and are theoretically
-    justified under assumptions of Gaussian noise. However, such assumptions do not hold for digitized shapes,
-    whose geometry comes from deterministic grid sampling rather than stochastic perturbations. This mismatch
-    makes the application of covariance-based estimators to digital surfaces theoretically less grounded and
-    practically less reliable, motivating the need for methods tailored to digital geometry.
+    Covariance-based normal estimation methods, commonly used for
+    point clouds (e.g.\ \cite{mitra:2003-acm}), constitute another
+    popular approach. These methods rely on local covariance analysis
+    and are theoretically justified under assumptions of Gaussian
+    noise. However, such assumptions do not exactly hold for digitized shapes,
+    whose geometry comes from deterministic grid sampling rather than
+    stochastic perturbations. This mismatch makes the application of
+    covariance-based estimators to digital surfaces theoretically less
+    grounded and practically less reliable, motivating the need for
+    methods tailored to digital geometry.
 
     We propose here a normal estimator defined as the most orthogonal
     vector to the cone of visibility at the point of interest.
     Visibility is high in smooth regions and the induced visibility
-    vectors are good approximations of tangent vectors. On the contrary
-    the visibility is blocked at sharp features, so the normal vector
-    is not influenced by the geometry on the other side of the features.
-    We demonstrate the superiority of this normal estimator for estimating
-    curvatures along digital surfaces with sharp features.
+    vectors are good approximations of tangent vectors. On the
+    contrary the visibility is blocked at sharp features, so the
+    normal vector is not influenced by the geometry on the other side
+    of the features. On the theoretical side, we show that, under some
+    hypotheses, our proposed normal estimator is multigrid convergent
+    toward the true normal vector field, with a speed of convergence
+    in $O(\sqrt{h})$. On the practical side, we demonstrate the
+    superiority of this normal estimator for estimating curvatures
+    along digital surfaces with smooth parts and sharp features.
 
     Note that our algorithm for computing visibility is in fact much
     more general. The same algorithm could be used to recognize if any
     pattern of lattice points is present on a shape. It is similar to
     an erosion algorithm where the structuring element is the chosen
-    pattern, and could also be used for morphological operations~\cite{soille1999morphological}.
-    The paper outline is as follows. In Section~2, we recall some
-    definitions and present tangency of chords and its equivalence
-    to visibility. Section~3 describes the specific data structure
-    for encoding set of grid cells, and the main algorithm that
-    exploits this encoding to compute visibility exactly. Section~4
-    discrete normal estimator, and how it improves curvature estimates
-    on digital surfaces. Section~5 provides proofs of the multigrid
-    convergence of this normal estimator on smooth surfaces. Finally,
-    Section 6 concludes and gives some perspectives to this work.
+    pattern, and could also be used for morphological
+    operations~\cite{soille1999morphological}.  The paper outline is
+    as follows. In Section~2, we recall some definitions and present
+    tangency of chords and its equivalence to visibility. Section~3
+    describes the specific data structure for encoding set of grid
+    cells, and the main algorithm that exploits this encoding to
+    compute visibility exactly. Section~4 discrete normal estimator,
+    and how it improves curvature estimates on digital
+    surfaces. Section~5 provides proofs of the multigrid convergence
+    of this normal estimator on digitizations of smooth
+    shapes. Finally, Section 6 concludes and gives some perspectives
+    to this work.
     %% , notably other usages of this algorithm in the field.
 
 %    \deleted[id=JO]{
