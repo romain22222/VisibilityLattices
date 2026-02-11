@@ -39,9 +39,15 @@
         \addplot[
             color=black,
             thick,
-            domain=0.12:0.4,
+            domain=0.21:0.4,
             samples=200,
-        ] {6*x^(-1/2)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{-\frac{1}{2}}$};
+        ] {4*x^(-1)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{-1}$};
+        \addplot[
+            color=gray,
+            thick,
+            domain=0.21:0.4,
+            samples=200,
+        ] {3*x^(-2/3)} node[pos=0.4, anchor=south west, yshift=10pt] {$h^{-\frac{2}{3}}$};
     \end{axis}
     \begin{axis}[
         hide axis,
