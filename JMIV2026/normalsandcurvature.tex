@@ -84,10 +84,12 @@ on the normal estimation, so we kept it to 1 for all the tests.
         \formatImageFigNormalesScale{2s/ellipsoids-VNR} &
         \formatImageFigNormalesScale{1s/ellipsoids-VNR} \\
         \hline
+%        \multicolumn{5}{|c|}{\includegraphics{./pictures/figNormalesScale/legend}} \\
+        \hline
     \end{tabular}
     \caption{Normal error on the ellipsoids shape for different methods and different gridsteps.
     VN stands for Visibility Normal, and the subscript stands for the kernel used (Uniform, Gaussian or Ring).
-    The error is colored from white (0) to red (0.1). II normals are computed using a radius of
+    The error is colored from white (0) to deep red (0.1). II normals are computed using a radius of
     $r=4.5$, PCA with a discrete radius of 4 (empirical), while our
     normal estimator are computed using a deviation of $\sigma=5h^{-\frac{1}{2}}$}
     \label{fig:errors-normals-showcase-ellipsoids}
@@ -147,8 +149,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/ellipsoid-II.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=asterisk
+                    color=red,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -156,8 +158,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/ellipsoid-PCA.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=square
+                    color=MyGreen,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -165,8 +167,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/ellipsoid-VNG.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=diamond
+                    color=orange,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -174,8 +176,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/ellipsoid-VNR.txt};
 
                 \addplot[
-                    color=red,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -192,8 +194,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/goursat-PCA.txt};
 
                 \addplot[
-                    color=red,
-                    mark=square
+                    color=MyGreen,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -201,8 +203,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/goursat-VNG.txt};
 
                 \addplot[
-                    color=red,
-                    mark=diamond
+                    color=orange,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -210,8 +212,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/goursat-VNR.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -219,8 +221,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/rcube-II.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=asterisk
+                    color=red,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -237,8 +239,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/rcube-VNG.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=diamond
+                    color=orange,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -246,8 +248,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/rcube-VNR.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -255,8 +257,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/sphere9-II.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=asterisk
+                    color=red,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -264,8 +266,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/L2/sphere9-PCA.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=square
+                    color=MyGreen,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -315,8 +317,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-II.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=asterisk
+                    color=red,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -324,8 +326,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-PCA.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=square
+                    color=MyGreen,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -333,8 +335,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNG.txt};
 
                 \addplot[
-                    color=cyan,
-                    mark=diamond
+                    color=orange,
+                    mark=halfcircle
                 ] table [
                 x=gridstep,
                 y=error,
@@ -342,8 +344,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/ellipsoid-VNR.txt};
 
                 \addplot[
-                    color=red,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -360,8 +362,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/goursat-PCA.txt};
 
                 \addplot[
-                    color=red,
-                    mark=square
+                    color=MyGreen,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -369,8 +371,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/goursat-VNG.txt};
 
                 \addplot[
-                    color=red,
-                    mark=diamond
+                    color=orange,
+                    mark=asterisk
                 ] table [
                 x=gridstep,
                 y=error,
@@ -378,8 +380,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/goursat-VNR.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -387,8 +389,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/rcube-II.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=asterisk
+                    color=red,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -405,8 +407,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/rcube-VNG.txt};
 
                 \addplot[
-                    color=MyGreen,
-                    mark=diamond
+                    color=orange,
+                    mark=square
                 ] table [
                 x=gridstep,
                 y=error,
@@ -414,8 +416,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/rcube-VNR.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=halfcircle
+                    color=cyan,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -423,8 +425,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/sphere9-II.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=asterisk
+                    color=red,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -432,8 +434,8 @@ the singularity.
                 ] {./graphDataNormals/smooth/Loo/sphere9-PCA.txt};
 
                 \addplot[
-                    color=orange,
-                    mark=square
+                    color=MyGreen,
+                    mark=diamond
                 ] table [
                 x=gridstep,
                 y=error,
@@ -471,21 +473,21 @@ the singularity.
                     column sep=15pt,
                 }
             ]
-                \addlegendimage{mark=halfcircle}
-                \addlegendentry{$II$}
-                \addlegendimage{mark=asterisk}
-                \addlegendentry{$PCA$}
-                \addlegendimage{mark=square}
-                \addlegendentry{$VN_G$}
-                \addlegendimage{mark=diamond}
-                \addlegendentry{$VN_R$}
                 \addlegendimage{color=cyan}
-                \addlegendentry{ellipsoid}
+                \addlegendentry{$II$}
                 \addlegendimage{color=red}
-                \addlegendentry{goursat}
+                \addlegendentry{$PCA$}
                 \addlegendimage{color=MyGreen}
-                \addlegendentry{rcube}
+                \addlegendentry{$VN_G$}
                 \addlegendimage{color=orange}
+                \addlegendentry{$VN_R$}
+                \addlegendimage{mark=halfcircle}
+                \addlegendentry{ellipsoid}
+                \addlegendimage{mark=asterisk}
+                \addlegendentry{goursat}
+                \addlegendimage{mark=square}
+                \addlegendentry{rcube}
+                \addlegendimage{mark=diamond}
                 \addlegendentry{sphere9}
 
             \end{axis}
@@ -544,7 +546,7 @@ the singularity.
     \centering
     \begin{tikzpicture}
         \begin{axis}
-            [
+        [
             width=0.9\columnwidth,
             xlabel={Gridstep},
             ylabel={RMSE error},
@@ -555,10 +557,10 @@ the singularity.
             ymode=log,
             xmode=log,
             log ticks with fixed point,
-            ]
+        ]
             \addplot[
                 color=cyan,
-                mark=halfcircle
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -566,8 +568,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/tetrahedron-II.txt};
 
             \addplot[
-                color=cyan,
-                mark=asterisk
+                color=red,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -575,8 +577,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/tetrahedron-PCA.txt};
 
             \addplot[
-                color=cyan,
-                mark=square
+                color=MyGreen,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -584,8 +586,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/tetrahedron-VNG.txt};
 
             \addplot[
-                color=cyan,
-                mark=diamond
+                color=orange,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -593,8 +595,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/tetrahedron-VNR.txt};
 
             \addplot[
-                color=red,
-                mark=halfcircle
+                color=cyan,
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -603,7 +605,7 @@ the singularity.
 
             \addplot[
                 color=red,
-                mark=asterisk
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -611,7 +613,7 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/cubesphere-PCA.txt};
 
             \addplot[
-                color=red,
+                color=MyGreen,
                 mark=square
             ] table [
             x=gridstep,
@@ -620,8 +622,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/cubesphere-VNG.txt};
 
             \addplot[
-                color=red,
-                mark=diamond
+                color=orange,
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -629,7 +631,7 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/cubesphere-VNR.txt};
 
             \addplot[
-                color=MyGreen,
+                color=cyan,
                 mark=halfcircle
             ] table [
             x=gridstep,
@@ -638,8 +640,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-II.txt};
 
             \addplot[
-                color=MyGreen,
-                mark=asterisk
+                color=red,
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -648,7 +650,7 @@ the singularity.
 
             \addplot[
                 color=MyGreen,
-                mark=square
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -656,8 +658,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNG.txt};
 
             \addplot[
-                color=MyGreen,
-                mark=diamond
+                color=orange,
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -688,7 +690,7 @@ the singularity.
             ]
             \addplot[
                 color=cyan,
-                mark=halfcircle
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -696,8 +698,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-II.txt};
 
             \addplot[
-                color=cyan,
-                mark=asterisk
+                color=red,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -705,8 +707,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-PCA.txt};
 
             \addplot[
-                color=cyan,
-                mark=square
+                color=MyGreen,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -714,8 +716,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNG.txt};
 
             \addplot[
-                color=cyan,
-                mark=diamond
+                color=orange,
+                mark=triangle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -723,8 +725,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNR.txt};
 
             \addplot[
-                color=red,
-                mark=halfcircle
+                color=cyan,
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -733,7 +735,7 @@ the singularity.
 
             \addplot[
                 color=red,
-                mark=asterisk
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -741,7 +743,7 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/cubesphere-PCA.txt};
 
             \addplot[
-                color=red,
+                color=MyGreen,
                 mark=square
             ] table [
             x=gridstep,
@@ -750,8 +752,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/cubesphere-VNG.txt};
 
             \addplot[
-                color=red,
-                mark=diamond
+                color=orange,
+                mark=square
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -759,7 +761,7 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/cubesphere-VNR.txt};
 
             \addplot[
-                color=MyGreen,
+                color=cyan,
                 mark=halfcircle
             ] table [
             x=gridstep,
@@ -768,8 +770,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-II.txt};
 
             \addplot[
-                color=MyGreen,
-                mark=asterisk
+                color=red,
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -778,7 +780,7 @@ the singularity.
 
             \addplot[
                 color=MyGreen,
-                mark=square
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -786,8 +788,8 @@ the singularity.
             ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNG.txt};
 
             \addplot[
-                color=MyGreen,
-                mark=diamond
+                color=orange,
+                mark=halfcircle
             ] table [
             x=gridstep,
             y expr=\thisrow{error}*\thisrow{gridstep},
@@ -816,28 +818,26 @@ the singularity.
                 column sep=15pt,
             }
         ]
-            \addlegendimage{mark=halfcircle, only marks}
-            \addlegendentry{II}
-            \addlegendimage{mark=asterisk, only marks}
-            \addlegendentry{PCA}
-            \addlegendimage{mark=square, only marks}
-            \addlegendentry{VNG}
-            \addlegendimage{mark=diamond, only marks}
-            \addlegendentry{VNR}
             \addlegendimage{color=cyan}
-            \addlegendentry{tetrahedron}
+            \addlegendentry{$II$}
             \addlegendimage{color=red}
-            \addlegendentry{cubesphere}
+            \addlegendentry{$PCA$}
             \addlegendimage{color=MyGreen}
-            \addlegendentry{double ellipsoid}
-
+            \addlegendentry{$VN_G$}
+            \addlegendimage{color=orange}
+            \addlegendentry{$VN_R$}
+            \addlegendimage{mark=halfcircle}
+            \addlegendentry{ellipsoids}
+            \addlegendimage{mark=square}
+            \addlegendentry{cubesphere}
+            \addlegendimage{mark=triangle}
+            \addlegendentry{tetrahedron}
         \end{axis}
     \end{tikzpicture}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution on
     piecewise smooth shapes, ignoring points closer than $2h$ to singularities.}
     \label{fig:errors-normals-piecewise}
 \end{figure}
-
 \begin{figure}
     % 3 pictures side by side, with a name under each, singularities in red
     \centering
