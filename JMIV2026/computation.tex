@@ -1,6 +1,6 @@
 As said in the introduction, any cell of $\mathcal{C}$ can be
 characterized as a point with integer coordinates, aka \emph{lattice
-point}. For instance, a standard way is to double the coordinates of
+point}. A standard way is to double the coordinates of
 the centroid of the cell (often called its Khalimsky code). Now we
 have to represent an arbitrary set $K$ of lattice points.
 
@@ -8,10 +8,10 @@ Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$.  We may
 choose an arbitrary projection \emph{axis} $j \in
 \{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
 can collect all the cells of $K$ that projects onto the same
-points. Let $p \in K$. Then $\pi^{-1}_j(p) \cap \Star{K}$ is a set of cells having
+points. Let $p \in K$. Then $\pi^{-1}_j( \pi_j(p)) \cap \Star{K}$ is a set of cells having
 all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
-Figure~\ref{fig:lattice-representation} for an illustration).
+Figure~\ref{fig:lattice-representation} for an illustration).\comment[id=JO]{Mettre à jour la figure ``right'' !}
 
 \begin{figure}[t]
   \centering
@@ -45,13 +45,14 @@ The global algorithm for computing visibility is given in
 Algorithm~\ref{alg:visibility}.  Given a digital input surface $C$ (a
 subcomplex), we compute the lattice map $\Omega$ of $\Star{C}$ once,
 generally along the axis where $C$ is the most elongated. In order to
-compute visibility up to a given distance $r$, we consider all non-null
-primitive vectors $D$ with infinity norm no greater than $r$.
-For each vector $\vv$, we compute the lattice map $M_\vv$ of its
-intersected cells (as a vector from $\mathbf{0}$ to $\vv$ in
-$\R^d$). The visibility along the direction $\vv$ reduces to computing
-for each pair of $M_\vv$ the possible translations of intervals in
-$\Omega$, and then intersecting all the translations.
+compute visibility up to a given distance $r$, we consider all
+non-null primitive vectors $D$ with infinity norm no greater than $r$.
+For each vector $\vv$, we compute the lattice map $M_\vv$ of the cells
+intersected by the vector from $\mathbf{0}$ to $\vv$ in $\R^d$
+(see \RefFigure{fig:visibility-algorithm-evolution}, top-right). The
+visibility along the direction $\vv$ reduces to computing for each
+pair of $M_\vv$ the possible translations of intervals in $\Omega$,
+and then intersecting all the translations.
 
 %% \begin{definition}
 %%   A sequence of intervals is an ordered list of intervals $L = ([a_i,b_i])_{i=1,\ldots,n}$ such that $b_i + 1 < a_{i+1}$, i.e., disjoint intervals with at least a missing integer.
@@ -106,7 +107,7 @@ $\Omega$, and then intersecting all the translations.
     the visibility is still possible. The last red intervals are
     the visible positions. We travel the lattice maps from
     bottom-up and the found visibilities are drawn on the
-    uppest figure.}
+    uppermost figure.}
   \label{fig:visibility-algorithm-evolution}
 \end{figure*}
 
@@ -153,14 +154,14 @@ figure~\ref{fig:visibility-results} on 3d shapes.
 
 To efficiently compute the intersection of two sequences of intervals
 $K$ and $L$ (Algorithm~\ref{alg:intersection}), we go through the
-first $2$ unvisited elements of the $2$ lists. If they do not overlap
+first two unvisited elements of the two lists. If they do not overlap
 (i.e.\ the start and end of the 1st interval are both smaller than the
 start of the other), then we can discard the smaller interval. Else,
-we construct the intersection of these 2 intervals as one of the
-resulting intervals. We then can skip the interval with the smallest
+we output the intersection of these 2 intervals as one of the
+resulting intervals. We then skip the interval with the smallest
 end. If both intervals have the same end, then both intervals can be
-skipped. Doing this computation until one of the lists is empty
-returns the intersection of both lists of intervals.
+skipped. Doing this computation until one of the two lists is empty
+returns the intersection of the input two lists of intervals.
 
 % Insert visibility results images
 
@@ -194,21 +195,28 @@ returns the intersection of both lists of intervals.
 
 % Quantitative results
 
-We have plotted on Figure~\ref{fig:meanvisibility-computationComplexity}
-the running times to compute global visibility of both~\cite[Algorithm
-  3]{lachaud:2022-jmiv} and our algorithm. Timings are very
-similar. Our algorithm is faster for smaller maximal radii (up to 20),
-while the other is slightly faster for bigger radii. We have also
-measured the (discrete) average visibility distance along digitization
-of smooth shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows
-a law proportionnal to $\sqrt{h}$. As shown in the next section, for
-real 3d images, a maximal radius below 10 is sufficient for normal and
-curvature estimation. Finally, we have measured the same average
-visibility distance on 3 piecewise smooth shapes with different $\Starop_1$ (Figure~\ref{fig:meanvisibility-gridstep-piecewise}).
-We can observe several regimes: for polyhedra, the average visibility is proportionnal to $h^{-3/2}$ whatever $\Starop$ we use;
-for other shapes, the average visibility is proportionnal to $h^{-1}$ for $\Starop_1$ but to $h^{-3/2}$ for $\Starop_2$. Above a
-certain gridstep, we think the visibility is limited by the maximal visibility size we use to compute it (the limitation is computed
-as proportional to $h^{-1/2}$).
+We have plotted on
+Figure~\ref{fig:meanvisibility-computationComplexity} the running
+times to compute global visibility of both~\cite[Algorithm
+3]{lachaud:2022-jmiv} and our algorithm. Timings are very similar. Our
+algorithm is faster for smaller maximal radii (up to 20), while the
+other is slightly faster for bigger radii. We have also measured the
+discrete average visibility distance along digitization of smooth
+shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows a law
+proportional to $1/\sqrt{h}$, so a the average continuous visibility
+distance is proportional to $\sqrt{h}$. As shown in the next section,
+for real 3d images, a maximal radius below 10 is sufficient for normal
+and curvature estimation.\comment[id=JO]{Update paragraph starting
+here} Finally, we have measured the same average visibility distance
+on 3 piecewise smooth shapes with different $\Starop_1$
+(Figure~\ref{fig:meanvisibility-gridstep-piecewise}).  We can observe
+several regimes: for polyhedra, the average visibility is
+proportionnal to $h^{-3/2}$ whatever $\Starop$ we use; for other
+shapes, the average visibility is proportionnal to $h^{-1}$ for
+$\Starop_1$ but to $h^{-3/2}$ for $\Starop_2$. Above a certain
+gridstep, we think the visibility is limited by the maximal visibility
+size we use to compute it (the limitation is computed as proportional
+to $h^{-1/2}$).
 
 \begin{figure}[t]
   \centering

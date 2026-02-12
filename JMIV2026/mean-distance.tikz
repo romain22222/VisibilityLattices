@@ -69,7 +69,7 @@
         \addlegendimage{color=yellow!80!black, thick}
         \addlegendentry{rcube}
         \addlegendimage{color=black, thick}
-        \addlegendentry{$\Theta\left(\sqrt{h}\right)$} %%=\sqrt{\frac{1}{x}}$}
+        \addlegendentry{$\Theta\left(1/\sqrt{h}\right)$} %%=\sqrt{\frac{1}{x}}$}
 
     \end{axis}
 
