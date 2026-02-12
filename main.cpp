@@ -1187,6 +1187,36 @@ void reorientVisibilityNormals() {
 	}
 }
 
+void displayAffectingPointsFor(int idx) {
+	// Get the points that affect the normal of pointel idx for mitra and vn, then display them in polyscope with different colors
+	std::vector<Point> mitra_points;
+	std::vector<Point> visibility_points;
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (auto point_idx: kdTree.pointsInBall(pointels[idx], mitra_radius)) {
+		mitra_points.emplace_back(pointels[point_idx]);
+	}
+	for (auto point_idx: kdTree.pointsInBall(pointels[idx], 2 * sigma)) {
+		auto tmp = kdTree.position(point_idx);
+		if (visibility.isVisible(pointels[idx], tmp)) { visibility_points.emplace_back(tmp); }
+	}
+
+	std::vector<RealPoint> central_point;
+	embedPointels({pointels[idx]}, central_point);
+	std::vector<RealPoint> rMitraPoints;
+	std::vector<RealPoint> rVisibilityPoints;
+	embedPointels(mitra_points, rMitraPoints);
+	embedPointels(visibility_points, rVisibilityPoints);
+
+	if (!noInterface) {
+		polyscope::registerPointCloud("Mitra affecting points", rMitraPoints)->setPointRadius(0.3 * gridstep, false)->
+			setPointColor({1.0f, 0.0f, 0.0f});
+		polyscope::registerPointCloud("Visibility affecting points", rVisibilityPoints)->
+			setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 1.0f, 0.0f});
+		polyscope::registerPointCloud("Central point", central_point)->setPointRadius(0.4 * gridstep, false)->
+			setPointColor({0.0f, 0.0f, 1.0f});
+	}
+}
+
 
 void computeCurvaturesFor(std::vector<RealVector> &normals) {
 	primal_surface->setVertexNormals(normals.cbegin(), normals.cend());
@@ -1518,8 +1548,13 @@ void myCallback() {
 	}
 	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
 	ImGui::SliderFloat("mitra radius", &mitra_radius, 1, 20);
+	ImGui::SliderFloat("sigma", &sigma, 1, 40);
 	if (ImGui::Button("Visibility")) {
 		computeVisibilityWithPointShow(pointel_idx);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Display normal affecting points")) {
+		displayAffectingPointsFor(pointel_idx);
 	}
 	if (ImGui::Button("Visibilities")) {
 		trace.beginBlock("Compute visibilities");
