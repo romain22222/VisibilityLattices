@@ -11,15 +11,15 @@ can collect all the cells of $K$ that projects onto the same
 points. Let $p \in K$. Then $\pi^{-1}_j( \pi_j(p)) \cap \Star{K}$ is a set of cells having
 all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
-Figure~\ref{fig:lattice-representation} for an illustration).\comment[id=JO]{Mettre à jour la figure ``right'' !}
+Figure~\ref{fig:lattice-representation} for an illustration).
 
 \begin{figure}[t]
   \centering
   \input{lattice.tikz}
   \caption{\label{fig:lattice-representation} Representation of a
     2d cell complex (here the star of a given curve) as a lattice
-    map. From 63 cells (with two coordinates) on the left, we get 11
-    intervals on the right.}
+    map. From 63 cells (with two coordinates) on the top, we get 11
+    intervals on the bottom.}
 \end{figure}
 
 
@@ -202,21 +202,12 @@ times to compute global visibility of both~\cite[Algorithm
 algorithm is faster for smaller maximal radii (up to 20), while the
 other is slightly faster for bigger radii. We have also measured the
 discrete average visibility distance along digitization of smooth
-shapes (Figure~\ref{fig:meanvisibility-gridstep}). It follows a law
-proportional to $1/\sqrt{h}$, so a the average continuous visibility
-distance is proportional to $\sqrt{h}$. As shown in the next section,
-for real 3d images, a maximal radius below 10 is sufficient for normal
-and curvature estimation.\comment[id=JO]{Update paragraph starting
-here} Finally, we have measured the same average visibility distance
-on 3 piecewise smooth shapes with different $\Starop_1$
-(Figure~\ref{fig:meanvisibility-gridstep-piecewise}).  We can observe
-several regimes: for polyhedra, the average visibility is
-proportionnal to $h^{-3/2}$ whatever $\Starop$ we use; for other
-shapes, the average visibility is proportionnal to $h^{-1}$ for
-$\Starop_1$ but to $h^{-3/2}$ for $\Starop_2$. Above a certain
-gridstep, we think the visibility is limited by the maximal visibility
-size we use to compute it (the limitation is computed as proportional
-to $h^{-1/2}$).
+shapes and one piecewise smooth shape for $\Starop_1$ and $\Starop_2$
+(Figure~\ref{fig:meanvisibility-gridstep}). Both follow a law
+proportional to $1/\sqrt{h}$, but $\Starop_2$ has a bigger constant.
+Thus, the average continuous visibility distance is proportional
+to $\sqrt{h}$. As shown in the next section, for real 3d images,
+a maximal radius below 10 is sufficient for normal and curvature estimation.
 
 \begin{figure}[t]
   \centering
