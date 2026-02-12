@@ -206,7 +206,7 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
 \begin{proof}
     We recall that, since $\partial X$ has positive reach greater than
     $\rho$, it means that around point $a$, $\partial X$ has an empty
-    intersection with the open ball of radius $\rho$ tangent to $a$
+    intersection with the two open balls of radius $\rho$ tangent to $a$
     (inside and outside). Therefore the distance $\max_{y \in \lbrack ab
     \rbrack} d(y, \partial X)$ cannot exceed the distance of a chord
     of length $l=\| \vec{ab}\|$ to a sphere of radius $\rho$, hence the
@@ -229,9 +229,10 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
 \end{proof}
 
 \begin{theorem}\label{thm-distance-pq-to-dX}
-    Let $p,q$ be two pointels of $\DBh{h}{X}$. If $\| \vec{pq}\|\Le
-    \sqrt{\alpha h} - \sqrt{d}h$, then the segment $\lbrack p q \rbrack$
-    stays close to $\CBh{h}{X}$ and more precisely:
+    Let $p,q$ be two pointels of $\DBh{h}{X}$, $\alpha$ some positive
+    constant, and $h$ a small enough gridstep. If $\| \vec{pq}\|\Le
+    \sqrt{\alpha h} - \sqrt{d}h$, then the segment $\lbrack p q
+    \rbrack$ stays close to $\CBh{h}{X}$ and more precisely:
     \begin{align*}
         \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) \Le (\sqrt{d}+\frac{\alpha}{4\rho})h.
     \end{align*}
@@ -255,7 +256,8 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
     where the last inequality derives from
     \RefLemma{lem-hausdorff-close}.
 
-    For the second term,
+    For the second term, if $h$ is small enough, $\|\vec{pq}\|$ hence
+    $\|\vec{ab}\|$ tend to zero so are smaller than $2\rho$, and
     \RefLemma{lem-segment-is-close-to-dX} induces
     \begin{align*}
         \max_{s \in \lbrack a b \rbrack} d( s, \partial X ) &\Le \frac{\|\vec{ab}\|^2}{4\rho}.
@@ -288,16 +290,16 @@ $\Theta(\sqrt{h})$, starting from $k\Ge 2$ for dimension 2 and 3.
     \lbrack^d$ ($\oplus$ is the Minkowski sum), a sufficient condition
     is that
     \begin{align*}
-        \max_{r \in \lbrack p q \rbrack} d(r,\DBh{h}{X}) \Le kh.
+        \max_{r \in \lbrack p q \rbrack} d(r,\DBh{h}{X}) < kh.
     \end{align*}
     Now let us fix $\beta:=\sqrt{\alpha}-\sqrt{dh}$. From $h <
-    \frac{\alpha}{d}$, we have $\beta > 0$. If $\|\vec{pq}\| \Le \beta
-    \sqrt{h}$, then $\|\vec{pq}\| \Le \alpha \sqrt{h} - \sqrt{d}h$.
+    \frac{\alpha}{d}$, we have $\beta > 0$. If $\|\vec{pq}\| < \beta
+    \sqrt{h}$, then $\|\vec{pq}\| < \alpha \sqrt{h} - \sqrt{d}h$.
     \RefTheorem{thm-distance-pq-to-dX} then implies
     \begin{align*}
-        \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) & \Le (\sqrt{d}+\frac{\alpha}{\
+        \max_{r \in \lbrack p, q \rbrack} d( r, \CBh{h}{X}) & < (\sqrt{d}+\frac{\alpha}{\
             4\rho})h \\
-        & \Le \frac{4\rho\sqrt{d}+4\rho(k-\sqrt{d})}{4\rho}h\\
+        & < \frac{4\rho\sqrt{d}+4\rho(k-\sqrt{d})}{4\rho}h\\
         & = kh,
     \end{align*}
     so $q$ is $k$-visible from $p$ in $\DBh{h}{X}$.
@@ -426,7 +428,7 @@ required yet for $V$ to contain only points that are visible from $p$.
     Indeed, if $P$ is the tangent plane at $\xi(p)$ to $\partial X$ (hence
     orthogonal to $\vn$), \cite[Lemma~10]{Boissonnat:2019-jact} tells
     that $\forall a,b \in \partial X, d(b, P) \le
-    \frac{\|a-b\|^2}{\rho}$. Let $a=\xi(p)$ and $b=\xi(q)$ for $q in
+    \frac{\|a-b\|^2}{\rho}$. Let $a=\xi(p)$ and $b=\xi(q)$ for $q \in
     V_k$. Since $\|a-p\|=O(h)$, $\|b-q\|=O(h)$, and
     $\|p-q\|=\Theta(\sqrt{h})$, we have first that
     $\|a-b\|=O(\sqrt{h})$. Then it holds that
@@ -470,16 +472,22 @@ required yet for $V$ to contain only points that are visible from $p$.
     $V_k$-visibility normal estimation is convergent for $k \ge 3$.
 \end{remark}
 \begin{remark}
-    In practice, we know only approximately the reach of the shape under
-    study, so choosing constants $K$ and $\beta$ is not handy. Instead,
-    we sort the $V_k$-visible points from $p$ according to their
-    distance to $p$, and we simply keep the half of the points whose
-    distance are closest to the average distance. Since we know that the
-    average distance to $p$ is greater than some $\Omega(\sqrt{h})$
-    (\RefTheorem{thm-k-visibility-distance}), keeping this half is a
-    good approximation of the targeted hypotheses for
-    convergence. Furthermore, it avoids the necessity of setting
-    parameters.
+    In practice, we know only approximately the reach of the shape
+    under study, so choosing constants $K$ and $\beta$ is not handy.
+    Instead we modify the weights of visible points according to their
+    distance to the point of evaluation. The visibility normal with
+    Ring weight kills the contribution of nearby points and of points
+    that are far away from the average visibility distance. This
+    corresponds to a smooth variant of keeping only points at distance
+    in $\Theta(\sqrt{h})$.
+    %% Instead, we sort the $V_k$-visible points from $p$ according to
+    %% their distance to $p$, and we simply keep the half of the points
+    %% whose distance are closest to the average distance. Since we know
+    %% that the average distance to $p$ is greater than some
+    %% $\Omega(\sqrt{h})$ (\RefTheorem{thm-k-visibility-distance}),
+    %% keeping this half is a good approximation of the targeted
+    %% hypotheses for convergence. Furthermore, it avoids the necessity
+    %% of setting parameters.
 \end{remark}
 %% We slightly simplify here
 %% the definition of the $k$-visibility normal $\vec{n}_k(p)$ at point
