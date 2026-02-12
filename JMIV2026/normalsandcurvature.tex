@@ -1,14 +1,30 @@
 \newcommand{\Kernel}[1]{\ensuremath{w_{\sigma}(#1)}}
 
 \paragraph{Saliency-aware normal estimator.}
-We propose a new normal estimator on digital surfaces, which uses
-the visibility of the point of interest while taking into account
-a user-given scale $\sigma$. If $\sigma$ is proportionnal to the
-average distance between visible points (so some
-$\Theta\left(\sqrt{h}\right)$), then this estimator is observed to be
-multigrid convergent along digitization of smooth shapes. However,
-since the computation window is limited by the visibility, it
-better approximates the geometry near sharp or salient features.
+\replaced[id=JO]{We propose a new normal estimator on digital surfaces,
+  which uses the visibility of the point of interest to define its
+  window of computation. Contributions of neighboring points are also
+  possibly weighted according to a scale $\sigma$, set as proportional
+  to the average visibility distance. As observed in our experiments,
+  and proven for $k$-visibility with $k \ge 2$ in the next section,
+  this average distance is no less than $\Omega(\sqrt{h})$. This new
+  estimator is shown multigrid convergent along digitization of smooth
+  shapes with same speed in the next section. Furthermore, since the
+  computation window is limited by the visibility, it better
+  approximates the geometry near sharp or salient features.}{We
+  propose a new normal estimator on digital surfaces, which uses the
+  visibility of the point of interest while taking into account a
+  user-given scale $\sigma$. If $\sigma$ is proportionnal to the
+  average distance between visible points (so some
+  $\Theta\left(\sqrt{h}\right)$) We propose a new normal estimator on
+  digital surfaces, which uses the visibility of the point of interest
+  while taking into account a user-given scale $\sigma$. If $\sigma$
+  is proportionnal to the average distance between visible points (so
+  some $\Theta\left(\sqrt{h}\right)$), then this estimator is observed
+  to be multigrid convergent along digitization of smooth
+  shapes. However, since the computation window is limited by the
+  visibility, it better approximates the geometry near sharp or
+  salient features.}
 
 Let $V_p$ be the set of visible points from the point $p$.
 Let $c_p$ be the weighted centroid of the visible points around $p$,
@@ -18,25 +34,33 @@ $\mathcal{V}_p$ of the points $V_p$ as:
 \begin{equation}
     \mathcal{V}_p = \sum_{q \in V_p} \Kernel{\|q-p\|}(q - c_p)(q - c_p)^T.
 \end{equation}
-The \emph{visibility normal} $\vec{n}(p)$ of point $p$ at scale $\sigma$ is defined
-as the last eigenvector of the covariance matrix $\mathcal{V}_p$
-of the visible points, corresponding to its smallest
-eigenvalue. Its orientation is chosen to point in the same
-direction as the average of the trivial normals to the surfels
-touching the point $p$. Note that the kernel $\Kernel{\cdot}$ can be chosen
-to be any positive function.
+The \emph{visibility normal} $\vec{n}(p)$ of point $p$ at scale
+$\sigma$ is defined as the last eigenvector of the covariance matrix
+$\mathcal{V}_p$ of the visible points, corresponding to its smallest
+eigenvalue. Its orientation is chosen to point in the same direction
+as the average of the trivial normals to the surfels touching the
+point $p$. Note that the kernel $\Kernel{\cdot}$ can be chosen to be
+any positive function. \added[id=JO]{We set $\sigma := \frac{1}{\#
+    V_p}\sum_{q \in V_p} \|q-p\|$ to be the average visibility
+  distance from $p$.}
 
-In practice, we chose to test 3 different kernels. First, the Uniform kernel ($\Kernel{x} = \mathbbm{1}_{x \leq 2\sigma}$)
-aims at weighting everything the same, whatever its distance to p. The Gaussian kernel
-($\Kernel{x} = e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting closer data more than further ones, arguing closer data
-represents better the information than further one. Finally, the Ring kernel
-($\Kernel{x} = \frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting data in middle range more
-than the rest, trying to extrapolate the tangential information of the visibility instead of
-its proximity. In~\ref{fig:errors-normals-showcase-ellipsoids}, we see that the Uniform kernel makes a lot more errors than the other two,
-while the Gaussian and Ring kernels have similar errors, so for the normal error tests
-we only tested on the latter two kernels. We also tested the influence of the star parameter,
-which controls how thick the visibility cone is, but we did not see a significant influence
-on the normal estimation, so we kept it to 1 for all the tests.
+In practice, we chose to test 3 different kernels. First, the Uniform
+kernel ($\Kernel{x} = \mathbbm{1}_{x \leq 2\sigma}$) aims at weighting
+everything the same, whatever its distance to p. The Gaussian kernel
+($\Kernel{x} = e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting closer
+data more than further ones, arguing closer data represents better the
+information than further one. Finally, the Ring kernel ($\Kernel{x} =
+\frac{x}{2\sigma^2}e^{-\frac{x^2}{2\sigma^2}}$) aims at weighting data
+in middle range more than the rest, trying to extrapolate the
+tangential information of the visibility instead of its
+proximity. In \RefFigure{fig:errors-normals-showcase-ellipsoids}, we see
+that the Uniform kernel makes a lot more errors than the other two,
+while the Gaussian and Ring kernels have similar errors, so for the
+normal error tests we only tested on the latter two kernels. We also
+tested the influence of the star parameter $k$, which controls how
+thick the visibility cone is, since convergence is proven only
+starting from $k=2$. However we did not see a significant influence on
+the normal estimation, so we kept it to 1 for all the tests.
 
 \newcommand{\formatImageFigNormalesScale}[1]{%
     \includegraphics[width=0.33\columnwidth]{./pictures/figNormalesScale/#1}%
@@ -111,8 +135,8 @@ $E_{\max}$. The ring kernel seems to be slightly worse than the Gaussian kernel,
 but they have the same convergence rates, which indicates that the choice of the kernel
 does not influence the convergence of the normal estimator, but only the constant in front of the error.
 
-Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shape
-(tetrahedron, cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
+Figure~\ref{fig:errors-normals-piecewise} shows the same errors computed on 3 piecewise smooth shapes
+(tetrahedron, cubesphere and double ellipsoid). \comment[id=JO]{Update paragraph with two shapes only} In order to capture the behavior of the normal estimators,
 we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
 We see that the RMSE and $E_{\max}$ are much better than both II and PCA, with a convergence rate of $h^3$,
 while both II and PCA stop converging after a certain threshold (here around h=0.2). It however doesn't seem
@@ -880,7 +904,7 @@ normal estimator (available in the \textsc{DGtal} library):
 (column II normals) Integral Invariant normals with $r=6$, (column
 CTriv normals) convolved trivial normals with $r=6$, (column
 Visibility normals) our proposed estimator (VN) with $\sigma=4$ and
-maximal visibility distance $2\sigma$. These parameters were
+maximal visibility distance $2\sigma$.\comment[id=JO]{Text to update} These parameters were
 chosen so that the respective computation windows of the different
 estimators are approximately the same.
 
@@ -897,8 +921,7 @@ features (although it tends to smooth curvatures) since it does
 not use information from across the gap. However, some oscillations
 of the curvatures are distinguishable especially along the flat
 parts, and some curvature estimates are erroneous on smoother
-parts (like the edge above 6 for $\kappa_2$ or several dice
-vertices).
+parts (like the edge above 6 for $\kappa_2$ or several vertices of the dice).
 
 The VN estimator takes the best of the two previous approaches. It
 remains precise and stable on smooth and flat regions, while
