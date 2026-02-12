@@ -1,31 +1,36 @@
 We have proposed a new algorithm that computes the visibility between
 all pairs of points on a digital surface. It uses the specificity of a
-structure to represent sets of lattice points or cells, a mapping from
-projected coordinates to list of integer intervals. Compared to a
+structure to represent sets of lattice points or cells with a mapping
+from projected coordinates to list of integer intervals. Compared to a
 classical breadth-first approach to compute visibility, it provides
-the exact visibility result, even when the set of visible points
-from a source is disconnected. As shown by experiments the running
-times are comparable with the breadth-first algorithm, and even faster
-for small maximal visibility distance, which are typical when
-processing standard 3d images up to $512^3$. We have used visibility
-to define a discrete tangent estimator that respects salient features
-while giving good approximations on digitization of smooth parts.
-This approximation is even proven to be multigrid convergent on
+the exact visibility result, even when the set of visible points from
+a source is disconnected. As shown by experiments the running times
+are comparable with the breadth-first algorithm, and even faster for
+small maximal visibility distance, which are typical when processing
+standard 3d images up to $512^3$. We have used visibility to define a
+discrete tangent estimator that respects salient features while giving
+good approximations on digitization of smooth parts.  This
+approximation is even proven to be multigrid convergent on
 digitization of smooth surfaces, with a convergence speed of order
-$h^{\frac{1}{2}}$ in the worst case. We also explored different kernels
-to choose to properly weight the neighborhood data in order to obtain
-the best normal possible The obtained normal field is more suitable
-to curvature estimation than the classical Integral Invariant normal estimator.
+$h^{\frac{1}{2}}$ in the worst case. We also explored different
+kernels to properly weight the neighborhood data in order to obtain
+the best possible normal approximation. The obtained normal vector
+field is more suitable to curvature estimation than the classical
+Integral Invariant normal estimator.
 
 We have several ideas for possible future works. First, it is possible
 to speed up the identification of non visibility by a coarse-to-fine
 approach and a precomputation of a pyramid of covering cells. We would
-like to explore if we can build such a pyramid variant of our
-algorithm, considering the primitive vectors as
-a hierarchy. Moreover, our algorithm is not limited
-to pairwise visibility, but is more an algorithm of exact pattern
-matching. We would like to explore new applications of pattern
-identification along digital surfaces (like corner detection, locally
-convex zones identification, etc.). We finally plan to do edge detection
-on digital surfaces using the same algorithm, by identifying patterns
-on the visibility.
+like to explore if we can build such a top-down variant of our
+algorithm, considering the primitive vectors as a hierarchy. Moreover,
+our algorithm is not limited to pairwise visibility, but is more an
+algorithm of exact pattern matching. We would like to explore new
+applications of pattern identification along digital surfaces (like
+corner detection, locally convex zones identification, etc.). We
+finally plan to do edge detection on digital surfaces using the same
+algorithm, by identifying patterns on the visibility. On a more
+theoretical level, we would like to prove the convergence of the
+$1$-visible normal, which is observed in practice. The difficulty lies
+in the fact that we can build smooth surface examples with points at
+distance $\sqrt{h}$ that are not $1$-visible. However the result seems
+to hold on average, so we intend to explore this line of research.
