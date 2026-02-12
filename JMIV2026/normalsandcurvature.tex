@@ -1,30 +1,18 @@
 \newcommand{\Kernel}[1]{\ensuremath{w_{\sigma}(#1)}}
 
 \paragraph{Saliency-aware normal estimator.}
-\replaced[id=JO]{We propose a new normal estimator on digital surfaces,
-  which uses the visibility of the point of interest to define its
-  window of computation. Contributions of neighboring points are also
-  possibly weighted according to a scale $\sigma$, set as proportional
-  to the average visibility distance. As observed in our experiments,
-  and proven for $k$-visibility with $k \ge 2$ in the next section,
-  this average distance is no less than $\Omega(\sqrt{h})$. This new
-  estimator is shown multigrid convergent along digitization of smooth
-  shapes with same speed in the next section. Furthermore, since the
-  computation window is limited by the visibility, it better
-  approximates the geometry near sharp or salient features.}{We
-  propose a new normal estimator on digital surfaces, which uses the
-  visibility of the point of interest while taking into account a
-  user-given scale $\sigma$. If $\sigma$ is proportionnal to the
-  average distance between visible points (so some
-  $\Theta\left(\sqrt{h}\right)$) We propose a new normal estimator on
-  digital surfaces, which uses the visibility of the point of interest
-  while taking into account a user-given scale $\sigma$. If $\sigma$
-  is proportionnal to the average distance between visible points (so
-  some $\Theta\left(\sqrt{h}\right)$), then this estimator is observed
-  to be multigrid convergent along digitization of smooth
-  shapes. However, since the computation window is limited by the
-  visibility, it better approximates the geometry near sharp or
-  salient features.}
+
+We propose a new normal estimator on digital surfaces,
+which uses the visibility of the point of interest to define its
+window of computation. Contributions of neighboring points are also
+possibly weighted according to a scale $\sigma$, set as proportional
+to the average visibility distance. As observed in our experiments,
+and proven for $k$-visibility with $k \ge 2$ in the next section,
+this average distance is no less than $\Omega(\sqrt{h})$. This new
+estimator is shown multigrid convergent along digitization of smooth
+shapes with same speed in the next section. Furthermore, since the
+computation window is limited by the visibility, it better
+approximates the geometry near sharp or salient features.
 
 Let $V_p$ be the set of visible points from the point $p$.
 Let $c_p$ be the weighted centroid of the visible points around $p$,
