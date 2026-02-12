@@ -9,17 +9,18 @@ of $\R^d$.  Let $M$ be the square matrix of order $d$ defined as:
   M := \frac{1}{N}\sum_{i=1}^N \vu_i \otimes \vu_i =
   \frac{1}{N}\sum_{i=1}^N \vu_i \TR{\vu_i}.
 \end{align}
-It is obvious that $M$ is a real symmetric matrix. Matrix $M$ is
-therefore diagonalizable as $V \Lambda \TR{V}$. Matrix $V$ is an
-orthogonal matrix whose column vectors $\vv_1, \ldots, \vv_d$ are
-called {\em eigenvectors} of $M$, while $\Lambda$ is a diagonal matrix
-whose diagonal elements $\lambda_1, \ldots, \lambda_d$ are real values
+It is obvious that $M$ is a real symmetric matrix, so $M$ is
+diagonalizable as $V \Lambda \TR{V}$. The matrix $V$ is an orthogonal
+matrix whose column vectors $\vv_1, \ldots, \vv_d$ are called {\em
+  eigenvectors} of $M$, while $\Lambda$ is a diagonal matrix whose
+diagonal elements $\lambda_1, \ldots, \lambda_d$ are real values
 called {\em eigenvalues} of $M$. We choose to order them in decreasing
 order ($\lambda_1 \Ge \ldots \Ge \lambda_d$).
 
-From now on, we choose $V$ as the orthonormal basis of $\R^d$.  For a
-vector $\vn$, its $j$-th component is then denoted by $n_j$, and for a
-vector $\vu_i$, it is denoted by $u_{i,j}$.
+From now on, we choose the orthonormal frame so that $V$ is the
+canonical orthonormal basis of $\R^d$.  For a vector $\vn$, its $j$-th
+component is denoted by $n_j$, and for a vector $\vu_i$, it is
+denoted by $u_{i,j}$.
 
 \begin{lemma}
   Eigenvalues follow  $\forall j \in \{1,\ldots,d\}, 0 \Le
@@ -69,7 +70,7 @@ component of $\vn$ is close to 1:
   \vn_j^2$ (see proof above). Then
   \begin{align*}
     \sum_{j=1}^d \lambda_j \vn_j^2& \Le \epsilon \\
-    \Leftrightarrow\quad \sum_{j=1}^{d-1} \lambda_j \vn_j^2 + \lambda_d \left(1 - \sum_{j=1}^{d-1} \vn_j^2 \right) & \Le \epsilon && \text{($\|\vn\|^2 = 1$)}\\
+    \Rightarrow\quad \sum_{j=1}^{d-1} \lambda_j \vn_j^2 + \lambda_d \left(1 - \sum_{j=1}^{d-1} \vn_j^2 \right) & \Le \epsilon && \text{($\|\vn\|^2 = 1$)}\\
     \Leftrightarrow\quad \lambda_d + \sum_{j=1}^{d-1} (\lambda_j - \lambda_d) \vn_j^2 & \Le \epsilon && \text{(reordering)}\\
     \Rightarrow \lambda_d & \Le \epsilon, 
   \end{align*}
@@ -79,7 +80,7 @@ component of $\vn$ is close to 1:
     \epsilon \\
     \Rightarrow~~ \lambda_d + \sum_{j=1}^{d-1} (\lambda_{d-1} - \lambda_d) \vn_j^2 & \Le
     \epsilon && \text{($\lambda_j \Ge \lambda_{d-1}$)} \\
-    \Leftrightarrow~~ \lambda_d + (\lambda_{d-1} - \lambda_d)(1-n_d^2) & \Le
+    \Rightarrow~~ \lambda_d + (\lambda_{d-1} - \lambda_d)(1-n_d^2) & \Le
     \epsilon && \text{($\|\vn\|^2=1$)} \\
     \Leftrightarrow~~ 1 -\frac{\epsilon - \lambda_d}{\lambda_{d-1} - \lambda_d} &\Le n_d^2 && \text{(reordering)}.
   \end{align*}
