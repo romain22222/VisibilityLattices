@@ -581,41 +581,6 @@ the singularity.
             xmode=log,
             log ticks with fixed point,
         ]
-            \addplot[
-                color=cyan,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/L2/tetrahedron-II.txt};
-
-            \addplot[
-                color=red,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/L2/tetrahedron-PCA.txt};
-
-            \addplot[
-                color=MyGreen,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/L2/tetrahedron-VNG.txt};
-
-            \addplot[
-                color=orange,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/L2/tetrahedron-VNR.txt};
 
             \addplot[
                 color=cyan,
@@ -711,42 +676,6 @@ the singularity.
             xmode=log,
             log ticks with fixed point,
             ]
-            \addplot[
-                color=cyan,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/Loo/tetrahedron-II.txt};
-
-            \addplot[
-                color=red,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/Loo/tetrahedron-PCA.txt};
-
-            \addplot[
-                color=MyGreen,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNG.txt};
-
-            \addplot[
-                color=orange,
-                mark=triangle
-            ] table [
-            x=gridstep,
-            y=error,
-            col sep=comma
-            ] {./graphDataNormals/piecewise/Loo/tetrahedron-VNR.txt};
-
             \addplot[
                 color=cyan,
                 mark=square
@@ -853,8 +782,6 @@ the singularity.
             \addlegendentry{ellipsoids}
             \addlegendimage{mark=square}
             \addlegendentry{cubesphere}
-            \addlegendimage{mark=triangle}
-            \addlegendentry{tetrahedron}
         \end{axis}
     \end{tikzpicture}
     \caption{Error RMSE and $E_{\max}$ as a function of grid resolution on
@@ -865,15 +792,13 @@ the singularity.
     % 3 pictures side by side, with a name under each, singularities in red
     \centering
     \begin{tabular}{c c}
-        \multicolumn{2}{c}{\includegraphics[width=0.3\columnwidth]{pictures/singularities/tetrahedronS}} \\
-        \multicolumn{2}{c}{Tetrahedron} \\
         \includegraphics[width=0.3\columnwidth]{pictures/singularities/cubesphereS} &
         \includegraphics[width=0.3\columnwidth]{pictures/singularities/double_ellipsoidS} \\
         Cubesphere & Ellipsoids Union \\
     \end{tabular}
     \caption{Singularities (in red) of the piecewise smooth shapes used to
     compute the errors in Figure~\ref{fig:errors-normals-piecewise}.
-    All 3 shapes are digitized at gridstep $h=0.25$.}
+    Both shapes are digitized at gridstep $h=0.25$.}
     \label{fig:singularities-showcase}
 \end{figure}
 

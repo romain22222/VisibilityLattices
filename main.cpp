@@ -979,9 +979,9 @@ void computeVisibilityDirectionToSharpFeatures() {
 	}
 }
 
-double sigma = -1;
+float sigma = -1;
 float mitra_radius = -1;
-double minus2SigmaSquare = -2 * sigma * sigma;
+float minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
 	return exp(d2 / minus2SigmaSquare);
@@ -1184,6 +1184,36 @@ void reorientVisibilityNormals() {
 		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
 		psPrimalMesh->addVertexVectorQuantity("Pointel trivial normal", primal_surface->vertexNormals());
 		psPrimalMesh->addFaceVectorQuantity("Face trivial normal", primal_surface->faceNormals());
+	}
+}
+
+void displayAffectingPointsFor(int idx) {
+	// Get the points that affect the normal of pointel idx for mitra and vn, then display them in polyscope with different colors
+	std::vector<Point> mitra_points;
+	std::vector<Point> visibility_points;
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (auto point_idx: kdTree.pointsInBall(pointels[idx], mitra_radius)) {
+		mitra_points.emplace_back(pointels[point_idx]);
+	}
+	for (auto point_idx: kdTree.pointsInBall(pointels[idx], 2 * sigma)) {
+		auto tmp = kdTree.position(point_idx);
+		if (visibility.isVisible(pointels[idx], tmp)) { visibility_points.emplace_back(tmp); }
+	}
+
+	std::vector<RealPoint> central_point;
+	embedPointels({pointels[idx]}, central_point);
+	std::vector<RealPoint> rMitraPoints;
+	std::vector<RealPoint> rVisibilityPoints;
+	embedPointels(mitra_points, rMitraPoints);
+	embedPointels(visibility_points, rVisibilityPoints);
+
+	if (!noInterface) {
+		polyscope::registerPointCloud("Mitra affecting points", rMitraPoints)->setPointRadius(0.3 * gridstep, false)->
+			setPointColor({1.0f, 0.0f, 0.0f});
+		polyscope::registerPointCloud("Visibility affecting points", rVisibilityPoints)->
+			setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 1.0f, 0.0f});
+		polyscope::registerPointCloud("Central point", central_point)->setPointRadius(0.4 * gridstep, false)->
+			setPointColor({0.0f, 0.0f, 1.0f});
 	}
 }
 
@@ -1518,8 +1548,13 @@ void myCallback() {
 	}
 	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
 	ImGui::SliderFloat("mitra radius", &mitra_radius, 1, 20);
+	ImGui::SliderFloat("sigma", &sigma, 1, 40);
 	if (ImGui::Button("Visibility")) {
 		computeVisibilityWithPointShow(pointel_idx);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Display normal affecting points")) {
+		displayAffectingPointsFor(pointel_idx);
 	}
 	if (ImGui::Button("Visibilities")) {
 		trace.beginBlock("Compute visibilities");
@@ -1839,7 +1874,7 @@ int gpuRun(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5. * pow(gridstep, -0.5);
+		sigma = (2. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -1927,9 +1962,9 @@ int gpuRun(int argc, char *argv[]) {
 		primal_surface->vertexNormals() = trivial_normals;
 		reorientIINormals();
 		trace.endBlock();
-		computeL2looErrorsNormals(mitra_normals, "Mitra");
-		computeL2looErrorsNormals(ii_normals, "II");
-		return 0;
+		// computeL2looErrorsNormals(mitra_normals, "Mitra");
+		// computeL2looErrorsNormals(ii_normals, "II");
+		// return 0;
 
 		if (computeCurvaturesFlag) {
 			trace.beginBlock("Initialize CNC for curvature computation");
@@ -1937,7 +1972,6 @@ int gpuRun(int argc, char *argv[]) {
 			trace.endBlock();
 		}
 	}
-
 
 
 	// Ready to choose program
@@ -1963,7 +1997,7 @@ int gpuRun(int argc, char *argv[]) {
 			return 1;
 		}
 		Time = trace.endBlock();
-		// computeMeanDistanceVisibility();
+		computeMeanDistanceVisibility();
 		if (computeNormalsFlag) {
 			std::vector<WeightChoice> chosenKernels = getChosenKernels(weightChoices);
 			for (WeightChoice w: chosenKernels) {
@@ -2132,7 +2166,7 @@ int main(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5. * pow(gridstep, -0.5);
+		sigma = (2. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -2211,7 +2245,6 @@ int main(int argc, char *argv[]) {
 	}
 	primal_surface->vertexNormals() = trivial_normals;
 	reorientIINormals();
-
 
 
 	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
