@@ -979,9 +979,9 @@ void computeVisibilityDirectionToSharpFeatures() {
 	}
 }
 
-double sigma = -1;
+float sigma = -1;
 float mitra_radius = -1;
-double minus2SigmaSquare = -2 * sigma * sigma;
+float minus2SigmaSquare = -2 * sigma * sigma;
 
 double wSig(double d2) {
 	return exp(d2 / minus2SigmaSquare);
@@ -1874,7 +1874,7 @@ int gpuRun(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5. * pow(gridstep, -0.5);
+		sigma = (2. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -1962,9 +1962,9 @@ int gpuRun(int argc, char *argv[]) {
 		primal_surface->vertexNormals() = trivial_normals;
 		reorientIINormals();
 		trace.endBlock();
-		computeL2looErrorsNormals(mitra_normals, "Mitra");
-		computeL2looErrorsNormals(ii_normals, "II");
-		return 0;
+		// computeL2looErrorsNormals(mitra_normals, "Mitra");
+		// computeL2looErrorsNormals(ii_normals, "II");
+		// return 0;
 
 		if (computeCurvaturesFlag) {
 			trace.beginBlock("Initialize CNC for curvature computation");
@@ -1972,7 +1972,6 @@ int gpuRun(int argc, char *argv[]) {
 			trace.endBlock();
 		}
 	}
-
 
 
 	// Ready to choose program
@@ -1998,7 +1997,7 @@ int gpuRun(int argc, char *argv[]) {
 			return 1;
 		}
 		Time = trace.endBlock();
-		// computeMeanDistanceVisibility();
+		computeMeanDistanceVisibility();
 		if (computeNormalsFlag) {
 			std::vector<WeightChoice> chosenKernels = getChosenKernels(weightChoices);
 			for (WeightChoice w: chosenKernels) {
@@ -2167,7 +2166,7 @@ int main(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = 5. * pow(gridstep, -0.5);
+		sigma = (2. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -2246,7 +2245,6 @@ int main(int argc, char *argv[]) {
 	}
 	primal_surface->vertexNormals() = trivial_normals;
 	reorientIINormals();
-
 
 
 	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
