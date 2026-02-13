@@ -1,0 +1,613 @@
+\begin{tikzpicture}
+
+    \begin{groupplot}[
+        group style={
+            group size=3 by 4,
+            horizontal sep=1.5cm,
+            vertical sep=1.4cm
+        },
+        width=0.66\columnwidth,
+        x dir=reverse,
+        ymajorgrids=true,
+        grid style=dashed,
+        ymode=log,
+        xmode=log,
+        log ticks with fixed point,
+        legend to name=sharedlegend,
+        legend columns=2,
+    ]
+
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/ellipsoid-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/ellipsoid-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/ellipsoid-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/ellipsoid-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.06*x^(2/3)} node[pos=0.4, anchor=north east] {$h^{\frac{2}{3}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/goursat-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/goursat-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/goursat-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/goursat-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.05*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}{3}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/cubesphere-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/cubesphere-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/cubesphere-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/cubesphere-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.6*x^(3)} node[pos=0.6, anchor=north east] {$h^3$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/ellipsoid-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/ellipsoid-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/ellipsoid-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/ellipsoid-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.3*x^(1/2)} node[pos=0.4, anchor=south west] {$h^{\frac{1}{2}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/goursat-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/goursat-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/goursat-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/goursat-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.3*x^(1/2)} node[pos=0.4, anchor=south west] {$h^{\frac{1}{2}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/cubesphere-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/cubesphere-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/cubesphere-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/cubesphere-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {4*x^(3)} node[pos=0.6, anchor=north east] {$h^3$};
+
+
+
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/sphere9-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/sphere9-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/sphere9-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/sphere9-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.015*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}{3}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/rcube-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/rcube-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/rcube-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/L2/rcube-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.05*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}{3}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/double_ellipsoid-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/double_ellipsoid-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.8*x^(2)} node[pos=0.6, anchor=north east] {$h^2$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/sphere9-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/sphere9-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/sphere9-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/sphere9-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.15*x^(1/2)} node[pos=0.4, anchor=south west] {$h^{\frac{1}{2}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/rcube-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/rcube-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/rcube-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/smooth/Loo/rcube-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.3*x^(1/2)} node[pos=0.4, anchor=south west] {$h^{\frac{1}{2}}$};
+        \nextgroupplot
+        \addplot[
+            color=cyan,
+            only marks,
+            mark=halfcircle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-II.txt};
+        \addlegendentry{$II$}
+        \addplot[
+            color=red,
+            only marks,
+            mark=triangle
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-PCA.txt};
+        \addlegendentry{$PCA$}
+        \addplot[
+            color=MyGreen,
+            only marks,
+            mark=diamond
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNG.txt};
+        \addlegendentry{$VN_G$}
+        \addplot[
+            color=orange,
+            only marks,
+            mark=square
+        ] table [
+        x=gridstep,
+        y=error,
+        col sep=comma
+        ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNR.txt};
+        \addlegendentry{$VN_R$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.12:0.4,
+            samples=200,
+        ] {0.4*x^(1/2)} node[pos=0.6, anchor=north east] {$h^{\frac{1}{2}}$};
+    \end{groupplot}
+
+    \node at (group c1r1.north) [above=0.1cm] {Ellipsoid};
+    \node at (group c2r1.north) [above=0.1cm] {Goursat};
+    \node at (group c3r1.north) [above=0.1cm] {Cubesphere};
+    \node at (group c1r3.north) [above=0.1cm] {Sphere};
+    \node at (group c2r3.north) [above=0.1cm] {Rounded cube};
+    \node at (group c3r3.north) [above=0.1cm] {Ellipsoid Union};
+
+    \node[rotate=90]
+    at (group c1r1.west)
+    [left=1.5cm] {RMSE};
+    \node[rotate=90]
+    at (group c1r2.west)
+    [left=1.5cm] {Emax};
+    \node[rotate=90]
+    at (group c1r3.west)
+    [left=1.5cm] {RMSE};
+    \node[rotate=90]
+    at (group c1r4.west)
+    [left=1.5cm] {Emax};
+
+    \path (group c1r4.south west) --
+    (group c3r4.south east)
+    node[midway, below=1.2cm] {\pgfplotslegendfromname{sharedlegend}};
+
+\end{tikzpicture}
