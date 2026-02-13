@@ -817,8 +817,8 @@ We compare the differences obtained by just changing the discrete
 normal estimator (available in the \textsc{DGtal} library):
 (column II normals) Integral Invariant normals with $r=6$, (column
 CTriv normals) convolved trivial normals with $r=6$, (column
-Visibility normals) our proposed estimator (VN) with $\sigma=4$ and
-maximal visibility distance $2\sigma$.\comment[id=JO]{Text to update} These parameters were
+Visibility normals) our proposed estimator (VN) according to
+the mean visibility distance. These parameters were
 chosen so that the respective computation windows of the different
 estimators are approximately the same.
 
@@ -890,12 +890,10 @@ $\sigma=4$) while the result is visually indistinguishable.
     parameterized by an input normal estimator: first column by
     ``Integral Invariant normals'' (radius $r=6$), second column
     by ``Convolved Trivial normals'' (radius $k=6$), third by
-    ``PCA Normals`` (radius $r=4$),fourth column by our presented
-    normal estimator (deviation $\sigma=4$, radius $r=2\sigma=8$,
-        with a star of 1 and with a weighted kernel.). Per row are
-        displayed the estimated curvatures in order: first and second
-        principal curvatures $\kappa_1$ and $\kappa_2$, mean curvature $H$,
-        Gaussian curvature $G$. The range of curvature between deep
-        blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
-        color equal to $0$.}
+    ``PCA Normals`` (radius $r=4$), fourth column by our presented
+    normal estimator. Per row are displayed the estimated curvatures
+    in order: first and second principal curvatures $\kappa_1$ and $\kappa_2$,
+    mean curvature $H$, Gaussian curvature $G$. The range of curvature
+    between deep blue and deep red is $\lbrack -0.1, 0.1 \rbrack$ with white
+    color equal to $0$.}
 \end{figure*}
