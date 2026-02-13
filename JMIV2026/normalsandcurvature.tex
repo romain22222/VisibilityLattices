@@ -120,14 +120,14 @@ on the continuous surface (Figure~\ref{fig:errors-normals}). We use 4 different 
 goursat, rcube and sphere9). We see that the RMSE and $E_{\max}$ errors of our
 estimator are convergent with respect to the grid resolution with a
 rate of convergence of $h^{\frac{2}{3}}$ for the RMSE and $h^{\frac{1}{2}}$ for
-$E_{\max}$. The ring kernel seems to be slightly worse than the Gaussian kernel,
+$E_{\max}$. The ring kernel seems to be slightly better than the Gaussian kernel,
 but they have the same convergence rates, which indicates that the choice of the kernel
 does not influence the convergence of the normal estimator, but only the constant in front of the error.
 
 Figure~\ref{fig:errors-normals} also shows these errors computed on 2 piecewise smooth shapes
 (cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
 we ignore the points that are closer than $2h$ to the singularities of the shapes (see~\ref{fig:singularities-showcase}).
-We see that the RMSE and $E_{\max}$ are much better at higher gridsteps than both II and PCA, with a convergence rate of $h^{\frac{1}{2}}$,
+We see that the RMSE and $E_{\max}$ are better at higher gridsteps than both II and PCA, with a convergence rate higher than $h^{\frac{2}{3}}$,
 II and PCA catching back on the error at lower gridsteps is due to to the singularity zone being
 at a continuous width instead of a discrete width, which allows them to be correct at a certain point. It however doesn't seem
 to have a better kernel between the ring and the gaussian kernel, sometimes one is better than the other, but
