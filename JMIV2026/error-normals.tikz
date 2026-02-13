@@ -118,7 +118,7 @@
             mark=halfcircle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/cubesphere-II.txt};
         \addlegendentry{$II$}
@@ -128,7 +128,7 @@
             mark=triangle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/cubesphere-PCA.txt};
         \addlegendentry{$PCA$}
@@ -138,7 +138,7 @@
             mark=diamond
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/cubesphere-VNG.txt};
         \addlegendentry{$VN_G$}
@@ -148,7 +148,7 @@
             mark=square
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/cubesphere-VNR.txt};
         \addlegendentry{$VN_R$}
@@ -157,7 +157,7 @@
             thick,
             domain=0.12:0.4,
             samples=200,
-        ] {0.2*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}/{3}}$};
+        ] {0.6*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}{3}}$};
         \nextgroupplot
         \addplot[
             color=cyan,
@@ -259,7 +259,7 @@
             mark=halfcircle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/cubesphere-II.txt};
         \addlegendentry{$II$}
@@ -269,7 +269,7 @@
             mark=triangle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/cubesphere-PCA.txt};
         \addlegendentry{$PCA$}
@@ -279,7 +279,7 @@
             mark=diamond
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/cubesphere-VNG.txt};
         \addlegendentry{$VN_G$}
@@ -289,7 +289,7 @@
             mark=square
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/cubesphere-VNR.txt};
         \addlegendentry{$VN_R$}
@@ -298,7 +298,7 @@
             thick,
             domain=0.12:0.4,
             samples=200,
-        ] {4*x^(1/2)} node[pos=0.6, anchor=north east] {$h^{\frac{1}/{2}}$};
+        ] {4*x^(1/2)} node[pos=0.6, anchor=north east] {$h^{\frac{1}{2}}$};
 
 
 
@@ -403,7 +403,7 @@
             mark=halfcircle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/double_ellipsoid-II.txt};
         \addlegendentry{$II$}
@@ -413,7 +413,7 @@
             mark=triangle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/double_ellipsoid-PCA.txt};
         \addlegendentry{$PCA$}
@@ -423,7 +423,7 @@
             mark=diamond
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNG.txt};
         \addlegendentry{$VN_G$}
@@ -433,7 +433,7 @@
             mark=square
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/L2/double_ellipsoid-VNR.txt};
         \addlegendentry{$VN_R$}
@@ -442,7 +442,7 @@
             thick,
             domain=0.12:0.4,
             samples=200,
-        ] {0.8*x^(2)} node[pos=0.6, anchor=north east] {$h^2$};
+        ] {0.8*x^(2/3)} node[pos=0.6, anchor=north east] {$h^{\frac{2}{3}}$};
         \nextgroupplot
         \addplot[
             color=cyan,
@@ -544,7 +544,7 @@
             mark=halfcircle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-II.txt};
         \addlegendentry{$II$}
@@ -554,7 +554,7 @@
             mark=triangle
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-PCA.txt};
         \addlegendentry{$PCA$}
@@ -564,7 +564,7 @@
             mark=diamond
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNG.txt};
         \addlegendentry{$VN_G$}
@@ -574,7 +574,7 @@
             mark=square
         ] table [
         x=gridstep,
-        y=error,
+        y expr=\thisrow{error}/\thisrow{gridstep},
         col sep=comma
         ] {./graphDataNormals/piecewise/Loo/double_ellipsoid-VNR.txt};
         \addlegendentry{$VN_R$}
@@ -583,7 +583,7 @@
             thick,
             domain=0.12:0.4,
             samples=200,
-        ] {0.4*x^(1/2)} node[pos=0.6, anchor=north east] {$h^{\frac{1}{2}}$};
+        ] {2*x^(1/2)} node[pos=0.6, anchor=north east] {$h^{\frac{1}{2}}$};
     \end{groupplot}
 
     \node at (group c1r1.north) [above=0.1cm] {Ellipsoid};
