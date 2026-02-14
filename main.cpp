@@ -1356,11 +1356,11 @@ void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std
 		const auto fxp = std::min(1.0, std::max(-1.0, sp));
 		const auto fxm = std::min(1.0, std::max(-1.0, antiSp));
 		angle_dev[i] = std::min(acos(fxp), acos(fxm));
-		if (angle_dev[i] > 0.1) {
-			std::cout << "Large angle deviation for normal " << normalName << " at index " << i
-				<< ": " << angle_dev[i] << " radians, " << angle_dev[i] * 180.0 / M_PI << " degrees" << std::endl;
-			std::cout << "Normal: " << normals[i] << ", True normal: " << true_normals[i] << std::endl;
-		}
+		// if (angle_dev[i] > 0.1) {
+			// std::cout << "Large angle deviation for normal " << normalName << " at index " << i
+			// 	<< ": " << angle_dev[i] << " radians, " << angle_dev[i] * 180.0 / M_PI << " degrees" << std::endl;
+			// std::cout << "Normal: " << normals[i] << ", True normal: " << true_normals[i] << std::endl;
+		// }
 	}
 	if (!noInterface)
 		psPrimalMesh->addVertexScalarQuantity("Angle deviation " + normalName, angle_dev)->setMapRange({0.0, 0.1})->
@@ -1910,7 +1910,7 @@ int gpuRun(int argc, char *argv[]) {
 		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 		primal_surface->faceNormals() = surfel_trivial_normals;
 		if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
-			params("r-radius", 1);
+			params("r-radius", 7./6.);
 		else
 			params("r-radius", iiRadius);
 		surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
@@ -2186,7 +2186,7 @@ int main(int argc, char *argv[]) {
 	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 	primal_surface->faceNormals() = surfel_trivial_normals;
 	if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
-		params("r-radius", 1);
+		params("r-radius", iiRadius/3.);
 	else
 		params("r-radius", iiRadius);
 	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
