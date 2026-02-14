@@ -1333,9 +1333,6 @@ void displaySingularities() {
 	psPrimalMesh->addVertexColorQuantity("Singularities", singularities_as_colors)->setEnabled(true);
 }
 
-
-auto olddgd = Polyhedra::digitization_gridstep_distance;
-
 void computeTrueNormalsPolyhedra() {
 	true_normals.clear();
 	for (const auto &pointel: pointels) {
@@ -1345,13 +1342,6 @@ void computeTrueNormalsPolyhedra() {
 }
 
 void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std::string &normalName) {
-	if (olddgd != Polyhedra::digitization_gridstep_distance && Polyhedra::isPolyhedron(polynomial)) {
-		std::cout << "Recomputing true normals with dgd " << Polyhedra::digitization_gridstep_distance << " (old was "
-			<< olddgd << ")" << std::endl;
-		computeTrueNormalsPolyhedra();
-		olddgd = gridstep;
-	}
-
 	angle_dev.clear();
 	angle_dev.resize(normals.size());
 	dummy.resize(normals.size(), 0.0);
@@ -1489,7 +1479,7 @@ void testDistancePlan() {
 	std::vector<double> distances(pointels.size());
 	for (size_t i = 0; i < plans.size(); ++i) {
 		for (size_t j = 0; j < pointels.size(); ++j) {
-			distances[j] = Polyhedra::planeDistance(plans[i], pointels[j], gridstep);
+			distances[j] = Polyhedra::planeDistance(plans[i], pointels[j]);
 		}
 		psPrimalMesh->addVertexScalarQuantity("Distances to plan " + std::to_string(i), distances)->setMapRange({
 			-0.1, 0.1
@@ -1595,6 +1585,9 @@ void myCallback() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
+		if (Polyhedra::isPolyhedron(polynomial)) {
+			computeTrueNormalsPolyhedra();
+		}
 		trace.beginBlock("Compute visibilities Normals Errors");
 		computeL2looErrorsNormals(visibility_normals,
 		                          "visib " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
@@ -1670,14 +1663,13 @@ void myCallback() {
 	} else {
 		centerPointChoice = CenterPointChoice::ITSELF;
 	}
-	// Add a slider for Polyhedra::digitization_gridstep_distance (default 0.2, can vary from 0.05 to 1)
-	ImGui::SliderFloat("Gridstep distance for plane distance", &Polyhedra::digitization_gridstep_distance, 0.05f, 1.0f);
 
 	if (ImGui::Button("TEST NEAREST POINT")) {
 		testNearestPoint();
 	}
 
 	ImGui::InputFloat("MinMaxCurv", &MaxCurv, 0.01f, 1.0f);
+	ImGui::InputFloat("SizeSingularity", &Polyhedra::factorSizeSingularity, 0.1f, 1.0f);
 
 	if (ImGui::Button("Display Singularities")) {
 		displaySingularities();
@@ -1765,8 +1757,8 @@ int gpuRun(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	int minAABB = -80;
-	int maxAABB = 80;
+	int minAABB = -10;
+	int maxAABB = 10;
 	bool listP = false;
 	bool computeCurvaturesFlag = false;
 	bool computeNormalsFlag = false;
@@ -1829,30 +1821,28 @@ int gpuRun(int argc, char *argv[]) {
 	params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
 	params("surfaceTraversal", "default");
 	bool is_polynomial = !polynomial.empty();
+	params("gridstep", gridstep);
+	params("minAABB", minAABB);
+	params("maxAABB", maxAABB);
+	params("polynomial", polynomial);
+	params("offset", 1.0);
+	params("closed", 1);
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
 		if (!Polyhedra::isPolyhedron(polynomial)) {
-			params("polynomial", polynomial);
-			params("gridstep", gridstep);
-			params("minAABB", minAABB);
-			params("maxAABB", maxAABB);
-			params("offset", 1.0);
-			params("closed", 1);
 			implicit_shape = SH3::makeImplicitShape3D(params);
 			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-			K = SH3::getKSpace(params);
 			binary_image = SH3::makeBinaryImage(digitized_shape,
-			                                    SH3::Domain(K.lowerBound(),
-			                                                K.upperBound()),
-			                                    params);
+												SH3::Domain(K.lowerBound(),
+															K.upperBound()),
+												params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
-			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial, gridstep);
-			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB, 1.0);
 			std::cout << "Digitization done." << std::endl;
-			K = SH3::getKSpace(binary_image, params);
-			std::cout << "KSpace done." << std::endl;
 		}
+		K = SH3::getKSpace(params);
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
@@ -1863,18 +1853,17 @@ int gpuRun(int argc, char *argv[]) {
 		trace.endBlock();
 	}
 
-	if (!saveShapeFilename.empty()) {
-		SH3::saveBinaryImage(binary_image, saveShapeFilename);
-	}
+	// if (!saveShapeFilename.empty()) {
+	// 	SH3::saveBinaryImage(binary_image, saveShapeFilename);
+	// }
 	if (noFurtherComputation) {
 		return 0;
 	}
 
-
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = (2. / sqrt(gridstep));
+		sigma = (1. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -1883,7 +1872,7 @@ int gpuRun(int argc, char *argv[]) {
 		VisibilityRadius = 2 * static_cast<int>(sigma);
 	}
 	std::cout << "sigma = " << sigma << std::endl;
-	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (3.5 / sqrt(gridstep));
+	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (2. / sqrt(gridstep));
 
 	std::vector<std::vector<std::size_t> > primal_faces;
 	std::vector<RealPoint> primal_positions;
@@ -1897,12 +1886,6 @@ int gpuRun(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
-	params("gridstep", gridstep);
-	if (Polyhedra::isPolyhedron(polynomial)) {
-		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
-	} else if (is_polynomial) {
-		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
-	}
 	// Need to convert the faces
 	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
 		primal_faces.push_back(primal_surface->incidentVertices(face));
@@ -1916,6 +1899,9 @@ int gpuRun(int argc, char *argv[]) {
 	trace.endBlock();
 
 	if (computeNormalsFlag) {
+		if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+			surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+		}
 		// Initialize normals with trivial normals
 		trace.beginBlock("Compute trivial normals");
 		auto pTC = new TangencyComputer<KSpace>(K);
@@ -1923,6 +1909,10 @@ int gpuRun(int argc, char *argv[]) {
 		int t_ring = int(round(params["t-ring"].as<double>()));
 		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 		primal_surface->faceNormals() = surfel_trivial_normals;
+		if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
+			params("r-radius", 1);
+		else
+			params("r-radius", iiRadius);
 		surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 		for (auto i = 1; i < t_ring + 3; i++) {
 			primal_surface->computeVertexNormalsFromFaceNormals();
@@ -2051,8 +2041,8 @@ int main(int argc, char *argv[]) {
 	std::string filename = "../volumes/bunny34.vol";
 	int thresholdMin = 0;
 	int thresholdMax = 255;
-	int minAABB = -80;
-	int maxAABB = 80;
+	int minAABB = -10;
+	int maxAABB = 10;
 	int VisibilityRadiusTmp = -1;
 	bool listP = false;
 	bool gpuRunFlag = false;
@@ -2120,36 +2110,28 @@ int main(int argc, char *argv[]) {
 	params("surfaceComponents", "All")("surfelAdjacency", 0); //exterior adjacency
 	params("surfaceTraversal", "default");
 	bool is_polynomial = !polynomial.empty();
+	params("gridstep", gridstep);
+	params("minAABB", minAABB);
+	params("maxAABB", maxAABB);
+	params("polynomial", polynomial);
+	params("offset", 1.0);
+	params("closed", 1);
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
 		if (!Polyhedra::isPolyhedron(polynomial)) {
-			params("gridstep", gridstep);
-			params("minAABB", minAABB);
-			params("maxAABB", maxAABB);
-			params("polynomial", polynomial);
-			params("offset", 1.0);
-			params("closed", 1);
 			implicit_shape = SH3::makeImplicitShape3D(params);
 			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
-			K = SH3::getKSpace(params);
 			binary_image = SH3::makeBinaryImage(digitized_shape,
 			                                    SH3::Domain(K.lowerBound(),
 			                                                K.upperBound()),
 			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
-			// polyhedra = CountedPtr(new Polyhedra::PolyhedronShape(std::vector<Polyhedra::Plane>(), {
-			// 	                                                      Polyhedra::Ellipsoid{
-			// 		                                                      {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 1,
-			// 		                                                      5, 1
-			// 	                                                      }
-			//                                                       }, gridstep));
-			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial, gridstep);
-			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB);
+			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
+			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB, 1.0);
 			std::cout << "Digitization done." << std::endl;
-			K = SH3::getKSpace(binary_image, params);
-			std::cout << "KSpace done." << std::endl;
 		}
+		K = SH3::getKSpace(params);
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
@@ -2166,7 +2148,7 @@ int main(int argc, char *argv[]) {
 	if (sigmaTmp != -1.0) {
 		sigma = sigmaTmp;
 	} else {
-		sigma = (2. / sqrt(gridstep));
+		sigma = (1. / sqrt(gridstep));
 	}
 	minus2SigmaSquare = -2. * sigma * sigma;
 	if (VisibilityRadiusTmp > 0) {
@@ -2175,7 +2157,7 @@ int main(int argc, char *argv[]) {
 		VisibilityRadius = 2 * static_cast<int>(sigma);
 	}
 	std::cout << "sigma = " << sigma << std::endl;
-	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (3.5 / sqrt(gridstep));
+	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (2./sqrt(gridstep));
 
 
 	trace.beginBlock("Computing digital points and primal surface");
@@ -2183,12 +2165,6 @@ int main(int argc, char *argv[]) {
 	digital_surface = SH3::makeDigitalSurface(binary_image, K, params);
 	primal_surface = SH3::makePrimalSurfaceMesh(digital_surface);
 	surfels = SH3::getSurfelRange(digital_surface, params);
-	params("gridstep", gridstep);
-	if (Polyhedra::isPolyhedron(polynomial)) {
-		surfel_true_normals = Polyhedra::getNormalVectors(polyhedra, K, surfels, params);
-	} else if (is_polynomial) {
-		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
-	}
 	// Need to convert the faces
 	for (auto face = 0; face < primal_surface->nbFaces(); ++face)
 		primal_faces.push_back(primal_surface->incidentVertices(face));
@@ -2200,15 +2176,19 @@ int main(int argc, char *argv[]) {
 	digital_dimensions = getFigSizes();
 	trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
 	trace.endBlock();
-
+	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
+		surfel_true_normals = SHG3::getNormalVectors(implicit_shape, K, surfels, params);
+	}
 	// Compute trivial normals
-
 	auto pTC = new TangencyComputer<KSpace>(K);
 	pTC->init(pointels.cbegin(), pointels.cend(), true);
 	int t_ring = int(round(params["t-ring"].as<double>()));
 	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 	primal_surface->faceNormals() = surfel_trivial_normals;
-	params("r-radius", iiRadius);
+	if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
+		params("r-radius", 1);
+	else
+		params("r-radius", iiRadius);
 	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 	for (auto i = 1; i < t_ring + 3; i++) {
 		primal_surface->computeVertexNormalsFromFaceNormals();

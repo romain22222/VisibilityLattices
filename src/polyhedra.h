@@ -18,6 +18,8 @@ namespace Polyhedra {
 	typedef ShortcutsGeometry<KSpace> SHG3;
 	typedef std::pair<RealPoint, double> Plane;
 
+	inline float factorSizeSingularity = 4.f;
+
 	struct Ellipsoid {
 		RealPoint center;
 		RealVector u;
@@ -28,9 +30,7 @@ namespace Polyhedra {
 		double c;
 	};
 
-	inline float digitization_gridstep_distance = 0.2f;
-
-	double planeDistance(const Plane &plane, const RealPoint &p, double gridstep);
+	double planeDistance(const Plane &plane, const RealPoint &p);
 
 	bool isPolyhedron(const std::string &shape);
 
@@ -43,14 +43,13 @@ namespace Polyhedra {
 	private:
 		std::vector<Plane> myPlanes;
 		std::vector<Ellipsoid> myEllipsoids;
-		double digitization_gridstep;
+		float digitization_gridstep_distance;
 
 	public:
-		PolyhedronShape(const std::vector<Plane> &planes, double gridstep);
+		PolyhedronShape(const std::vector<Plane> &planes);
 
 		PolyhedronShape(const std::vector<Plane> &planes,
-		                const std::vector<Ellipsoid> &ellipsoids,
-		                double gridstep);
+		                const std::vector<Ellipsoid> &ellipsoids);
 
 
 		std::vector<Plane> getPlanes() const;
@@ -68,7 +67,11 @@ namespace Polyhedra {
 		                       int maxIter,
 		                       double gamma) const;
 
+		double distIncertain() const;
+
 		RealVector gradient(const RealPoint &p) const;
+
+		void setGridstep(const float g);
 
 		bool isASingularity(const RealPoint &p) const;
 
@@ -81,19 +84,21 @@ namespace Polyhedra {
 		double gaussianCurvature(const RealPoint &p) const;
 	};
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, double d = 1.0);
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape);
 
 	typedef sgf::ShapeNormalVectorFunctor<PolyhedronShape> NormalFunctor;
 
 	CountedPtr<SH3::BinaryImage> makeBinaryPolyhedron(const std::string &shape,
 	                                                  double gridstep,
 	                                                  double minAABB,
-	                                                  double maxAABB);
+	                                                  double maxAABB,
+	                                                  double offset);
 
 	CountedPtr<SH3::BinaryImage> makeBinaryPolyhedron(const CountedPtr<PolyhedronShape> &implicitShape,
 	                                                  double gridstep,
 	                                                  double minAABB,
-	                                                  double maxAABB);
+	                                                  double maxAABB,
+	                                                  double offset);
 
 	std::vector<RealVector> getNormalVectors(const CountedPtr<PolyhedronShape> &shape,
 	                                         const KSpace &K,

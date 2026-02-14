@@ -11,8 +11,8 @@ namespace Polyhedra {
 	typedef std::pair<RealPoint, double> Plane;
 	constexpr auto eps = 1e-6;
 
-	double planeDistance(const Plane &plane, const RealPoint &p, const double gridstep) {
-		return plane.first.dot(gridstep * p) - plane.second;
+	double planeDistance(const Plane &plane, const RealPoint &p) {
+		return plane.first.dot(p) - plane.second;
 	}
 
 	bool isPolyhedron(const std::string &shape) {
@@ -38,16 +38,15 @@ namespace Polyhedra {
 		return (n == 0.0) ? v : v / n;
 	}
 
-	PolyhedronShape::PolyhedronShape(const std::vector<Plane> &planes, double gridstep)
-		: myPlanes(planes), digitization_gridstep(gridstep) {
+	PolyhedronShape::PolyhedronShape(const std::vector<Plane> &planes)
+		: myPlanes(planes), digitization_gridstep_distance(0) {
 	}
 
 	PolyhedronShape::PolyhedronShape(const std::vector<Plane> &planes,
-	                                 const std::vector<Ellipsoid> &ellipsoids,
-	                                 double gridstep)
+	                                 const std::vector<Ellipsoid> &ellipsoids)
 		: myPlanes(planes),
 		  myEllipsoids(ellipsoids),
-		  digitization_gridstep(gridstep) {
+		  digitization_gridstep_distance(0) {
 	}
 
 	std::vector<Plane> PolyhedronShape::getPlanes() const {
@@ -55,9 +54,8 @@ namespace Polyhedra {
 	}
 
 	double ellipsoidDistance(const Ellipsoid &e,
-	                         const RealPoint &p,
-	                         double gridstep) {
-		RealVector d = gridstep * p - e.center;
+	                         const RealPoint &p) {
+		RealVector d = p - e.center;
 		double x = d.dot(e.u) / e.a;
 		double y = d.dot(e.v) / e.b;
 		double z = d.dot(e.w) / e.c;
@@ -65,9 +63,8 @@ namespace Polyhedra {
 	}
 
 	RealVector ellipsoidGradient(const Ellipsoid &e,
-	                             const RealPoint &p,
-	                             double gridstep) {
-		RealPoint d = gridstep * p - e.center;
+	                             const RealPoint &p) {
+		RealPoint d = p - e.center;
 		return 2.0 * RealVector(
 			       d[0] / (e.a * e.a),
 			       d[1] / (e.b * e.b),
@@ -76,30 +73,32 @@ namespace Polyhedra {
 	}
 
 	Orientation PolyhedronShape::planeOrientation(const RealPoint &p) const {
-		Orientation o = DGtal::INSIDE;
+		if (myPlanes.empty())
+			return DGtal::OUTSIDE;
 
-		// 1. Plans → toujours intersection
+		Orientation o = DGtal::INSIDE;
 		for (const auto &pl: myPlanes) {
-			double d = planeDistance(pl, p, digitization_gridstep);
+			double d = planeDistance(pl, p);
 			if (d > eps) {
 				o = DGtal::OUTSIDE;
 				break;
 			}
 			if (std::abs(d) <= eps) o = DGtal::ON;
 		}
-		if (myPlanes.empty())
-			o = DGtal::OUTSIDE;
+
 		return o;
 	}
 
 	Orientation PolyhedronShape::orientation(const RealPoint &p) const {
 		Orientation o = planeOrientation(p);
-		if (o == DGtal::INSIDE || myEllipsoids.empty())
+		if (o == DGtal::INSIDE || myEllipsoids.empty()) {
 			return o;
+		}
 		for (const auto &e: myEllipsoids) {
-			double d = ellipsoidDistance(e, p, digitization_gridstep);
-			if (d < -eps)
+			double d = ellipsoidDistance(e, p);
+			if (d < -eps) {
 				return DGtal::INSIDE;
+			}
 			if (d < eps)
 				o = DGtal::ON;
 		}
@@ -119,9 +118,9 @@ namespace Polyhedra {
 	RealPoint PolyhedronShape::totalCorrectionEllipsoid(double gamma, const RealPoint &x) const {
 		RealPoint totalCorrection(0, 0, 0);
 		for (const auto &el: myEllipsoids) {
-			auto dist = ellipsoidDistance(el, x, digitization_gridstep);
+			auto dist = ellipsoidDistance(el, x);
 			if (dist > 0) // outside ellipsoid -> project
-				totalCorrection -= gamma * dist * ellipsoidGradient(el, x, digitization_gridstep);
+				totalCorrection -= gamma * dist * ellipsoidGradient(el, x);
 		}
 		return totalCorrection;
 	}
@@ -148,14 +147,22 @@ namespace Polyhedra {
 		return x;
 	}
 
+	void PolyhedronShape::setGridstep(const float g) {
+		digitization_gridstep_distance = g;
+	}
+
+	double PolyhedronShape::distIncertain() const {
+		return factorSizeSingularity * digitization_gridstep_distance;
+	}
+
 	RealVector PolyhedronShape::gradient(const RealPoint &p) const {
 		// First check for ellipsoids
 		// Then check plane orientations, if outside -> keep gradient of ellipsoid, else if any gradient of ellipsoid : ambiguous, else keep plane gradient
 		RealVector grad(0, 0, 0);
 		int count = 0;
 		for (const auto &el: myEllipsoids) {
-			if (std::abs(ellipsoidDistance(el, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
-				grad = ellipsoidGradient(el, p, digitization_gridstep);
+			if (std::abs(ellipsoidDistance(el, p)) <= distIncertain()) {
+				grad = ellipsoidGradient(el, p);
 				count++;
 			}
 			if (count >= 2)
@@ -167,11 +174,11 @@ namespace Polyhedra {
 		if (count == 1) {
 			// for each plane, check if outside
 			for (const auto &pl: myPlanes)
-				if (planeDistance(pl, p, digitization_gridstep) > digitization_gridstep_distance + eps)
+				if (planeDistance(pl, p) > distIncertain())
 					return grad; // keep ellipsoid gradient
 		}
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+			if (std::abs(planeDistance(pl, p)) <= distIncertain()) {
 				grad = pl.first;
 				count++;
 			}
@@ -187,7 +194,7 @@ namespace Polyhedra {
 	bool PolyhedronShape::isASingularity(const RealPoint &p) const {
 		int count = 0;
 		for (const auto &el: myEllipsoids) {
-			if (std::abs(ellipsoidDistance(el, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+			if (std::abs(ellipsoidDistance(el, p)) <= distIncertain()) {
 				count++;
 			}
 			if (count >= 2)
@@ -196,11 +203,11 @@ namespace Polyhedra {
 		if (count == 1) {
 			// for each plane, check if outside
 			for (const auto &pl: myPlanes)
-				if (planeDistance(pl, p, digitization_gridstep) > digitization_gridstep_distance + eps)
+				if (planeDistance(pl, p) > distIncertain())
 					return false; // keep ellipsoid gradient
 		}
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+			if (std::abs(planeDistance(pl, p)) <= distIncertain()) {
 				count++;
 			}
 			if (count >= 2)
@@ -212,7 +219,7 @@ namespace Polyhedra {
 	int PolyhedronShape::countIntersections(const RealPoint &p) const {
 		auto intersectingPlanes = 0;
 		for (const auto &pl: myPlanes) {
-			if (std::abs(planeDistance(pl, p, digitization_gridstep)) <= digitization_gridstep_distance + eps) {
+			if (std::abs(planeDistance(pl, p)) <= distIncertain()) {
 				intersectingPlanes++;
 			}
 		}
@@ -240,7 +247,8 @@ namespace Polyhedra {
 		return std::numeric_limits<double>::infinity();
 	}
 
-	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape, double gridstep, double d) {
+	CountedPtr<PolyhedronShape> makeImplicitPolyhedron(const std::string &shape) {
+		double d = 1;
 		std::vector<Plane> planes;
 		std::vector<Ellipsoid> ellipsoids;
 
@@ -357,44 +365,48 @@ namespace Polyhedra {
 			ellipsoids = {
 				Ellipsoid{{1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 1.5 * d, 1.5 * d, 1.5 * d}
 			};
+			factorSizeSingularity = 2.f;
 		} else if (shape == "double_ellipsoid") {
 			ellipsoids = {
 				Ellipsoid{{-d / 1.5, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, d / 1.2, d, d},
 				Ellipsoid{{d / 1.5, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, d / 1.2, d, d}
 			};
+			factorSizeSingularity = 8.f;
 		} else {
 			trace.error() << "[makeImplicitPolyhedron] Unknown shape: " << shape << std::endl;
 		}
 
-		return CountedPtr<PolyhedronShape>(new PolyhedronShape(planes, ellipsoids,
-		                                                       gridstep));
+		return CountedPtr<PolyhedronShape>(new PolyhedronShape(planes, ellipsoids));
 	}
 
 	CountedPtr<SH3::BinaryImage> makeBinaryPolyhedron(const std::string &shape,
 	                                                  double gridstep,
 	                                                  double minAABB,
-	                                                  double maxAABB) {
-		auto implicitShape = makeImplicitPolyhedron(shape, gridstep);
-		return makeBinaryPolyhedron(implicitShape, gridstep, minAABB, maxAABB);
+	                                                  double maxAABB,
+	                                                  double offset) {
+		auto implicitShape = makeImplicitPolyhedron(shape);
+		return makeBinaryPolyhedron(implicitShape, gridstep, minAABB, maxAABB, offset);
 	}
 
 	CountedPtr<SH3::BinaryImage> makeBinaryPolyhedron(const CountedPtr<PolyhedronShape> &implicitShape,
 	                                                  double gridstep,
 	                                                  double minAABB,
-	                                                  double maxAABB) {
-		RealPoint p1(minAABB - gridstep, minAABB - gridstep, minAABB - gridstep);
-		RealPoint p2(maxAABB + gridstep, maxAABB + gridstep, maxAABB + gridstep);
-
+	                                                  double maxAABB,
+	                                                  double offset) {
+		RealPoint p1(minAABB - offset * gridstep, minAABB - offset * gridstep, minAABB - offset * gridstep);
+		RealPoint p2(maxAABB + offset * gridstep, maxAABB + offset * gridstep, maxAABB + offset * gridstep);
+		(*implicitShape).setGridstep(gridstep);
 		GaussDigitizer<Z3i::Space, PolyhedronShape> digitizer;
 		digitizer.attach(implicitShape);
 		digitizer.init(p1, p2, gridstep);
 
 		auto domain = digitizer.getDomain();
-		auto binary_image = SH3::makeBinaryImage(domain);
-		for (const auto &p: domain)
-			binary_image->setValue(p, digitizer(p));
+		CountedPtr<SH3::BinaryImage> img(new SH3::BinaryImage(domain));
+		std::transform(domain.begin(), domain.end(),
+		               img->begin(),
+		               [&digitizer](const Point &p) { return digitizer(p); });
 
-		return binary_image;
+		return img;
 	}
 
 	template<typename ReturnType, template<typename> class Functor>
