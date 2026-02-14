@@ -365,7 +365,7 @@ namespace Polyhedra {
 			ellipsoids = {
 				Ellipsoid{{1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, 1.5 * d, 1.5 * d, 1.5 * d}
 			};
-			factorSizeSingularity = 2.f;
+			factorSizeSingularity = 4.f;
 		} else if (shape == "double_ellipsoid") {
 			ellipsoids = {
 				Ellipsoid{{-d / 1.5, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}, d / 1.2, d, d},
