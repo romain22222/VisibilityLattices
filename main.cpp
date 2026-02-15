@@ -1828,6 +1828,7 @@ int gpuRun(int argc, char *argv[]) {
 	params("offset", 1.0);
 	params("closed", 1);
 	if (is_polynomial) {
+		K = SH3::getKSpace(params);
 		trace.beginBlock("Build polynomial surface");
 		if (!Polyhedra::isPolyhedron(polynomial)) {
 			implicit_shape = SH3::makeImplicitShape3D(params);
@@ -1842,7 +1843,6 @@ int gpuRun(int argc, char *argv[]) {
 			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB, 1.0);
 			std::cout << "Digitization done." << std::endl;
 		}
-		K = SH3::getKSpace(params);
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
