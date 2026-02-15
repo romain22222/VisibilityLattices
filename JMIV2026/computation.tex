@@ -203,10 +203,13 @@ algorithm is faster for smaller maximal radii (up to 20), while the
 other is slightly faster for bigger radii. We have also measured the
 discrete average visibility distance along digitization of smooth
 shapes for $\Starop_1$ (Figure~\ref{fig:meanvisibility-gridstep}).
-Most of the shapes follows a law in $\Theta\left( h^{-\frac{1}{2}} \right)$,
-excepted rcube and leopold, which contains flat surfaces which makes the
-visibility distance grow faster than the previous law (measured to be between
-$\Theta\left( h^{-\frac{3}{5}} \right)$ and $\Theta\left( h^{-\frac{2}{3}} \right)$).
+Smooth shapes studied are sphere9 (or Sphere) ($x^2+y^2+z^2=81$), goursat ($0.03\left(x^4+y^4+z^4\right)-2\left(x^2+y^2+z^2\right)=8$),
+torus ($\left(x^2+y^2+z^2+32\right)^2-144\left(x^2+y^2\right)=0$), leopold ($x^2 y^2 z^2+4\left(x^2+y^2+z^2\right)=100$)
+and rcube (or Rounded Cube) ($x^4+y^4+z^4=6561$). Most of the shapes follows
+a law in $\Theta\left( h^{-\frac{1}{2}} \right)$, excepted rcube and leopold,
+which contains flat surfaces which makes the visibility distance grow faster
+than the previous law (measured to be between $\Theta\left( h^{-\frac{3}{5}} \right)$
+and $\Theta\left( h^{-\frac{2}{3}} \right)$).
 
 We also tried this measurement on an GluedEllipsoid with $\Starop_1$ and $\Starop_2$
 (Figure~\ref{fig:meanvisibility-gridstep-piecewise}). Both $\Starop$ follow a law
