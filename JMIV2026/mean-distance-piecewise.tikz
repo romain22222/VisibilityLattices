@@ -13,6 +13,13 @@
         ymode=log,
         xmode=log,
         log ticks with fixed point,
+        legend columns=3,
+        legend style={
+            at={(0.5,-0.2)},
+            anchor=north,
+            draw=none,
+            column sep=15pt,
+        }
     ]
         \addplot [
             color=red,
@@ -25,6 +32,7 @@
         y=mean_distance,
         col sep=comma
         ] {./graphDataMeanDist/double_ellipsoid_1.txt};
+        \addlegendentry{$Star_1$}
         \addplot [
             color=MyGreen,
             mark=o,
@@ -36,34 +44,13 @@
         y=mean_distance,
         col sep=comma
         ] {./graphDataMeanDist/double_ellipsoid_2.txt};
+        \addlegendentry{$Star_2$}
         \addplot[
             color=black,
             thick,
-            domain=0.21:0.4,
+            domain=0.03:0.11,
             samples=200,
-        ] {4*x^(-1)} node[pos=0.4, anchor=north east, yshift=10pt] {$h^{-1}$};
-        \addplot[
-            color=gray,
-            thick,
-            domain=0.21:0.4,
-            samples=200,
-        ] {3*x^(-2/3)} node[pos=0.4, anchor=south west, yshift=10pt] {$h^{-\frac{2}{3}}$};
-    \end{axis}
-    \begin{axis}[
-        hide axis,
-        xmin=0, xmax=1,
-        ymin=0, ymax=1,
-        legend columns=2,
-        legend style={
-            at={(0.2,-0.2)},
-            anchor=north,
-            draw=none,
-            column sep=15pt,
-        }
-    ]
-        \addlegendimage{color=red, mark=*}
-        \addlegendentry{$Star_1$}
-        \addlegendimage{color=MyGreen, mark=o}
-        \addlegendentry{$Star_2$}
+        ] {2.5*x^(-1/2)};
+        \addlegendentry{$\Theta\left( h^{-\frac{1}{2}} \right)$}
     \end{axis}
 \end{tikzpicture}

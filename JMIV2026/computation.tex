@@ -4,7 +4,7 @@ point}. A standard way is to double the coordinates of
 the centroid of the cell (often called its Khalimsky code). Now we
 have to represent an arbitrary set $K$ of lattice points.
 
-Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$.  We may
+Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$. We may
 choose an arbitrary projection \emph{axis} $j \in
 \{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
 can collect all the cells of $K$ that projects onto the same
@@ -14,9 +14,9 @@ ordered increasingly and stored as a list of integer intervals (see
 Figure~\ref{fig:lattice-representation} for an illustration).
 
 \begin{figure}[t]
-  \centering
-  \input{lattice.tikz}
-  \caption{\label{fig:lattice-representation} Representation of a
+    \centering
+    \input{lattice.tikz}
+    \caption{\label{fig:lattice-representation} Representation of a
     2d cell complex (here the star of a given curve) as a lattice
     map. From 63 cells (with two coordinates) on the top, we get 11
     intervals on the bottom.}
@@ -42,7 +42,7 @@ $L_q$ is the \emph{intervals}. For a point $q$ which is a shift of
 $M_K$, we write $M_K[q]$ for the corresponding intervals $L_q$.
 
 The global algorithm for computing visibility is given in
-Algorithm~\ref{alg:visibility}.  Given a digital input surface $C$ (a
+Algorithm~\ref{alg:visibility}. Given a digital input surface $C$ (a
 subcomplex), we compute the lattice map $\Omega$ of $\Star{C}$ once,
 generally along the axis where $C$ is the most elongated. In order to
 compute visibility up to a given distance $r$, we consider all
@@ -75,40 +75,40 @@ and then intersecting all the translations.
 
 
 \begin{algorithm*}
-  \caption{Given a subcomplex $C$ and an integer $r$, returns the visibility from every point of $C$ up to distance $r$. The main axis is supposed to be $z$, while $x,y$ are the auxiliary axes.}
-  \label{alg:visibility}
-  \begin{algorithmic}
-    \Function{Visibility}{$C$: Subcomplex, $r$: Integer}
-    \State $\Omega \gets M_{\Call{Star}{C}}$ \Comment{Lattice map of the star of input subcomplex}
-    \State $Directions \gets \Call{GetAllPrimalDirections}{r}$
-    \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Directions) \times \#C.pointels$}
-    \State $low, high \gets \Call{BoundingBoxZ}{\Omega}$
-    \ForAll{$\vv$ in $Directions$}
-    \ForAll{shift $S$ in $\Omega$}
-    \State $R \gets [low, high]$
-    \ForAll{pair $P$ in $M_{\Call{Star}{[\mathbf{0},\mathbf{v}]}}$}
-    \State $R \gets R \cap \Call{Translations}{P.intervals,\Omega[S + P.shift]}$
-    \EndFor
-    \State \Call{UpdateVisibility}{$V$, $R$}
-    \EndFor
-    \EndFor
-    \State \Return $V$
-    \EndFunction
-  \end{algorithmic}
+    \caption{Given a subcomplex $C$ and an integer $r$, returns the visibility from every point of $C$ up to distance $r$. The main axis is supposed to be $z$, while $x,y$ are the auxiliary axes.}
+    \label{alg:visibility}
+    \begin{algorithmic}
+        \Function{Visibility}{$C$: Subcomplex, $r$: Integer}
+            \State $\Omega \gets M_{\Call{Star}{C}}$ \Comment{Lattice map of the star of input subcomplex}
+            \State $Directions \gets \Call{GetAllPrimalDirections}{r}$
+            \State $V: \text{vector of boolean} \gets [0, \ldots, 0]$ \Comment{length $Size(Directions) \times \#C.pointels$}
+            \State $low, high \gets \Call{BoundingBoxZ}{\Omega}$
+            \ForAll{$\vv$ in $Directions$}
+                \ForAll{shift $S$ in $\Omega$}
+                    \State $R \gets [low, high]$
+                    \ForAll{pair $P$ in $M_{\Call{Star}{[\mathbf{0},\mathbf{v}]}}$}
+                        \State $R \gets R \cap \Call{Translations}{P.intervals,\Omega[S + P.shift]}$
+                    \EndFor
+                    \State \Call{UpdateVisibility}{$V$, $R$}
+                \EndFor
+            \EndFor
+            \State \Return $V$
+        \EndFunction
+    \end{algorithmic}
 \end{algorithm*}
 
 
 \begin{figure*}
-  \centering
-  \input{algorithm.tikz}
-  \caption{Evolution of the visibility check algorithm for a $(2,1)$
-    vector. Green is the vector lattice map, black is the figure
-    lattice map, red are the current intervals of positions where
-    the visibility is still possible. The last red intervals are
-    the visible positions. We travel the lattice maps from
-    bottom-up and the found visibilities are drawn on the
-    uppermost figure.}
-  \label{fig:visibility-algorithm-evolution}
+    \centering
+    \input{algorithm.tikz}
+    \caption{Evolution of the visibility check algorithm for a $(2,1)$
+        vector. Green is the vector lattice map, black is the figure
+        lattice map, red are the current intervals of positions where
+        the visibility is still possible. The last red intervals are
+        the visible positions. We travel the lattice maps from
+        bottom-up and the found visibilities are drawn on the
+        uppermost figure.}
+    \label{fig:visibility-algorithm-evolution}
 \end{figure*}
 
 Figure~\ref{fig:visibility-algorithm-evolution} shows an example of
@@ -129,27 +129,27 @@ figure~\ref{fig:visibility-results} on 3d shapes.
 %% points are present in figure~\ref{fig:visibility-results}.
 
 \begin{algorithm}
-  \caption{Given 2 lists of integer intervals $K$ and $L$, returns $K \cap L$}
-  \label{alg:intersection}
-  \begin{algorithmic}
-    \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
-    \State $R \gets \emptyset$; $k \gets 0$; $l \gets 0$;
-    \While{$k < K.size \And l < L.size$}
-    \State $[a,b] \gets K[k]$; $[c,d] \gets L[l]$
-    \State $e \gets \max(a, c)$; $f \gets \min(b, d)$;
-    \If{$e \leq f$}
-    $R.append([e, f])$;
-    \EndIf
-    \If{$b \leq d$}
-    $k \gets k+1$;
-    \EndIf
-    \If{$d \leq b$}
-    $l \gets l+1$;
-    \EndIf
-    \EndWhile
-    \State \Return $R$
-    \EndFunction
-  \end{algorithmic}
+    \caption{Given 2 lists of integer intervals $K$ and $L$, returns $K \cap L$}
+    \label{alg:intersection}
+    \begin{algorithmic}
+        \Function{Intersection ($\cap$)}{\text{K, L}: Intervals}
+            \State $R \gets \emptyset$; $k \gets 0$; $l \gets 0$;
+            \While{$k < K.size \And l < L.size$}
+                \State $[a,b] \gets K[k]$; $[c,d] \gets L[l]$
+                \State $e \gets \max(a, c)$; $f \gets \min(b, d)$;
+                \If{$e \leq f$}
+                    $R.append([e, f])$;
+                \EndIf
+                \If{$b \leq d$}
+                    $k \gets k+1$;
+                \EndIf
+                \If{$d \leq b$}
+                    $l \gets l+1$;
+                \EndIf
+            \EndWhile
+            \State \Return $R$
+        \EndFunction
+    \end{algorithmic}
 \end{algorithm}
 
 To efficiently compute the intersection of two sequences of intervals
@@ -166,15 +166,15 @@ returns the intersection of the input two lists of intervals.
 % Insert visibility results images
 
 \begin{figure}
-  \centering
-  \begin{tabular}{c}
-    \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} \\
-    \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_features}
-  \end{tabular}
-  \caption{Examples of visibilities from a source point:
-    (top) the visibility is stopped at the sharp edge, (bottom) the
-    visibility does not cross the gap between the two parts.}
-  \label{fig:visibility-results}
+    \centering
+    \begin{tabular}{c}
+        \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} \\
+        \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_features}
+    \end{tabular}
+    \caption{Examples of visibilities from a source point:
+        (top) the visibility is stopped at the sharp edge, (bottom) the
+        visibility does not cross the gap between the two parts.}
+    \label{fig:visibility-results}
 \end{figure}
 %
 %    \begin{figure*}
@@ -202,34 +202,40 @@ times to compute global visibility of both~\cite[Algorithm
 algorithm is faster for smaller maximal radii (up to 20), while the
 other is slightly faster for bigger radii. We have also measured the
 discrete average visibility distance along digitization of smooth
-shapes and one piecewise smooth shape for $\Starop_1$ and $\Starop_2$
-(Figure~\ref{fig:meanvisibility-gridstep}). Both follow a law
-proportional to $1/\sqrt{h}$, but $\Starop_2$ has a bigger constant.
+shapes for $\Starop_1$ (Figure~\ref{fig:meanvisibility-gridstep}).
+Most of the shapes follows a law in $\Theta\left( h^{-\frac{1}{2}} \right)$,
+excepted rcube and leopold, which contains flat surfaces which makes the
+visibility distance grow faster than the previous law (measured to be between
+$\Theta\left( h^{-\frac{3}{5}} \right)$ and $\Theta\left( h^{-\frac{2}{3}} \right)$).
+
+We also tried this measurement on an Ellipsoid Union with $\Starop_1$ and $\Starop_2$
+(Figure~\ref{fig:meanvisibility-gridstep-piecewise}). Both $\Starop$ follow a law
+proportional to $h^{-\frac{1}{2}}$, but $\Starop_2$ has a bigger constant.
 Thus, the average continuous visibility distance is proportional
 to $\sqrt{h}$. As shown in the next section, for real 3d images,
 a maximal radius below 10 is sufficient for normal and curvature estimation.
 
 \begin{figure}[t]
-  \centering
-  \input{pointelscomptime.tikz}
-  \caption{ \label{fig:meanvisibility-computationComplexity}Computation
+    \centering
+    \input{pointelscomptime.tikz}
+    \caption{ \label{fig:meanvisibility-computationComplexity}Computation
     time of visibility as a function of the number of pointels. We
     compare the running time of the naive breadth first visibility
     algorithm against our algorithm using intervals. We input the same
     maximal radius to both versions (10, 20, 30) and test it on 6
     different figures (goursat, torus, rcube, sphere9, leopold,
-    ``D20'') with various gridsteps, ($\#$ pointels ranging from 520
-    to 390235).}
+        ``D20'') with various gridsteps, ($\#$ pointels ranging from 520
+        to 390235).}
 \end{figure}
 
-\begin{figure*}
-  \centering
-  \input{mean-distance.tikz}
-  \caption{\label{fig:meanvisibility-gridstep} Mean discrete distance of visibility as a function of the gridstep $h$ (see text).}
-\end{figure*}
+\begin{figure}
+    \centering
+    \input{mean-distance.tikz}
+    \caption{\label{fig:meanvisibility-gridstep} Mean discrete distance of visibility as a function of the gridstep $h$ (see text).}
+\end{figure}
 
-%\begin{figure}
-%    \centering
-%    \input{mean-distance-piecewise.tikz}
-%    \caption{\label{fig:meanvisibility-gridstep-piecewise} Mean discrete distance of visibility as a function of the gridstep $h$ for 3 piecewise smooth shapes (see text).}
-%\end{figure}
+\begin{figure}
+    \centering
+    \input{mean-distance-piecewise.tikz}
+    \caption{\label{fig:meanvisibility-gridstep-piecewise} Mean discrete distance of visibility as a function of the gridstep $h$ for the piecewise smooth shape Ellipsoid Union (see text).}
+\end{figure}
