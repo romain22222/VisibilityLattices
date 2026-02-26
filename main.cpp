@@ -88,6 +88,8 @@ std::vector<RealPoint> surfel_true_normals;
 std::vector<RealPoint> ii_normals;
 std::vector<RealPoint> surfel_ii_normals;
 
+LinearKDTree<Point, 3> globalKdTree;
+
 // Curvature variables
 CountedPtr<CNC> pCNC;
 CNC::ScalarMeasure mu0;
@@ -1053,6 +1055,7 @@ std::string weightChoiceToString(WeightChoice choice) {
 
 static int weightCurrentItem = 1;
 static int centerPointChoiceInt = 0;
+static int selectedFunctionIdx = 1;
 std::vector<double> angle_dev(visibility_normals.size());
 std::vector<double> dummy(visibility_normals.size(), 0.0);
 
@@ -1357,9 +1360,9 @@ void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std
 		const auto fxm = std::min(1.0, std::max(-1.0, antiSp));
 		angle_dev[i] = std::min(acos(fxp), acos(fxm));
 		// if (angle_dev[i] > 0.1) {
-			// std::cout << "Large angle deviation for normal " << normalName << " at index " << i
-			// 	<< ": " << angle_dev[i] << " radians, " << angle_dev[i] * 180.0 / M_PI << " degrees" << std::endl;
-			// std::cout << "Normal: " << normals[i] << ", True normal: " << true_normals[i] << std::endl;
+		// std::cout << "Large angle deviation for normal " << normalName << " at index " << i
+		// 	<< ": " << angle_dev[i] << " radians, " << angle_dev[i] * 180.0 / M_PI << " degrees" << std::endl;
+		// std::cout << "Normal: " << normals[i] << ", True normal: " << true_normals[i] << std::endl;
 		// }
 	}
 	if (!noInterface)
@@ -1454,6 +1457,156 @@ void computeL2looErrorsCurvatures() {
 					computedC - trueC)
 				->setMapRange({0.0, MaxCurv})->setColorMap("reds");
 		}
+	}
+}
+
+double circleOfInterest = 4.0;
+double widthOfRing = 1.0;
+int nbPointsInCircleOfInterest = 10;
+
+double computeSaillencyForPointVCountIntersectionPoints(const int &pointel_idx, int debugging = 0) {
+	// 1. Compute the mean visibility distance at that pointel
+	// 2. Pick the k closest visible pointels to that distance from the pointel
+	// 3. Compute the intersections of all visible points from these k pointels
+	// Saillency score = #pointels in the intersection / #pointels visible from the pointel
+	const auto &pointel = pointels[pointel_idx];
+	std::vector<Point> visibles;
+	for (auto point_idx: globalKdTree.pointsInBall(pointel, VisibilityRadius)) {
+		auto tmp = globalKdTree.position(point_idx);
+		if (visibility.isVisible(pointel, tmp)) {
+			visibles.push_back(tmp);
+		}
+	}
+
+	double concernedDMin = std::max(0.0, circleOfInterest - widthOfRing);
+	double concernedDMax = circleOfInterest + widthOfRing;
+	std::vector<Point> pointelAtMD;
+	for (const auto &v: visibles) {
+		// keep only the points which are at a distance from the pointel between M-2*gridstep and M+2*gridstep
+		double d = (v - pointel).norm();
+		if (d >= concernedDMin && d <= concernedDMax) {
+			pointelAtMD.push_back(v);
+		}
+	}
+
+	// Select at most nbPointsInCircleOfInterest random points if there are more than nbPointsInCircleOfInterest points in pointelAtMD, otherwise keep them all
+	if (pointelAtMD.size() > nbPointsInCircleOfInterest) {
+		std::vector<Point> selectedPointelAtMD;
+		std::sample(pointelAtMD.begin(), pointelAtMD.end(), std::back_inserter(selectedPointelAtMD),
+		            nbPointsInCircleOfInterest, std::mt19937{0});
+		pointelAtMD.swap(selectedPointelAtMD);
+	}
+
+	std::vector<Point> intersection;
+	int i = 0;
+	for (const auto &v: pointelAtMD) {
+		std::vector<Point> visiblesFromV;
+		for (auto point_idx: globalKdTree.pointsInBall(v, VisibilityRadius)) {
+			auto tmp = globalKdTree.position(point_idx);
+			if (visibility.isVisible(v, tmp)) {
+				visiblesFromV.push_back(tmp);
+			}
+		}
+		if (debugging) {
+			std::cout << "Visible from v: " << v << " are: " << visiblesFromV.size() << std::endl;
+			std::vector<RealPoint> rVisiblesFromV;
+			embedPointels(visiblesFromV, rVisiblesFromV);
+			polyscope::registerPointCloud("Saillency debugging visibles from " + std::to_string(i), rVisiblesFromV)
+				->setPointRadius(0.3 * gridstep, false)->setPointColor({1.0f, 1.0f, 0.0f})->setEnabled(false);
+		}
+		if (intersection.empty()) {
+			// Start of the loop, just put visibles from v in the intersection
+			intersection.swap(visiblesFromV);
+		} else {
+			std::vector<Point> newIntersection;
+			for (const auto &p: intersection) {
+				if (std::find(visiblesFromV.begin(), visiblesFromV.end(), p) != visiblesFromV.end()) {
+					newIntersection.push_back(p);
+				}
+			}
+			intersection.swap(newIntersection);
+		}
+		if (debugging) {
+			std::cout << "Intersection is now: " << intersection.size() << std::endl;
+			std::vector<RealPoint> rVisibles;
+			embedPointels(intersection, rVisibles);
+			polyscope::registerPointCloud("Saillency debugging intersection after " + std::to_string(i), rVisibles)
+				->setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 1.0f, 1.0f})->setEnabled(false);
+		}
+		i++;
+	}
+	if (debugging) {
+		std::cout << "Pointel: " << pointel << std::endl;
+		std::cout << "Visible points size: " << visibles.size() << std::endl;
+		std::vector<RealPoint> rVisibles;
+		embedPointels(visibles, rVisibles);
+		polyscope::registerPointCloud("Saillency debugging visibles", rVisibles)
+			->setPointRadius(0.3 * gridstep, false)->setPointColor({1.0f, 0.0f, 0.0f});
+		std::vector<RealPoint> rKClosestVisibles;
+		embedPointels(pointelAtMD, rKClosestVisibles);
+		polyscope::registerPointCloud("Saillency debugging k closest visibles", rKClosestVisibles)
+			->setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 1.0f, 0.0f});
+		std::vector<RealPoint> rIntersection;
+		embedPointels(intersection, rIntersection);
+		polyscope::registerPointCloud("Saillency debugging intersection", rIntersection)
+			->setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 0.0f, 1.0f});
+	}
+	return (double) intersection.size();
+}
+
+double computeSaillencyForPointVAngleTests(const int &pidx, int debugging = 0) {
+	// Compute the angle between the visibility normal and the vector from the pointel to each visible point, then return the average of the cosines of these angles as the saillency score
+	if (visibility_normals.empty()) {
+		std::cout << "Computing visibility normals for saillency computation" << std::endl;
+		computeVisibilityNormals();
+		std::cout << "Visibility normals computed" << std::endl;
+	}
+	auto pointel = pointels[pidx];
+	std::vector<Point> visibles;
+	for (auto point_idx: globalKdTree.pointsInBall(pointel, VisibilityRadius)) {
+		auto tmp = globalKdTree.position(point_idx);
+		if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
+			visibles.push_back(tmp);
+		}
+	}
+	auto normal = visibility_normals[pidx];
+	double saillency_score = 0.0;
+	auto rng = std::mt19937{22222};
+	std::vector<std::pair<int, int> > idxPairs;
+	for (int i = 0; i < nbPointsInCircleOfInterest; ++i) {
+		int idx1 = 0;
+		int idx2 = 0;
+		while (idx1 == idx2 && std::ranges::find(idxPairs, std::make_pair(idx1, idx2)) != idxPairs.
+		       end()) {
+			idx1 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
+			idx2 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
+			if (idx1 > idx2) std::swap(idx1, idx2);
+		}
+		idxPairs.emplace_back(idx1, idx2);
+
+		auto q1 = visibles[idx1];
+		auto q2 = visibles[idx2];
+		if (!visibility.isVisible(q1, q2)) {
+			auto pq1 = q1 - pointel;
+			auto pq2 = q2 - pointel;
+			auto pq1_proj = pq1 - pq1.dot(normal) * normal;
+			auto pq2_proj = pq2 - pq2.dot(normal) * normal;
+			double angle_cos = 1 + pq1_proj.dot(pq2_proj) / (pq1_proj.norm() * pq2_proj.norm());
+			saillency_score += angle_cos / (q1-q2).squaredNorm();
+		}
+	}
+	return idxPairs.size() > 0 ? saillency_score / idxPairs.size() : 0.0;
+}
+
+std::vector<double> saillencies;
+
+double (*selectedFunction)(const int &pointel_idx, int debugging) = computeSaillencyForPointVCountIntersectionPoints;
+
+void computeSaillencies() {
+	saillencies.clear();
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
+	for (auto pidx = 0; pidx < pointels.size(); ++pidx) {
+		saillencies.push_back(selectedFunction(pidx, 0));
 	}
 }
 
@@ -1674,6 +1827,30 @@ void myCallback() {
 	if (ImGui::Button("Display Singularities")) {
 		displaySingularities();
 	}
+	ImGui::InputDouble("Circle of interest", &circleOfInterest);
+	ImGui::InputDouble("Width of ring", &widthOfRing);
+	ImGui::InputInt("Nb points in circle of interest", &nbPointsInCircleOfInterest);
+	const char *selectedFunctionIdxs[] = {"Nb intersection points", "Angle tests"};
+	ImGui::Combo("Saillency function", &selectedFunctionIdx, selectedFunctionIdxs,
+	             IM_ARRAYSIZE(selectedFunctionIdxs));
+	if (selectedFunctionIdx == 0) {
+		selectedFunction = computeSaillencyForPointVCountIntersectionPoints;
+	} else {
+		selectedFunction = computeSaillencyForPointVAngleTests;
+	}
+
+	if (ImGui::Button("Compute Saillencies")) {
+		trace.beginBlock("Compute saillencies");
+		computeSaillencies();
+		Time = trace.endBlock();
+		if (!noInterface) {
+			psPrimalMesh->addVertexScalarQuantity("Saillencies", saillencies)->setColorMap("reds");
+		}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Test saillency selected")) {
+		selectedFunction(pointel_idx, 1);
+	}
 
 	// Shortcuts
 	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
@@ -1834,9 +2011,9 @@ int gpuRun(int argc, char *argv[]) {
 			implicit_shape = SH3::makeImplicitShape3D(params);
 			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
 			binary_image = SH3::makeBinaryImage(digitized_shape,
-												SH3::Domain(K.lowerBound(),
-															K.upperBound()),
-												params);
+			                                    SH3::Domain(K.lowerBound(),
+			                                                K.upperBound()),
+			                                    params);
 		} else {
 			std::cout << "Using polyhedron: " << polynomial << std::endl;
 			polyhedra = Polyhedra::makeImplicitPolyhedron(polynomial);
@@ -1910,7 +2087,7 @@ int gpuRun(int argc, char *argv[]) {
 		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 		primal_surface->faceNormals() = surfel_trivial_normals;
 		if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
-			params("r-radius", 7./6.);
+			params("r-radius", 7. / 6.);
 		else
 			params("r-radius", iiRadius);
 		surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
@@ -2157,7 +2334,7 @@ int main(int argc, char *argv[]) {
 		VisibilityRadius = 2 * static_cast<int>(sigma);
 	}
 	std::cout << "sigma = " << sigma << std::endl;
-	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (2./sqrt(gridstep));
+	mitra_radius = (mitra_radius_tmp > 0) ? mitra_radius_tmp : (2. / sqrt(gridstep));
 
 
 	trace.beginBlock("Computing digital points and primal surface");
@@ -2186,10 +2363,10 @@ int main(int argc, char *argv[]) {
 	auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 	primal_surface->faceNormals() = surfel_trivial_normals;
 	if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
-		params("r-radius", iiRadius/3.);
+		params("r-radius", iiRadius / 3.);
 	else
 		params("r-radius", iiRadius);
-	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+	// surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
 	for (auto i = 1; i < t_ring + 3; i++) {
 		primal_surface->computeVertexNormalsFromFaceNormals();
 		primal_surface->computeFaceNormalsFromVertexNormals();
@@ -2197,10 +2374,10 @@ int main(int argc, char *argv[]) {
 	}
 	trivial_normals = primal_surface->vertexNormals();
 	trivial_normals.resize(pointels.size());
-	ii_normals.resize(pointels.size());
+	// ii_normals.resize(pointels.size());
 	true_normals.resize(pointels.size());
 	for (auto &n: trivial_normals) n = RealVector::zero;
-	for (auto &n: ii_normals) n = RealVector::zero;
+	// for (auto &n: ii_normals) n = RealVector::zero;
 	for (auto &n: true_normals) n = RealVector::zero;
 	for (auto k = 0; k < surfels.size(); k++) {
 		const auto &surf = surfels[k];
@@ -2209,14 +2386,14 @@ int main(int argc, char *argv[]) {
 			const auto p = K.uCoords(c0);
 			const auto idx = pTC->index(p);
 			trivial_normals[idx] += surfel_trivial_normals[k];
-			ii_normals[idx] += surfel_ii_normals[k];
+			// ii_normals[idx] += surfel_ii_normals[k];
 			if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 				true_normals[idx] += surfel_true_normals[k];
 			}
 		}
 	}
 	for (auto &n: trivial_normals) n /= n.norm();
-	for (auto &n: ii_normals) n /= n.norm();
+	// for (auto &n: ii_normals) n /= n.norm();
 	if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 		for (auto &n: true_normals)
 			if (n.norm() != 0) n /= n.norm();
@@ -2224,10 +2401,13 @@ int main(int argc, char *argv[]) {
 		computeTrueNormalsPolyhedra();
 	}
 	primal_surface->vertexNormals() = trivial_normals;
-	reorientIINormals();
+	// reorientIINormals();
+
+	nbPointsInCircleOfInterest = 10 / gridstep;
 
 
 	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
+	globalKdTree = LinearKDTree<Point, 3>(pointels);
 
 	// Initialize polyscope
 	if (noInterface) {
