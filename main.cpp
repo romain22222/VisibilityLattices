@@ -1101,10 +1101,11 @@ void computeMitraNormals() {
 }
 
 void computeVisibilityNormals() {
-	visibility_normals.clear();
-	visibility_normals.reserve(pointels.size());
+	visibility_normals.resize(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
-	for (const auto &pointel: pointels) {
+#pragma omp parallel for schedule(dynamic)
+	for (auto pidx = 0; pidx < pointels.size(); ++pidx) {
+		const auto pointel = pointels[pidx];
 		std::vector<Point> visibles;
 		RealPoint centroid(0, 0, 0);
 		if (centerPointChoice == CenterPointChoice::ITSELF) {
@@ -1142,7 +1143,7 @@ void computeVisibilityNormals() {
 		}
 		Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> solver(cov / (double) visibles.size());
 		auto normalE = solver.eigenvectors().col(0);
-		visibility_normals.emplace_back(normalE.x(), normalE.y(), normalE.z());
+		visibility_normals[pidx] = {normalE.x(), normalE.y(), normalE.z()};
 	}
 	if (!noInterface) {
 		psPrimalMesh->addVertexVectorQuantity("Pointel visibility normals", visibility_normals);
@@ -1464,7 +1465,7 @@ double circleOfInterest = 4.0;
 double widthOfRing = 1.0;
 int nbPointsInCircleOfInterest = 10;
 
-double computeSaillencyForPointVCountIntersectionPoints(const int &pointel_idx, int debugging = 0) {
+std::pair<double, double> computeSaillencyForPointVCountIntersectionPoints(const int &pointel_idx, int debugging = 0) {
 	// 1. Compute the mean visibility distance at that pointel
 	// 2. Pick the k closest visible pointels to that distance from the pointel
 	// 3. Compute the intersections of all visible points from these k pointels
@@ -1551,62 +1552,117 @@ double computeSaillencyForPointVCountIntersectionPoints(const int &pointel_idx, 
 		polyscope::registerPointCloud("Saillency debugging intersection", rIntersection)
 			->setPointRadius(0.3 * gridstep, false)->setPointColor({0.0f, 0.0f, 1.0f});
 	}
-	return (double) intersection.size();
+	return {(double) intersection.size(), 0.0};
 }
 
-double computeSaillencyForPointVAngleTests(const int &pidx, int debugging = 0) {
+std::vector<double> angle_means;
+std::vector<int> factor_sums;
+std::vector<double> mean_distances;
+
+void doDisplayAngleMeans() {
+	if (!angle_means.empty()) {
+		psPrimalMesh->addVertexScalarQuantity("Mean angle between visibility normal and vector to pairs of visible points", angle_means)
+			->setColorMap("coolwarm");
+		psPrimalMesh->addVertexScalarQuantity("Sum of visibility factors for pairs of visible points", factor_sums)
+			->setColorMap("coolwarm");
+		psPrimalMesh->addVertexScalarQuantity("Mean distance between pairs of visible points", mean_distances)
+			->setColorMap("coolwarm");
+	} else {
+		std::cout << "No angle means computed yet, cannot display" << std::endl;
+	}
+}
+
+std::pair<double, double> computeSaillencyForPointVAngleTests(const int &pidx, int debugging = 0) {
 	// Compute the angle between the visibility normal and the vector from the pointel to each visible point, then return the average of the cosines of these angles as the saillency score
+	const auto& pointel = pointels[pidx];
+	std::vector<Point> visibles;
+	for (const auto point_idx: globalKdTree.pointsInBall(pointel, VisibilityRadius/2)) {
+		if (auto tmp = globalKdTree.position(point_idx); visibility.isVisible(pointel, tmp) && tmp != pointel) {
+			visibles.push_back(tmp);
+		}
+	}
+	const auto& normal = visibility_normals[pidx];
+	double saillency_score = 0.0;
+	auto rng = std::mt19937{22222};
+	std::vector<std::pair<int, int> > idxPairs;
+	double angleMean = 0.0;
+	int factorSum = 0;
+	double mean_distance = 0.0;
+	for (int i = 0; i < nbPointsInCircleOfInterest; ++i) {
+		int idx1 = 0;
+		int idx2 = 0;
+		int tries = 0;
+		while ((idx1 == idx2 || std::ranges::find(idxPairs, std::make_pair(idx1, idx2)) != idxPairs.
+		       end()) && tries++ < 10*nbPointsInCircleOfInterest) {
+			idx1 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
+			idx2 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
+			if (idx1 > idx2) std::swap(idx1, idx2);
+		}
+		if (tries >= 10*nbPointsInCircleOfInterest) {
+			// Too many tries, probably not enough visible points to have nbPointsInCircleOfInterest pairs,
+			break;
+		}
+		idxPairs.emplace_back(idx1, idx2);
+
+		const auto& q1 = visibles[idx1];
+		const auto& q2 = visibles[idx2];
+		const auto factor = visibility.isVisible(q1, q2) ? 1. : -1.;
+		auto pq1 = q1 - pointel;
+		auto pq2 = q2 - pointel;
+		auto pq1_proj = pq1 - pq1.dot(normal) * normal;
+		auto pq2_proj = pq2 - pq2.dot(normal) * normal;
+		const double angle_cos = pq1_proj.dot(pq2_proj) / (pq1_proj.norm() * pq2_proj.norm());
+		const double distance = (q1 - q2).norm();
+		angleMean += angle_cos;
+		factorSum += factor;
+		mean_distance += distance;
+		// saillency_score += factor / distance;
+		saillency_score += factor;
+	}
+	factor_sums[pidx] = factorSum;
+	mean_distances[pidx] = mean_distance / nbPointsInCircleOfInterest;
+
+	return {!idxPairs.empty() ? saillency_score : 0.0, angleMean / idxPairs.size()};
+}
+
+std::vector<double> saillencies;
+
+std::pair<double, double> (*selectedFunction)(const int &pointel_idx, int debugging) = computeSaillencyForPointVCountIntersectionPoints;
+
+void computeSaillencies() {
+	saillencies.resize(pointels.size());
+	angle_means.resize(pointels.size());
+	factor_sums.resize(pointels.size());
+	mean_distances.resize(pointels.size());
+	auto kdTree = LinearKDTree<Point, 3>(pointels);
 	if (visibility_normals.empty()) {
 		std::cout << "Computing visibility normals for saillency computation" << std::endl;
 		computeVisibilityNormals();
 		std::cout << "Visibility normals computed" << std::endl;
 	}
-	auto pointel = pointels[pidx];
-	std::vector<Point> visibles;
-	for (auto point_idx: globalKdTree.pointsInBall(pointel, VisibilityRadius)) {
-		auto tmp = globalKdTree.position(point_idx);
-		if (visibility.isVisible(pointel, tmp) && tmp != pointel) {
-			visibles.push_back(tmp);
-		}
+#pragma omp parallel for schedule(dynamic)
+	for (auto pidx = 0; pidx < pointels.size(); ++pidx) {
+		auto [saillency, angleMean] = selectedFunction(pidx, 0);
+		saillencies[pidx] = saillency;
+		angle_means[pidx] = angleMean;
 	}
-	auto normal = visibility_normals[pidx];
-	double saillency_score = 0.0;
-	auto rng = std::mt19937{22222};
-	std::vector<std::pair<int, int> > idxPairs;
-	for (int i = 0; i < nbPointsInCircleOfInterest; ++i) {
-		int idx1 = 0;
-		int idx2 = 0;
-		while (idx1 == idx2 && std::ranges::find(idxPairs, std::make_pair(idx1, idx2)) != idxPairs.
-		       end()) {
-			idx1 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
-			idx2 = std::uniform_int_distribution<>(0, visibles.size() - 1)(rng);
-			if (idx1 > idx2) std::swap(idx1, idx2);
-		}
-		idxPairs.emplace_back(idx1, idx2);
-
-		auto q1 = visibles[idx1];
-		auto q2 = visibles[idx2];
-		if (!visibility.isVisible(q1, q2)) {
-			auto pq1 = q1 - pointel;
-			auto pq2 = q2 - pointel;
-			auto pq1_proj = pq1 - pq1.dot(normal) * normal;
-			auto pq2_proj = pq2 - pq2.dot(normal) * normal;
-			double angle_cos = 1 + pq1_proj.dot(pq2_proj) / (pq1_proj.norm() * pq2_proj.norm());
-			saillency_score += angle_cos / (q1-q2).squaredNorm();
-		}
-	}
-	return idxPairs.size() > 0 ? saillency_score / idxPairs.size() : 0.0;
 }
 
-std::vector<double> saillencies;
+std::vector<bool> isAThreshold;
 
-double (*selectedFunction)(const int &pointel_idx, int debugging) = computeSaillencyForPointVCountIntersectionPoints;
+double computedThreshold = 3.5;
 
-void computeSaillencies() {
-	saillencies.clear();
-	auto kdTree = LinearKDTree<Point, 3>(pointels);
-	for (auto pidx = 0; pidx < pointels.size(); ++pidx) {
-		saillencies.push_back(selectedFunction(pidx, 0));
+double threshold(int pidx) {
+	return nbPointsInCircleOfInterest * computedThreshold / mean_distances[pidx];
+}
+
+void smartSaillencyThreshold() {
+	isAThreshold.clear();
+	for (size_t i = 0; i < saillencies.size(); ++i) {
+		isAThreshold.push_back(saillencies[i] > threshold(i));
+	}
+	if (!noInterface) {
+		psPrimalMesh->addVertexScalarQuantity("Is a threshold " + std::to_string(nbPointsInCircleOfInterest), isAThreshold)->setColorMap("viridis");
 	}
 }
 
@@ -1845,11 +1901,19 @@ void myCallback() {
 		Time = trace.endBlock();
 		if (!noInterface) {
 			psPrimalMesh->addVertexScalarQuantity("Saillencies", saillencies)->setColorMap("reds");
+			doDisplayAngleMeans();
 		}
+		smartSaillencyThreshold();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Test saillency selected")) {
 		selectedFunction(pointel_idx, 1);
+	}
+
+	ImGui::InputDouble("Threshold factor", &computedThreshold);
+	ImGui::SameLine();
+	if (ImGui::Button("Redo Smart Saillency Threshold")) {
+		smartSaillencyThreshold();
 	}
 
 	// Shortcuts
@@ -2295,6 +2359,7 @@ int main(int argc, char *argv[]) {
 	params("closed", 1);
 	if (is_polynomial) {
 		trace.beginBlock("Build polynomial surface");
+		K = SH3::getKSpace(params);
 		if (!Polyhedra::isPolyhedron(polynomial)) {
 			implicit_shape = SH3::makeImplicitShape3D(params);
 			auto digitized_shape = SH3::makeDigitizedImplicitShape3D(implicit_shape, params);
@@ -2308,7 +2373,6 @@ int main(int argc, char *argv[]) {
 			binary_image = Polyhedra::makeBinaryPolyhedron(polyhedra, gridstep, minAABB, maxAABB, 1.0);
 			std::cout << "Digitization done." << std::endl;
 		}
-		K = SH3::getKSpace(params);
 		trace.endBlock();
 	} else {
 		trace.beginBlock("Reading image vol file");
@@ -2403,7 +2467,7 @@ int main(int argc, char *argv[]) {
 	primal_surface->vertexNormals() = trivial_normals;
 	// reorientIINormals();
 
-	nbPointsInCircleOfInterest = 10 / gridstep;
+	nbPointsInCircleOfInterest = 40 / gridstep;
 
 
 	pCNC = CountedPtr<CNC>(new CNC(*primal_surface));
