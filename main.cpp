@@ -1650,13 +1650,28 @@ void computeSaillencies() {
 
 std::vector<bool> isAThreshold;
 
-double computedThreshold = 3.5;
+double currentSeekedAngle = 10.0;
+double thresholdValue;
+
+double toRad(double deg) {
+	return deg * M_PI / 180.0;
+}
+
+void initThresholdAlpha() {
+	thresholdValue = M_2_PI/cos(toRad(currentSeekedAngle));
+}
+
+void initThresholdDeltaBeta() {
+	thresholdValue = M_2_PI/sin(toRad(currentSeekedAngle));
+}
 
 double threshold(int pidx) {
-	return nbPointsInCircleOfInterest * computedThreshold / mean_distances[pidx];
+	return nbPointsInCircleOfInterest * thresholdValue / mean_distances[pidx];
 }
 
 void smartSaillencyThreshold() {
+	initThresholdDeltaBeta();
+	std::cout << "Computed threshold : " << thresholdValue << std::endl;
 	isAThreshold.clear();
 	for (size_t i = 0; i < saillencies.size(); ++i) {
 		isAThreshold.push_back(saillencies[i] > threshold(i));
@@ -1910,8 +1925,7 @@ void myCallback() {
 		selectedFunction(pointel_idx, 1);
 	}
 
-	ImGui::InputDouble("Threshold factor", &computedThreshold);
-	ImGui::SameLine();
+	ImGui::InputDouble("Seeked max external angle", &currentSeekedAngle);
 	if (ImGui::Button("Redo Smart Saillency Threshold")) {
 		smartSaillencyThreshold();
 	}
