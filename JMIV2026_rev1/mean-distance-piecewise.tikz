@@ -1,0 +1,56 @@
+\begin{tikzpicture}
+    \begin{axis}[
+        width=0.9\columnwidth,
+%            height=0.5\textwidth,
+%            legend columns=3,
+    %xlabel={Gridstep},
+        ylabel={Mean distance},
+        x dir=reverse,
+%            legend pos=north west,
+        ymajorgrids=true,
+        grid style=dashed,
+%        ymax=50,
+        ymode=log,
+        xmode=log,
+        log ticks with fixed point,
+        legend columns=3,
+        legend style={
+            at={(0.5,-0.2)},
+            anchor=north,
+            draw=none,
+            column sep=15pt,
+        }
+    ]
+        \addplot [
+            color=red,
+            mark=*,
+            only marks,
+            mark size=1.5pt,
+            opacity=0.4
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/double_ellipsoid_1.txt};
+        \addlegendentry{$Star_1$}
+        \addplot [
+            color=MyGreen,
+            mark=o,
+            only marks,
+            mark size=1.5pt,
+            opacity=0.8
+        ] table [
+        x=gridstep,
+        y=mean_distance,
+        col sep=comma
+        ] {./graphDataMeanDist/double_ellipsoid_2.txt};
+        \addlegendentry{$Star_2$}
+        \addplot[
+            color=black,
+            thick,
+            domain=0.03:0.11,
+            samples=200,
+        ] {2.5*x^(-1/2)};
+        \addlegendentry{$\Theta\left( h^{-\frac{1}{2}} \right)$}
+    \end{axis}
+\end{tikzpicture}
