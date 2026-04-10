@@ -160,7 +160,14 @@ $\Star{Z}$.  Each such integer position~$t$ corresponds to a pair of
 points $(p, p+\vv)$ that are visible in~$Z$.  These pairs are drawn as
 red arrows on the top-left figure~(F).  Note that the process can be
 stopped early as soon as the running intersection $R_i$ becomes empty,
-since further intersections cannot produce new positions.}
+since further intersections cannot produce new positions.
+This procedure requires a data representation that is both compact in
+storage and efficient for the interval inclusion and intersection
+operations at its core.  Lattice maps fulfill both requirements: they
+encode a potentially large cell complex as a small collection of
+integer interval sequences, and all the key operations
+(translation, inclusion test, intersection) reduce to simple
+linear-time scans over sorted intervals.}
 
 In general, the algorithm reduces to determining all possible
 inclusions by translation of sequences of intervals into another
