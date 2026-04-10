@@ -13,14 +13,22 @@ all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
 Figure~\ref{fig:lattice-representation} for an illustration).
 
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
     \input{lattice.tikz}
-    \caption{\label{fig:lattice-representation} Representation of a
+    \caption{\label{fig:lattice-representation} \replaced[id=ROM]{Representation of a
+    2d cell complex (here the star of a given curve) as a lattice
+    map. (a)~The digital set $Z$ (black dots $\bullet$) and the
+    boundary of $\Star{Z}$ (dashed). (b)~The cells of $\Star{Z}$
+    shown in red: 2-cells (squares), 1-cells (segments), and 0-cells
+    (dots). (c)~Khalimsky coding: each of the 63 cells is encoded as
+    a lattice point with doubled coordinates (black $\bullet$); each
+    red outline shows the original cell it encodes. (d)~Projection
+    along one axis yields a lattice map of 11 integer intervals.}{Representation of a
     2d cell complex (here the star of a given curve) as a lattice
     map. From 63 cells (with two coordinates) on the top, we get 11
-    intervals on the bottom.}
-\end{figure}
+    intervals on the bottom.}}
+\end{figure*}
 
 
 A \emph{sequence of intervals} is an ordered list of intervals $L =

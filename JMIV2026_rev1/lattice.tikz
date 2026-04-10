@@ -1,6 +1,21 @@
-\begin{tabular}{c}
-  \begin{tikzpicture}[scale=0.75]
-    \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,1.75) grid (6.75,7.25);
+\newcommand{\drawBigRedSquare}[2]{% 2-cell red outline
+    \draw[thick, red] (#1+1.1,#2+2.1) -- (#1+1.9,#2+2.1) -- (#1+1.9,#2+2.9) -- (#1+1.1,#2+2.9) -- cycle}
+\newcommand{\drawBigRedVLine}[2]{% vertical 1-cell red outline
+    \draw[thick, red] (#1+1,#2+2.1) -- (#1+1,#2+2.9)}
+\newcommand{\drawBigRedHLine}[2]{% horizontal 1-cell red outline
+    \draw[thick, red] (#1+1.1,#2+2) -- (#1+1.9,#2+2)}
+\newcommand{\drawRedPoint}[2]{% 0-cell red dot
+    \filldraw[thick, red] (#1,#2) circle (0.05)}
+\newcommand{\drawKSquare}[2]{% 2-cell as black dot in Khalimsky coords
+    \filldraw[black] (#1+1.5,#2+2.5) circle (0.05);}
+\newcommand{\drawKVLine}[2]{% vertical 1-cell as black dot
+    \filldraw[black] (#1+1,#2+2.5) circle (0.05);}
+\newcommand{\drawKHLine}[2]{% horizontal 1-cell as black dot
+    \filldraw[black] (#1+1.5,#2+2) circle (0.05);}
+\newcommand{\drawKPoint}[2]{% 0-cell as black dot
+    \filldraw[black] (#1,#2) circle (0.05);}
+%%
+\newcommand{\drawShapePoints}{%
     \filldraw[black] (1,4) circle (0.05);
     \filldraw[black] (1,5) circle (0.05);
     \filldraw[black] (2,5) circle (0.05);
@@ -11,26 +26,228 @@
     \filldraw[black] (2,2) circle (0.05);
     \filldraw[black] (1,2) circle (0.05);
     \filldraw[black] (4,2) circle (0.05);
-    %% \filldraw[black] (2,1) circle (0.05);
-    %% \filldraw[black] (1,1) circle (0.05);
-    %% \filldraw[black] (1,0) circle (0.05);
-    %% \filldraw[black] (2,0) circle (0.05);
-    %% \filldraw[black] (3,0) circle (0.05);
-    %% \filldraw[black] (3,1) circle (0.05);
-    %% \filldraw[black] (4,1) circle (0.05);
-    %% \filldraw[black] (5,1) circle (0.05);
-    \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
-    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,7)};
-    \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2) ;
-    \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
-  \end{tikzpicture} \\
-  \begin{tikzpicture}[scale=0.75]
-    \foreach \y in {2,2.5,...,7} {
-      \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
+}
+\newcommand{\drawShapeCurve}{%
+    \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2);
+}
+\newcommand{\drawStarBoundary}{%
+    \draw[thick,dashed] (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+}
+\newcommand{\drawAxesInteger}{%
+    \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=15.6pt}] {(-1,1) -- (-1,6)};
+    \foreach \y in {0,1,2,3,4,5} {
+        \node at (-1.3,\y+1) {\scriptsize\y};
     }
-    \draw[-{Stealth[length=3mm]}=black] (-1,1) -- (-1,6.5);
-    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=21.5pt}] {(-1,1) -- (-1,6.5)};
-    \draw[thick,dashed]  (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
+    \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=15.6pt}] {(-1,0) -- (5,0)};
+    \foreach \x in {0,1,2,3,4,5} {
+        \node at (\x,-0.5) {\scriptsize\x};
+    }
+}
+\newcommand{\drawAxesKhalimsky}{%
+    \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=7.8pt}] {(-1,1) -- (-1,6)};
+    \foreach \y in {0,1,...,10} {
+        \node at (-1.5,\y/2+1) {\scriptsize\y};
+    }
+    \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (6.5,0);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=7.8pt}] {(-1,0) -- (5,0)};
+    \foreach \x in {0,1,...,10} {
+        \node at (\x/2,-0.5) {\scriptsize\x};
+    }
+}
+\newcommand{\drawAllBigSquares}{%
+    \drawBigRedSquare{-1}{-1};
+    \drawBigRedSquare{-1}{0};
+    \drawBigRedSquare{-1}{1};
+    \drawBigRedSquare{-1}{2};
+    \drawBigRedSquare{-1}{3};
+    \drawBigRedSquare{0}{-1};
+    \drawBigRedSquare{0}{0};
+    \drawBigRedSquare{0}{1};
+    \drawBigRedSquare{0}{2};
+    \drawBigRedSquare{0}{3};
+    \drawBigRedSquare{1}{-1};
+    \drawBigRedSquare{1}{0};
+    \drawBigRedSquare{1}{1};
+    \drawBigRedSquare{1}{2};
+    \drawBigRedSquare{1}{3};
+    \drawBigRedSquare{2}{-1};
+    \drawBigRedSquare{2}{0};
+    \drawBigRedSquare{2}{1};
+    \drawBigRedSquare{2}{2};
+    \drawBigRedSquare{2}{3};
+    \drawBigRedSquare{3}{-1};
+    \drawBigRedSquare{3}{0};
+}
+\newcommand{\drawAllBigVLines}{%
+    \drawBigRedVLine{0}{-1};
+    \drawBigRedVLine{0}{0};
+    \drawBigRedVLine{0}{1};
+    \drawBigRedVLine{0}{2};
+    \drawBigRedVLine{0}{3};
+    \drawBigRedVLine{1}{-1};
+    \drawBigRedVLine{1}{0};
+    \drawBigRedVLine{1}{2};
+    \drawBigRedVLine{1}{3};
+    \drawBigRedVLine{2}{-1};
+    \drawBigRedVLine{2}{0};
+    \drawBigRedVLine{2}{1};
+    \drawBigRedVLine{2}{2};
+    \drawBigRedVLine{2}{3};
+    \drawBigRedVLine{3}{-1};
+    \drawBigRedVLine{3}{0};
+}
+\newcommand{\drawAllBigHLines}{%
+    \drawBigRedHLine{-1}{0};
+    \drawBigRedHLine{-1}{2};
+    \drawBigRedHLine{-1}{3};
+    \drawBigRedHLine{0}{0};
+    \drawBigRedHLine{0}{2};
+    \drawBigRedHLine{0}{3};
+    \drawBigRedHLine{1}{0};
+    \drawBigRedHLine{1}{1};
+    \drawBigRedHLine{1}{2};
+    \drawBigRedHLine{1}{3};
+    \drawBigRedHLine{2}{0};
+    \drawBigRedHLine{2}{1};
+    \drawBigRedHLine{2}{2};
+    \drawBigRedHLine{2}{3};
+    \drawBigRedHLine{3}{0};
+}
+\newcommand{\drawAllRedPoints}{%
+    \drawRedPoint{1}{4};
+    \drawRedPoint{1}{5};
+    \drawRedPoint{2}{5};
+    \drawRedPoint{3}{5};
+    \drawRedPoint{3}{4};
+    \drawRedPoint{3}{3};
+    \drawRedPoint{3}{2};
+    \drawRedPoint{2}{2};
+    \drawRedPoint{1}{2};
+    \drawRedPoint{4}{2};
+}
+\newcommand{\drawAllKSquares}{%
+    \drawKSquare{-1}{-1};
+    \drawKSquare{-1}{0};
+    \drawKSquare{-1}{1};
+    \drawKSquare{-1}{2};
+    \drawKSquare{-1}{3};
+    \drawKSquare{0}{-1};
+    \drawKSquare{0}{0};
+    \drawKSquare{0}{1};
+    \drawKSquare{0}{2};
+    \drawKSquare{0}{3};
+    \drawKSquare{1}{-1};
+    \drawKSquare{1}{0};
+    \drawKSquare{1}{1};
+    \drawKSquare{1}{2};
+    \drawKSquare{1}{3};
+    \drawKSquare{2}{-1};
+    \drawKSquare{2}{0};
+    \drawKSquare{2}{1};
+    \drawKSquare{2}{2};
+    \drawKSquare{2}{3};
+    \drawKSquare{3}{-1};
+    \drawKSquare{3}{0};
+}
+\newcommand{\drawAllKVLines}{%
+    \drawKVLine{0}{-1};
+    \drawKVLine{0}{0};
+    \drawKVLine{0}{1};
+    \drawKVLine{0}{2};
+    \drawKVLine{0}{3};
+    \drawKVLine{1}{-1};
+    \drawKVLine{1}{0};
+    \drawKVLine{1}{2};
+    \drawKVLine{1}{3};
+    \drawKVLine{2}{-1};
+    \drawKVLine{2}{0};
+    \drawKVLine{2}{1};
+    \drawKVLine{2}{2};
+    \drawKVLine{2}{3};
+    \drawKVLine{3}{-1};
+    \drawKVLine{3}{0};
+}
+\newcommand{\drawAllKHLines}{%
+    \drawKHLine{-1}{0};
+    \drawKHLine{-1}{2};
+    \drawKHLine{-1}{3};
+    \drawKHLine{0}{0};
+    \drawKHLine{0}{2};
+    \drawKHLine{0}{3};
+    \drawKHLine{1}{0};
+    \drawKHLine{1}{1};
+    \drawKHLine{1}{2};
+    \drawKHLine{1}{3};
+    \drawKHLine{2}{0};
+    \drawKHLine{2}{1};
+    \drawKHLine{2}{2};
+    \drawKHLine{2}{3};
+    \drawKHLine{3}{0};
+}
+\newcommand{\drawAllKPoints}{%
+    \drawKPoint{1}{4};
+    \drawKPoint{1}{5};
+    \drawKPoint{2}{5};
+    \drawKPoint{3}{5};
+    \drawKPoint{3}{4};
+    \drawKPoint{3}{3};
+    \drawKPoint{3}{2};
+    \drawKPoint{2}{2};
+    \drawKPoint{1}{2};
+    \drawKPoint{4}{2};
+}
+\begin{tabular}{c@{\hspace{4mm}}c}
+\begin{tikzpicture}[scale=0.55]
+    \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+    \drawAxesInteger
+    \drawShapePoints
+    \drawShapeCurve
+    \drawStarBoundary
+\end{tikzpicture}
+&
+\begin{tikzpicture}[scale=0.55]
+    \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+    \drawAxesInteger
+    \drawShapeCurve
+    \drawStarBoundary
+    \drawAllBigSquares
+    \drawAllBigVLines
+    \drawAllBigHLines
+    \drawAllRedPoints
+\end{tikzpicture}
+\\[-2mm]
+\small (a) $Z$ and boundary of $\Star{Z}$ (dashed)
+&
+\small (b) Cells of $\Star{Z}$ in red
+\\[4mm]
+\begin{tikzpicture}[scale=0.55]
+    \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
+    \drawAxesKhalimsky
+    \drawShapeCurve
+    \drawStarBoundary
+    \drawAllBigSquares
+    \drawAllBigVLines
+    \drawAllBigHLines
+    \drawAllRedPoints
+    \drawAllKSquares
+    \drawAllKVLines
+    \drawAllKHLines
+    \drawAllKPoints
+\end{tikzpicture}
+&
+\begin{tikzpicture}[scale=0.55]
+    \foreach \y in {2,2.5,...,7} {
+        \draw[thin, lightgray,xshift=-1cm,yshift=-1cm] (-0.25,\y) -- (7.25,\y);
+    }
+    \draw[-{Stealth[length=3mm]}=black] (-1,0) -- (-1,7);
+    \draw decorate [decoration={crosses,transform={rotate=45},shape size=1.5mm,segment length=7.8pt}] {(-1,1) -- (-1,6)};
+    \foreach \y in {0,1,...,10} {
+        \node at (-1.5,\y/2+1) {\scriptsize\y};
+    }
+    \drawStarBoundary
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5.5)--(3.6,5.5);
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,5)--(3.6,5);
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,4.5)--(3.6,4.5);
@@ -42,10 +259,10 @@
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2.5)--(4.6,2.5);
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,2)--(4.6,2);
     \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1.5)--(4.6,1.5);
-    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,1)--(5.6,1);
-    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0.5)--(5.6,0.5);
-    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,0)--(3.6,0);
-    %% \draw[thick, arrows = {Bracket[sharp]-Bracket[sharp]}] (0.4,-0.5)--(3.6,-0.5);
-    %\filldraw[white,yshift=-1.25cm] (0,2) circle (0.01); % readjust the height to match the original path
-  \end{tikzpicture}\\[-8mm]
+    \node at (0,-0.5) {};
+\end{tikzpicture}
+\\[-2mm]
+\small (c) Khalimsky coding (each $\bullet$ encodes a cell)
+&
+\small (d) Lattice map (11 intervals)
 \end{tabular}
