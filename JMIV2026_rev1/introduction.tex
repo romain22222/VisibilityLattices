@@ -66,13 +66,14 @@
     established.
 
     Covariance-based normal estimation methods, commonly used for
-    point clouds (e.g.\ \cite{mitra:2003-acm}), constitute another
-    popular approach. These methods rely on local covariance analysis
+    point clouds (e.g.\ \cite{mitra:2003-acm}), \added[id=ROM]{or statistical-based
+    normal estimation methods on triangular meshes (e.g.\ \cite{jones:2003-tog}),} constitute \replaced[id=ROM]{other popular approaches}{another
+    popular approach}. These methods rely on local covariance analysis
     and are theoretically justified under assumptions of Gaussian
     noise. However, such assumptions do not exactly hold for digitized shapes,
     whose geometry comes from deterministic grid sampling rather than
-    stochastic perturbations. This mismatch makes the application of
-    covariance-based estimators to digital surfaces theoretically less
+    stochastic perturbations. This mismatch makes \replaced[id=ROM]{these applications on}{the application of
+    covariance-based estimators to} digital surfaces theoretically less
     grounded and practically less reliable, motivating the need for
     methods tailored to digital geometry.
 
