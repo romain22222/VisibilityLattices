@@ -1,3 +1,12 @@
+    \added[id=ROM]{
+    \noindent\textbf{Notations.} We summarize here the main notations used in the article.
+    $Z \subset \Z^d$ denotes a \emph{digital set}, i.e., a finite set of lattice points in the $d$-dimensional digital space.
+    $h > 0$ denotes the \emph{digitization grid step}, representing the resolution of the digital lattice.
+    $k \in \mathbb{N}, k \geq 1$ denotes the \emph{star parameter}, controlling the thickness of the visibility cone around a digital set.
+    $\Star{Z}$ denotes the \emph{star} of a subset $Z$, i.e., the set of all cells that intersect the closure of $Z$.
+    $\kStar{Z}{k}$ denotes the \emph{$k$-star} of a digital set $Z$, obtained by iterating the star operator $k$ times.
+    }
+
     All the theory and algorithms presented in this section are
     defined and valid in arbitrary dimension $d$. They will however be
     illustrated in 2d for clarity, while experiments will be
@@ -17,8 +26,8 @@
     $\Star{\sigma}\coloneqq\{\tau \in \mathcal{C}, \sigma \subset \bar{\tau}
     \}$. It is naturally extended to any subcomplex $K$ by union,
     i.e. $\Star{K} \coloneqq \cup_{\sigma \in K} \Star{\sigma}$, and more
-    generally to any subset $Y$ of $\R^d$ as $\Star{Y}\coloneqq\{ c \in \C,
-    \bar{c} \cap Y \neq \emptyset \}$. The \emph{body} $\|K\|$ of $K$
+    generally to any subset $\replaced[id=ROM]{Z}{X}$ of $\R^d$ as $\Star{\replaced[id=ROM]{Z}{X}}\coloneqq\{ c \in \C,
+    \bar{c} \cap \replaced[id=ROM]{Z}{X} \neq \emptyset \}$. The \emph{body} $\|K\|$ of $K$
     is its realization in $\R^d$, i.e. $\|K\|\coloneqq\cup_{c \in K} c$. One
     can check that $\Star{K}=\Star{\|K\|}$, so these definitions are
     sound.
