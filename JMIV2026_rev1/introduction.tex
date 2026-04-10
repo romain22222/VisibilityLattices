@@ -28,14 +28,14 @@
     visibility.
 
     We propose an algorithm that solves the following visibility
-    problem: given a digital set $X \subset \Z^d$, two points $p,q$ of
-    $X$ are \emph{visible} whenever the Euclidean straight line
+    problem: given a digital set $\replaced[id=ROM]{Z}{X} \subset \Z^d$, two points $p,q$ of
+    $\replaced[id=ROM]{X}{Z}$ are \emph{visible} whenever the Euclidean straight line
     segment $\lbrack p,q \rbrack$ is never at chessboard distance
-    ($L_\infty$-distance) greater or equal to $1$ from $X$. It is
-    equivalent to the \emph{cotangency} of $p$ and $q$ in $X$, as
+    ($L_\infty$-distance) greater or equal to $1$ from $\replaced[id=ROM]{Z}{X}$. It is
+    equivalent to the \emph{cotangency} of $p$ and $q$ in $\replaced[id=ROM]{Z}{X}$, as
     formalized in~\cite{lachaud:2021-dgmm,lachaud:2022-jmiv}, and can
     be viewed as an inclusion problem between sets of lattice points
-    in this form. Indeed, cells \replaced[id=ROM]{surrounding}{surunding} $X$ can be encoded as
+    in this form. Indeed, cells \replaced[id=ROM]{surrounding}{surunding} $\replaced[id=ROM]{Z}{X}$ can be encoded as
     lattice points (Khalimsky coding), as well as the cells covering
     lattice directions. The originality of our method is to encode
     subsets of lattice points as sets of integer intervals and to
