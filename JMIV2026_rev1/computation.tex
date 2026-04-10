@@ -8,7 +8,7 @@ Let $(\ve_j)_{j=1,\dots,d}$ be the canonical basis of $\Z^d$. We may
 choose an arbitrary projection \emph{axis} $j \in
 \{1,\ldots,d\}$. Letting $\pi_j$ be the projector along this axis, we
 can collect all the cells of $K$ that projects onto the same
-points. Let $p \in K$. Then $\pi^{-1}_j( \pi_j(p)) \cap \Star{K}$ is a set of cells having
+points. \replaced[author=ROM]{Let}{Consider a point} $p \in K$. Then $\pi^{-1}_j( \pi_j(p)) \cap \Star{K}$ is a set of cells having
 all the same coordinates except along coordinate $j$. This set can be
 ordered increasingly and stored as a list of integer intervals (see
 Figure~\ref{fig:lattice-representation} for an illustration).
@@ -155,7 +155,7 @@ figure~\ref{fig:visibility-results} on 3d shapes.
 To efficiently compute the intersection of two sequences of intervals
 $K$ and $L$ (Algorithm~\ref{alg:intersection}), we go through the
 first two unvisited elements of the two lists. If they do not overlap
-(i.e.\ the start and end of the 1st interval are both smaller than the
+(i.e.\ the start and end of the \replaced[author=ROM]{1st}{first} interval are both smaller than the
 start of the other), then we can discard the smaller interval. Else,
 we output the intersection of these 2 intervals as one of the
 resulting intervals. We then skip the interval with the smallest
