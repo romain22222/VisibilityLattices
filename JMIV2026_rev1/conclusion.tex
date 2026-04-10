@@ -18,15 +18,20 @@ the best possible normal approximation. The obtained normal vector
 field is more suitable to curvature estimation than the classical
 Integral Invariant normal estimator.
 
+\added[id=ROM]{Beyond this specific application, we note that our algorithm for
+computing visibility is in fact much more general. The same algorithm
+could be used to recognize if any pattern of lattice points is present
+on a shape. It is similar to an erosion algorithm where the
+structuring element is the chosen pattern, and could also be used for
+morphological operations~\cite{soille1999morphological}.}
+
 We have several ideas for possible future works. First, it is possible
 to speed up the identification of non visibility by a coarse-to-fine
 approach and a precomputation of a pyramid of covering cells. We would
 like to explore if we can build such a top-down variant of our
-algorithm, considering the primitive vectors as a hierarchy. Moreover,
-our algorithm is not limited to pairwise visibility, but is more an
-algorithm of exact pattern matching. We would like to explore new
+algorithm, considering the primitive vectors as a hierarchy. \replaced[id=ROM]{We}{Building on this generality, we would like to explore new
 applications of pattern identification along digital surfaces (like
-corner detection, locally convex zones identification, etc.). We
+corner detection, locally convex zones identification, etc.). We}
 finally plan to do edge detection on digital surfaces using the same
 algorithm, by identifying patterns on the visibility. On a more
 theoretical level, we would like to prove the convergence of the
