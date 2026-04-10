@@ -54,7 +54,8 @@
     points. One can check that $p$ and $q$ must belong to $Z$ to be
     visible.  Figure~\ref{fig:visibility-2d} illustrates what is
     considered visible or not on some examples for $k=1$ (i.e. for
-    $\Starop_1$).  Unless otherwise specified, we will consider
+    $\Starop_1$)\added[id=ROM]{, while Figure~\ref{fig:all-visible-from-point}
+    shows all the visible points from a given source}.  Unless otherwise specified, we will consider
     visibility with $k=1$. This does not change the algorithmic
     principles nor most of the practical results we get.
 
@@ -100,7 +101,7 @@
     % Path from p to q : r u r u r r r r r u r
     \begin{figure}[t]
         \centering
-        \begin{tikzpicture}
+        \begin{tikzpicture}[scale=1.5]
             \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (0.25,0.25) grid (5.25,3.25);
             %% Star cells (transparent)
             \draw[thick, red, opacity=0.3] (-0.5+0.1,-0.5+0.1) -- (-0.5+0.4,-0.5+0.1) -- (-0.5+0.4,-0.5+0.4) -- (-0.5+0.1,-0.5+0.4) -- cycle;
@@ -198,6 +199,99 @@
         \centering
         \begin{tikzpicture}[scale=0.65]
             \draw[step=1,lightgray,thin] (-1.5,-1.5) grid (5.5,5.5);
+            \draw[thick, red, opacity=0.3] (-0.8,-0.8) -- (-0.2,-0.8) -- (-0.2,-0.2) -- (-0.8,-0.2) -- cycle;
+            \draw[thick, red, opacity=0.3] (-0.8,0.2) -- (-0.2,0.2) -- (-0.2,0.8) -- (-0.8,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (-0.8,1.2) -- (-0.2,1.2) -- (-0.2,1.8) -- (-0.8,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (-0.8,2.2) -- (-0.2,2.2) -- (-0.2,2.8) -- (-0.8,2.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (-0.8,3.2) -- (-0.2,3.2) -- (-0.2,3.8) -- (-0.8,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (-0.8,4.2) -- (-0.2,4.2) -- (-0.2,4.8) -- (-0.8,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,-0.8) -- (0.8,-0.8) -- (0.8,-0.2) -- (0.2,-0.2) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,0.2) -- (0.8,0.2) -- (0.8,0.8) -- (0.2,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,1.2) -- (0.8,1.2) -- (0.8,1.8) -- (0.2,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,2.2) -- (0.8,2.2) -- (0.8,2.8) -- (0.2,2.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,3.2) -- (0.8,3.2) -- (0.8,3.8) -- (0.2,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0.2,4.2) -- (0.8,4.2) -- (0.8,4.8) -- (0.2,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (1.2,-0.8) -- (1.8,-0.8) -- (1.8,-0.2) -- (1.2,-0.2) -- cycle;
+            \draw[thick, red, opacity=0.3] (1.2,0.2) -- (1.8,0.2) -- (1.8,0.8) -- (1.2,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (1.2,1.2) -- (1.8,1.2) -- (1.8,1.8) -- (1.2,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (1.2,3.2) -- (1.8,3.2) -- (1.8,3.8) -- (1.2,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (1.2,4.2) -- (1.8,4.2) -- (1.8,4.8) -- (1.2,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (2.2,-0.8) -- (2.8,-0.8) -- (2.8,-0.2) -- (2.2,-0.2) -- cycle;
+            \draw[thick, red, opacity=0.3] (2.2,0.2) -- (2.8,0.2) -- (2.8,0.8) -- (2.2,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (2.2,1.2) -- (2.8,1.2) -- (2.8,1.8) -- (2.2,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (2.2,3.2) -- (2.8,3.2) -- (2.8,3.8) -- (2.2,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (2.2,4.2) -- (2.8,4.2) -- (2.8,4.8) -- (2.2,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (3.2,0.2) -- (3.8,0.2) -- (3.8,0.8) -- (3.2,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (3.2,1.2) -- (3.8,1.2) -- (3.8,1.8) -- (3.2,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (3.2,2.2) -- (3.8,2.2) -- (3.8,2.8) -- (3.2,2.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (3.2,3.2) -- (3.8,3.2) -- (3.8,3.8) -- (3.2,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (3.2,4.2) -- (3.8,4.2) -- (3.8,4.8) -- (3.2,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (4.2,0.2) -- (4.8,0.2) -- (4.8,0.8) -- (4.2,0.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (4.2,1.2) -- (4.8,1.2) -- (4.8,1.8) -- (4.2,1.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (4.2,2.2) -- (4.8,2.2) -- (4.8,2.8) -- (4.2,2.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (4.2,3.2) -- (4.8,3.2) -- (4.8,3.8) -- (4.2,3.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (4.2,4.2) -- (4.8,4.2) -- (4.8,4.8) -- (4.2,4.8) -- cycle;
+            \draw[thick, red, opacity=0.3] (0,-0.8) -- (0,-0.2);
+            \draw[thick, red, opacity=0.3] (0,0.2) -- (0,0.8);
+            \draw[thick, red, opacity=0.3] (0,1.2) -- (0,1.8);
+            \draw[thick, red, opacity=0.3] (0,2.2) -- (0,2.8);
+            \draw[thick, red, opacity=0.3] (0,3.2) -- (0,3.8);
+            \draw[thick, red, opacity=0.3] (0,4.2) -- (0,4.8);
+            \draw[thick, red, opacity=0.3] (1,-0.8) -- (1,-0.2);
+            \draw[thick, red, opacity=0.3] (1,0.2) -- (1,0.8);
+            \draw[thick, red, opacity=0.3] (1,3.2) -- (1,3.8);
+            \draw[thick, red, opacity=0.3] (1,4.2) -- (1,4.8);
+            \draw[thick, red, opacity=0.3] (2,-0.8) -- (2,-0.2);
+            \draw[thick, red, opacity=0.3] (2,0.2) -- (2,0.8);
+            \draw[thick, red, opacity=0.3] (2,1.2) -- (2,1.8);
+            \draw[thick, red, opacity=0.3] (2,3.2) -- (2,3.8);
+            \draw[thick, red, opacity=0.3] (2,4.2) -- (2,4.8);
+            \draw[thick, red, opacity=0.3] (3,0.2) -- (3,0.8);
+            \draw[thick, red, opacity=0.3] (3,1.2) -- (3,1.8);
+            \draw[thick, red, opacity=0.3] (3,3.2) -- (3,3.8);
+            \draw[thick, red, opacity=0.3] (3,4.2) -- (3,4.8);
+            \draw[thick, red, opacity=0.3] (4,0.2) -- (4,0.8);
+            \draw[thick, red, opacity=0.3] (4,1.2) -- (4,1.8);
+            \draw[thick, red, opacity=0.3] (4,2.2) -- (4,2.8);
+            \draw[thick, red, opacity=0.3] (4,3.2) -- (4,3.8);
+            \draw[thick, red, opacity=0.3] (4,4.2) -- (4,4.8);
+            \draw[thick, red, opacity=0.3] (-0.8,0) -- (-0.2,0);
+            \draw[thick, red, opacity=0.3] (0.2,0) -- (0.8,0);
+            \draw[thick, red, opacity=0.3] (1.2,0) -- (1.8,0);
+            \draw[thick, red, opacity=0.3] (2.2,0) -- (2.8,0);
+            \draw[thick, red, opacity=0.3] (1.2,1) -- (1.8,1);
+            \draw[thick, red, opacity=0.3] (2.2,1) -- (2.8,1);
+            \draw[thick, red, opacity=0.3] (3.2,1) -- (3.8,1);
+            \draw[thick, red, opacity=0.3] (4.2,1) -- (4.8,1);
+            \draw[thick, red, opacity=0.3] (3.2,2) -- (3.8,2);
+            \draw[thick, red, opacity=0.3] (4.2,2) -- (4.8,2);
+            \draw[thick, red, opacity=0.3] (3.2,3) -- (3.8,3);
+            \draw[thick, red, opacity=0.3] (4.2,3) -- (4.8,3);
+            \draw[thick, red, opacity=0.3] (3.2,4) -- (3.8,4);
+            \draw[thick, red, opacity=0.3] (4.2,4) -- (4.8,4);
+            \draw[thick, red, opacity=0.3] (2.2,4) -- (2.8,4);
+            \draw[thick, red, opacity=0.3] (1.2,4) -- (1.8,4);
+            \draw[thick, red, opacity=0.3] (0.2,4) -- (0.8,4);
+            \draw[thick, red, opacity=0.3] (-0.8,4) -- (-0.2,4);
+            \draw[thick, red, opacity=0.3] (0.2,3) -- (0.8,3);
+            \draw[thick, red, opacity=0.3] (-0.8,3) -- (-0.2,3);
+            \draw[thick, red, opacity=0.3] (0.2,2) -- (0.8,2);
+            \draw[thick, red, opacity=0.3] (-0.8,2) -- (-0.2,2);
+            \filldraw[thick, red, opacity=0.3] (0,0) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (1,0) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (2,0) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (2,1) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (3,1) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (4,1) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (4,2) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (4,3) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (4,4) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (3,4) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (2,4) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (1,4) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (0,4) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (0,3) circle (0.1);
+            \filldraw[thick, red, opacity=0.3] (0,2) circle (0.1);
             \draw[thick,dashed] (-1,-1) -- (3,-1) -- (3,0) -- (5,0) -- (5,5) -- (-1,5)
                 -- (-1,1) -- (0,1) -- (1,1) -- (1,2)
                 -- (1,3) -- (3,3) -- (3,2) -- (1,2)
@@ -221,7 +315,7 @@
                 \filldraw[gray] (\x,\y) circle (0.1);
             }
         \end{tikzpicture}
-        \caption{\added[id=ROM]{All visible points from source $p$ within the digital set $Z$.
+        \caption{\added[id=ROM]{All 1-visible points from source $p$ within the digital set $Z$.
             Black dashed lines show visible chords, red dashed lines show non-visible chords.
             Red points are not visible from $p$.}}
         \label{fig:all-visible-from-point}
