@@ -119,8 +119,7 @@ and then intersecting all the translations.
     \label{fig:visibility-algorithm-evolution}
 \end{figure*}
 
-\added[id=ROM]{%
-Figure~\ref{fig:visibility-algorithm-evolution} illustrates the
+\added[id=ROM]{Figure~\ref{fig:visibility-algorithm-evolution} illustrates the
 execution of Algorithm~\ref{alg:visibility} on an elementary 2D
 example, for the direction vector $\vv=(2,1)$.  The top-left part~(F)
 shows the digital set $Z$ (black dots and bold edges) together with
@@ -132,28 +131,28 @@ from bottom to top.  The top-right part~(V) shows the direction vector
 $\vv$ from $\mathbf{0}$ to $(2,1)$ together with its star
 $\Star{[\mathbf{0},\vv]}$, projected along the same axis into the
 \emph{vector lattice map} $M_\vv$: the green bracket intervals,
-again organized by row.
+again organized by row.}
 
-The bottom part details the core computation, which processes each
-projected row (shift) $i=1,\ldots,5$ in sequence. For each row~$i$:
+\added[id=ROM]{The bottom part details the core computation, which processes each
+projected row (shift) $i=1,\ldots,5$ in sequence. For each row~$i$:}
 \begin{enumerate}
-  \item $V_i$ (green interval) is the entry of the vector lattice map
-    $M_\vv$ at row~$i$.
-  \item $F_i$ (gray intervals) is the entry of the figure lattice map
-    $\Omega$ at the corresponding shifted row $S + P.\mathrm{shift}$.
-  \item $T_i$ (violet intervals) is the set of all translations~$t$
+  \item \added[id=ROM]{$V_i$ (green interval) is the entry of the vector lattice map
+    $M_\vv$ at row~$i$.}
+  \item \added[id=ROM]{$F_i$ (gray intervals) is the entry of the figure lattice map
+    $\Omega$ at the corresponding shifted row $S + P.\mathrm{shift}$.}
+  \item \added[id=ROM]{$T_i$ (violet intervals) is the set of all translations~$t$
     such that $V_i + t \subseteq F_i$, i.e., all positions where the
-    green interval fits entirely inside the gray intervals.
-  \item $R_i$ (red intervals) is the running intersection: $R_1 = T_1$
+    green interval fits entirely inside the gray intervals.}
+  \item \added[id=ROM]{$R_i$ (red intervals) is the running intersection: $R_1 = T_1$
     and $R_i = T_i \cap R_{i-1}$ for $i \geq 2$.  The black dots on
-    $R_i$ mark the integer positions within these intervals.
+    $R_i$ mark the integer positions within these intervals.}
 \end{enumerate}
-When a row of the vector lattice map is offset along the auxiliary axis
+\added[id=ROM]{When a row of the vector lattice map is offset along the auxiliary axis
 (as for rows~4 and~5 where $V_i$ starts at a shifted position,
 indicated by the black arrow), the corresponding figure intervals
-$F_i$ are looked up at the appropriately shifted key in $\Omega$.
+$F_i$ are looked up at the appropriately shifted key in $\Omega$.}
 
-After all rows have been processed, the final result $R_5$ gives all
+\added[id=ROM]{After all rows have been processed, the final result $R_5$ gives all
 starting positions~$t$ along the auxiliary axis where the entire
 translated vector star $\Star{[\mathbf{0},\vv]}+t$ fits inside
 $\Star{Z}$.  Each such integer position~$t$ corresponds to a pair of
@@ -223,7 +222,7 @@ returns the intersection of the input two lists of intervals.
 \begin{figure}
     \centering
     \begin{tabular}{c}
-        \includegraphics[width=0.4\textwidth]{pictures/visibility_from_given_point_r_10} \\
+        \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_saillencies} \\
         \includegraphics[width=0.4\textwidth]{pictures/visibility_aware_of_features}
     \end{tabular}
     \caption{Examples of visibilities from a source point:
