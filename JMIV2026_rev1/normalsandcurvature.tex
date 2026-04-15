@@ -126,7 +126,7 @@ does not influence the convergence of the normal estimator, but only the constan
 
 Figure~\ref{fig:errors-normals} also shows these errors computed on 2 piecewise smooth shapes
 (cubesphere and double ellipsoid). In order to capture the behavior of the normal estimators,
-we ignore the points that are closer than $4h$ to the singularities for Cubesphere and $8h$ for the GluedEllipsoid (see~\ref{fig:singularities-showcase}).
+we ignore the points that are closer than $4h$ to the singularities for Cubesphere and $8h$ for the GluedEllipsoid (see \added[id=ROM]{Figure}~\ref{fig:singularities-showcase}).
 We see that the RMSE and $E_{\max}$ are much better than both II and PCA, with a convergence rate at $h^{\frac{2}{3}}$ for RMSE and $h^{\frac{1}{2}}$ for $E_{\max}$,
 both failing to \replaced[id=ROM]{capture salient features}{accomodate the saillency}. It however doesn't seem
 to have a better kernel between the ring and the \replaced[id=ROM]{Gaussian}{gaussian} kernel, sometimes one is better than the other, but
