@@ -30,6 +30,17 @@
 \newcommand{\drawShapeCurve}{%
     \draw[black] (1,4) -- (1,5) -- (3,5) -- (3,2) -- (4,2) -- (1,2);
 }
+\newcommand{\drawShapeRedEdges}{%
+    \draw[thick, red] (1,4.1) -- (1,4.9);
+    \draw[thick, red] (1.1,5) -- (1.9,5);
+    \draw[thick, red] (2.1,5) -- (2.9,5);
+    \draw[thick, red] (3,4.1) -- (3,4.9);
+    \draw[thick, red] (3,3.1) -- (3,3.9);
+    \draw[thick, red] (3,2.1) -- (3,2.9);
+    \draw[thick, red] (3.1,2) -- (3.9,2);
+    \draw[thick, red] (2.1,2) -- (2.9,2);
+    \draw[thick, red] (1.1,2) -- (1.9,2);
+}
 \newcommand{\drawStarBoundary}{%
     \draw[thick,dashed] (0,3) -- (0,1) -- (5,1) -- (5,3) -- (4,3) -- (4,6) -- (0,6) -- (0,3) -- (2,3) -- (2,4);
 }
@@ -204,14 +215,12 @@
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
     \drawAxesInteger
     \drawShapePoints
-    \drawShapeCurve
     \drawStarBoundary
 \end{tikzpicture}
 &
 \begin{tikzpicture}[scale=0.55]
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
     \drawAxesInteger
-    \drawShapeCurve
     \drawStarBoundary
     \drawAllBigSquares
     \drawAllBigVLines
@@ -226,7 +235,6 @@
 \begin{tikzpicture}[scale=0.55]
     \draw[step=0.5,lightgray,thin,xshift=-1cm,yshift=-1cm] (-0.25,0.75) grid (6.75,7.25);
     \drawAxesKhalimsky
-    \drawShapeCurve
     \drawStarBoundary
     \drawAllBigSquares
     \drawAllBigVLines
