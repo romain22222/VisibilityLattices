@@ -1,27 +1,25 @@
     \added[id=ROM]{
     \noindent\textbf{Notations.} We summarize here the main notations used in the article.
     $Z \subset \Z^d$ denotes a \emph{digital set}, i.e., a finite set of lattice points in the $d$-dimensional digital space.
-    $h > 0$ denotes the \emph{digitization grid step}, representing the resolution of the digital lattice.
-    $k \in \mathbb{N}, k \geq 1$ denotes the \emph{star parameter}, controlling the thickness of the visibility cone around a digital set.
-    $\Star{Z}$ denotes the \emph{star} of a subset $Z$, i.e., the set of all cells that intersect the closure of $Z$.
-    $\kStar{Z}{k}$ denotes the \emph{$k$-star} of a digital set $Z$, obtained by iterating the star operator $k$ times.
-    }
-
-    All the theory and algorithms presented in this section are
+    $h > 0$ denotes the \emph{digitization grid step}, representing the resolution of the digital lattice.}
+    \deleted[id=ROM]{All the theory and algorithms presented in this section are
     defined and valid in arbitrary dimension $d$. They will however be
     illustrated in 2d for clarity, while experiments will be
-    performed on 3d digital shapes.  Let $\Z^d$ be the $d$-dimensional
+    performed on 3d digital shapes.}Let $\Z^d$ be the $d$-dimensional
     digital space.  Let $\mathcal{C}^d$ be the (cubical) cell complex
     induced by the lattice $\Z^d$ : its 0-cells are the points of
     $\Z^d$, its 1-cells are the open unit segments joining two 0-cells
     at distance 1, its 2-cells are the open unit squares, \ldots, and
     its $d$-cells are the $d$-dimensional open unit hypercubes with
-    vertices in $\Z^d$.  We denote by $\mathcal{C}^d_k$ the set of its
-    $k$-cells, for $0 \Le k \Le d$.  In the following, a cell always
+    vertices in $\Z^d$.  We denote by $\mathcal{C}^d_\replaced[id=ROM]{m}{k}$ the set of its
+    $m$-cells, for $0 \Le \replaced[id=ROM]{m}{k} \Le d$.  In the following, a cell always
     designates an element of $\mathcal{C}^d$, and the term subcomplex
     always indicates a subset of $\mathcal{C}^d$.
 
-    The \emph{topological closure} of a cell $\tau$ is denoted by
+    \added[id=ROM]{All the theory and algorithms presented in this section are
+    defined and valid in arbitrary dimension $d$. They will however be
+    illustrated in 2d for clarity, while experiments will be
+    performed on 3d digital shapes.} The \emph{topological closure} of a cell $\tau$ is denoted by
     $\bar{\tau}$. The \emph{star} of a cell $\sigma$ is the subcomplex
     $\Star{\sigma}\coloneqq\{\tau \in \mathcal{C}, \sigma \subset \bar{\tau}
     \}$. It is naturally extended to any subcomplex $K$ by union,
