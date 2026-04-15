@@ -143,7 +143,7 @@ projected row (shift) $i=1,\ldots,5$ in sequence. For each row~$i$:}
   \item \added[id=ROM]{$T_i$ (violet intervals) is the set of all translations~$t$
     such that $V_i + t \subseteq F_i$, i.e., all positions where the
     green interval fits entirely inside the gray intervals.}
-  \item \added[id=ROM]{$R_i$ (red intervals) is the running intersection: $R_1 = T_1$
+  \item \added[id=ROM]{$R_i$ (red intervals) is the current intersection: $R_1 = T_1$
     and $R_i = T_i \cap R_{i-1}$ for $i \geq 2$.  The black dots on
     $R_i$ mark the integer positions within these intervals.}
 \end{enumerate}
@@ -158,7 +158,7 @@ translated vector star $\Star{[\mathbf{0},\vv]}+t$ fits inside
 $\Star{Z}$.  Each such integer position~$t$ corresponds to a pair of
 points $(p, p+\vv)$ that are visible in~$Z$.  These pairs are drawn as
 red arrows on the top-left figure~(F).  Note that the process can be
-stopped early as soon as the running intersection $R_i$ becomes empty,
+stopped early as soon as the current intersection $R_i$ becomes empty,
 since further intersections cannot produce new positions.
 This procedure requires a data representation that is both compact in
 storage and efficient for the interval inclusion and intersection
