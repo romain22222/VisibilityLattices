@@ -1066,17 +1066,17 @@ enum CenterPointChoice {
 
 auto centerPointChoice = CenterPointChoice::CENTROID;
 
-void computeMitraNormals() {
+void computeMitraNormals(float radius) {
 	mitra_normals.clear();
 	mitra_normals.reserve(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
 	for (const auto &pointel: pointels) {
-		// 1. Get all the points in the ball of mitra_radius
+		// 1. Get all the points in the ball of radius
 		// 2. Compute the centroid of these points
 		// 3. Compute the covariance matrix of these points
 		std::vector<Point> neighbors;
 		RealPoint centroid(0, 0, 0);
-		for (auto point_idx: kdTree.pointsInBall(pointel, mitra_radius)) {
+		for (auto point_idx: kdTree.pointsInBall(pointel, radius)) {
 			auto tmp = kdTree.position(point_idx);
 			neighbors.push_back(tmp);
 			centroid += tmp;
@@ -1829,7 +1829,7 @@ void myCallback() {
 		computeVisibilityNormals();
 		reorientVisibilityNormals();
 		Time = trace.endBlock();
-		computeMitraNormals();
+		computeMitraNormals(mitra_radius);
 		reorientMitraNormals();
 		doRedisplayNormalAsColorsAbsolute();
 		doRedisplayNormalAsColorsRelative();
@@ -1844,6 +1844,17 @@ void myCallback() {
 		computeIINormals(iiRadius * 2);
 		reorientIINormals();
 		doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
+	}
+	if (ImGui::Button("Recompute Mitra normals")) {
+		computeMitraNormals(mitra_radius);
+		reorientMitraNormals();
+		doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Recompute Mitra normals (2x radius)")) {
+		computeMitraNormals(mitra_radius * 2);
+		reorientMitraNormals();
+		doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
@@ -2232,7 +2243,7 @@ int gpuRun(int argc, char *argv[]) {
 		} else if (Polyhedra::isPolyhedron(polynomial)) {
 			computeTrueNormalsPolyhedra();
 		}
-		computeMitraNormals();
+		computeMitraNormals(mitra_radius);
 		reorientMitraNormals();
 		primal_surface->vertexNormals() = trivial_normals;
 		reorientIINormals();
