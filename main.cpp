@@ -1164,6 +1164,33 @@ void reorientMitraNormals() {
 	}
 }
 
+void computeIINormals(double radius) {
+	trace.beginBlock("Compute II normals with radius " + std::to_string(radius));
+	Parameters iiParams = SH3::defaultParameters() | SHG3::defaultParameters() | SHG3::parametersGeometryEstimation();
+	bool is_polynomial = !polynomial.empty();
+	if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
+		iiParams("r-radius", 7. / 6.);
+	else
+		iiParams("r-radius", radius);
+	surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, iiParams);
+	ii_normals.resize(pointels.size());
+	for (auto &n: ii_normals) n = RealVector::zero;
+	auto pTC = new TangencyComputer<KSpace>(K);
+	pTC->init(pointels.cbegin(), pointels.cend(), true);
+	for (auto k = 0; k < surfels.size(); k++) {
+		const auto &surf = surfels[k];
+		const auto cells0 = SH3::getPrimalVertices(K, surf);
+		for (const auto &c0: cells0) {
+			const auto p = K.uCoords(c0);
+			const auto idx = pTC->index(p);
+			ii_normals[idx] += surfel_ii_normals[k];
+		}
+	}
+	for (auto &n: ii_normals) n /= n.norm();
+	delete pTC;
+	trace.endBlock();
+}
+
 void reorientIINormals() {
 	for (int i = 0; i < ii_normals.size(); ++i) {
 		const auto triv_normal = getTrivNormal(i);
@@ -1807,6 +1834,17 @@ void myCallback() {
 		doRedisplayNormalAsColorsAbsolute();
 		doRedisplayNormalAsColorsRelative();
 	}
+	if (ImGui::Button("Recompute II normals")) {
+		computeIINormals(iiRadius);
+		reorientIINormals();
+		doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Recompute II normals (2x radius)")) {
+		computeIINormals(iiRadius * 2);
+		reorientIINormals();
+		doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
 		if (Polyhedra::isPolyhedron(polynomial)) {
@@ -2164,11 +2202,7 @@ int gpuRun(int argc, char *argv[]) {
 		int t_ring = int(round(params["t-ring"].as<double>()));
 		auto surfel_trivial_normals = SHG3::getTrivialNormalVectors(K, surfels);
 		primal_surface->faceNormals() = surfel_trivial_normals;
-		if (is_polynomial && Polyhedra::isPolyhedron(polynomial))
-			params("r-radius", 7. / 6.);
-		else
-			params("r-radius", iiRadius);
-		surfel_ii_normals = SHG3::getIINormalVectors(binary_image, surfels, params);
+		computeIINormals(iiRadius);
 		for (auto i = 1; i < t_ring + 3; i++) {
 			primal_surface->computeVertexNormalsFromFaceNormals();
 			primal_surface->computeFaceNormalsFromVertexNormals();
@@ -2176,10 +2210,8 @@ int gpuRun(int argc, char *argv[]) {
 		}
 		trivial_normals = primal_surface->vertexNormals();
 		trivial_normals.resize(pointels.size());
-		ii_normals.resize(pointels.size());
 		true_normals.resize(pointels.size());
 		for (auto &n: trivial_normals) n = RealVector::zero;
-		for (auto &n: ii_normals) n = RealVector::zero;
 		for (auto &n: true_normals) n = RealVector::zero;
 		for (auto k = 0; k < surfels.size(); k++) {
 			const auto &surf = surfels[k];
@@ -2188,14 +2220,12 @@ int gpuRun(int argc, char *argv[]) {
 				const auto p = K.uCoords(c0);
 				const auto idx = pTC->index(p);
 				trivial_normals[idx] += surfel_trivial_normals[k];
-				ii_normals[idx] += surfel_ii_normals[k];
 				if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 					true_normals[idx] += surfel_true_normals[k];
 				}
 			}
 		}
 		for (auto &n: trivial_normals) n /= n.norm();
-		for (auto &n: ii_normals) n /= n.norm();
 		if (is_polynomial && !Polyhedra::isPolyhedron(polynomial)) {
 			for (auto &n: true_normals)
 				if (n.norm() != 0) n /= n.norm();
