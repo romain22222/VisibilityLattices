@@ -1,4 +1,7 @@
+#include <algorithm>
 #include <iostream>
+#include <cstdio>
+#include <cstring>
 #include <random>
 #include <string>
 #include <polyscope/polyscope.h>
@@ -31,6 +34,7 @@
 #include "CLI11.hpp"
 #include "omp.h"
 #include "gpu/Vec3i.cu"
+#include "src/adafit_bridge.h"
 #include "src/polyhedra.h"
 
 #ifdef USE_CUDA_VISIBILITY
@@ -41,6 +45,10 @@
 
 using namespace DGtal;
 using namespace Z3i;
+
+#ifndef VISIBILITY_LATTICES_SOURCE_DIR
+#define VISIBILITY_LATTICES_SOURCE_DIR "."
+#endif
 
 // Typedefs
 typedef PointVector<3, Integer> IntegerVector;
@@ -82,11 +90,15 @@ std::vector<RealPoint> visibility_sharps;
 std::vector<RealPoint> mitra_normals;
 std::vector<RealPoint> normalMitraColors;
 
+std::vector<RealPoint> adafit_normals;
+std::vector<RealPoint> normalAdaFitColors;
+
 std::vector<RealPoint> true_normals;
 std::vector<RealPoint> trivial_normals;
 std::vector<RealPoint> surfel_true_normals;
 std::vector<RealPoint> ii_normals;
 std::vector<RealPoint> surfel_ii_normals;
+std::vector<RealPoint> primal_positions_cache;
 
 LinearKDTree<Point, 3> globalKdTree;
 
@@ -114,6 +126,13 @@ bool noInterface = false;
 std::string polynomial;
 char *inputVisibilityFilename = new char[256]("visibility.vis");
 int nStarTest = 1;
+static char inputAdaFitPython[256] = "python3";
+static char inputAdaFitScript[1024] = VISIBILITY_LATTICES_SOURCE_DIR "/python/adafit_runner.py";
+static char inputAdaFitRepo[1024] = VISIBILITY_LATTICES_SOURCE_DIR "/out/AdaFit";
+static char inputAdaFitCheckpoint[1024] = VISIBILITY_LATTICES_SOURCE_DIR "/out/AdaFit/trained_model/AdaFit/my_experiment_model_599.pth";
+static char inputAdaFitCacheDir[1024] = VISIBILITY_LATTICES_SOURCE_DIR "/out/adafit";
+static int adafitKNeighbors = 64;
+std::string adafitLastStatus = "AdaFit not run yet.";
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -130,6 +149,13 @@ bool isPointLowerThan(const Point &p1, const Point &p2) {
 
 Point vec3iToPointVector(const Vec3i &vector) {
 	return Point(vector.x, vector.y, vector.z);
+}
+
+void copyStringToBuffer(const std::string &value, char *buffer, size_t bufferSize) {
+	if (bufferSize == 0) {
+		return;
+	}
+	std::snprintf(buffer, bufferSize, "%s", value.c_str());
 }
 
 class ComputeVisibilityParams : public Parameters {
@@ -1164,6 +1190,42 @@ void reorientMitraNormals() {
 	}
 }
 
+bool computeAdaFitNormals() {
+	trace.beginBlock("Compute AdaFit normals");
+	const auto &positions = primal_positions_cache.empty() ? primal_surface->positions() : primal_positions_cache;
+	AdaFitBridge::Config config;
+	config.pythonExecutable = inputAdaFitPython;
+	config.runnerScript = inputAdaFitScript;
+	config.repoPath = inputAdaFitRepo;
+	config.checkpointPath = inputAdaFitCheckpoint;
+	config.outputDirectory = inputAdaFitCacheDir;
+	config.kNeighbors = adafitKNeighbors;
+
+	std::vector<RealPoint> computedNormals;
+	auto result = AdaFitBridge::computeNormals(positions, computedNormals, config);
+	adafitLastStatus = result.message;
+	trace.endBlock();
+	if (!result.success) {
+		std::cerr << result.message << std::endl;
+		return false;
+	}
+	adafit_normals = std::move(computedNormals);
+	if (!noInterface) {
+		psPrimalMesh->addVertexVectorQuantity("Pointel AdaFit normals", adafit_normals);
+	}
+	return true;
+}
+
+void reorientAdaFitNormals() {
+	if (!adafit_normals.empty()) {
+		for (int i = 0; i < adafit_normals.size(); ++i) {
+			const auto triv_normal = getTrivNormal(i);
+			if (adafit_normals[i].dot(triv_normal) < 0)
+				adafit_normals[i] = -adafit_normals[i];
+		}
+	}
+}
+
 void computeIINormals(double radius) {
 	trace.beginBlock("Compute II normals with radius " + std::to_string(radius));
 	Parameters iiParams = SH3::defaultParameters() | SHG3::defaultParameters() | SHG3::parametersGeometryEstimation();
@@ -1298,6 +1360,8 @@ void doRedisplayNormalAsColorsAbsolute() {
 	normalIIColors.reserve(visibility_normals.size());
 	normalMitraColors.clear();
 	normalMitraColors.reserve(mitra_normals.size());
+	normalAdaFitColors.clear();
+	normalAdaFitColors.reserve(adafit_normals.size());
 	for (const auto &n: visibility_normals) {
 		normalVisibilityColors.push_back(0.5f * (n + 1.0f));
 	}
@@ -1307,11 +1371,17 @@ void doRedisplayNormalAsColorsAbsolute() {
 	for (const auto &n: mitra_normals) {
 		normalMitraColors.push_back(0.5f * (n + 1.0f));
 	}
+	for (const auto &n: adafit_normals) {
+		normalAdaFitColors.push_back(0.5f * (n + 1.0f));
+	}
 	psPrimalMesh->addVertexColorQuantity(
 		"Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) +
 		" as colors (absolute)", normalVisibilityColors);
 	psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
 	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
+	if (!adafit_normals.empty()) {
+		psPrimalMesh->addVertexColorQuantity("Normals AdaFit as colors (absolute)", normalAdaFitColors);
+	}
 
 	if (!true_normals.empty()) {
 		normalTrueColors.clear();
@@ -1343,6 +1413,9 @@ void doRedisplayNormalAsColorsRelative() {
 		                                     static_cast<WeightChoice>(weightCurrentItem)));
 	doRedisplayNormalAsColorsRelativeFor(ii_normals, "II");
 	doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
+	if (!adafit_normals.empty()) {
+		doRedisplayNormalAsColorsRelativeFor(adafit_normals, "AdaFit");
+	}
 	if (!true_normals.empty()) {
 		doRedisplayNormalAsColorsRelativeFor(true_normals, "true");
 	}
@@ -1399,6 +1472,85 @@ void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std
 				"reds");
 	std::cout << "L2 error normals " << normalName << ": " << SHG3::getScalarsNormL2(angle_dev, dummy) << std::endl;
 	std::cout << "Loo error normals " << normalName << ": " << SHG3::getScalarsNormLoo(angle_dev, dummy) << std::endl;
+}
+
+struct NormalComparisonStats {
+	bool valid = false;
+	std::size_t count = 0;
+	double meanAngleDeg = 0.0;
+	double medianAngleDeg = 0.0;
+	double maxAngleDeg = 0.0;
+	double meanAbsDot = 0.0;
+};
+
+NormalComparisonStats compareNormalFields(const std::vector<RealVector> &lhs, const std::vector<RealVector> &rhs) {
+	NormalComparisonStats stats;
+	const auto count = std::min(lhs.size(), rhs.size());
+	if (count == 0) {
+		return stats;
+	}
+	std::vector<double> anglesDeg;
+	anglesDeg.reserve(count);
+	double absDotSum = 0.0;
+	for (std::size_t i = 0; i < count; ++i) {
+		if (lhs[i].norm() == 0.0 || rhs[i].norm() == 0.0) {
+			continue;
+		}
+		const double absDot = std::min(1.0, std::max(0.0, std::abs(lhs[i].dot(rhs[i]))));
+		anglesDeg.push_back(std::acos(absDot) * 180.0 / M_PI);
+		absDotSum += absDot;
+	}
+	if (anglesDeg.empty()) {
+		return stats;
+	}
+	std::sort(anglesDeg.begin(), anglesDeg.end());
+	stats.valid = true;
+	stats.count = anglesDeg.size();
+	stats.meanAbsDot = absDotSum / static_cast<double>(anglesDeg.size());
+	stats.maxAngleDeg = anglesDeg.back();
+	stats.medianAngleDeg = anglesDeg[anglesDeg.size() / 2];
+	for (double angle: anglesDeg) {
+		stats.meanAngleDeg += angle;
+	}
+	stats.meanAngleDeg /= static_cast<double>(anglesDeg.size());
+	return stats;
+}
+
+void printNormalComparisonStats(const std::string &name, const NormalComparisonStats &stats) {
+	if (!stats.valid) {
+		std::cout << name << ": invalid comparison" << std::endl;
+		return;
+	}
+	std::cout << name
+	          << " | count=" << stats.count
+	          << " mean_angle_deg=" << stats.meanAngleDeg
+	          << " median_angle_deg=" << stats.medianAngleDeg
+	          << " max_angle_deg=" << stats.maxAngleDeg
+	          << " mean_abs_dot=" << stats.meanAbsDot
+	          << std::endl;
+}
+
+int runHeadlessNormalComparison() {
+	trace.beginBlock("Headless comparison II/Mitra/AdaFit");
+	computeIINormals(iiRadius);
+	reorientIINormals();
+	computeMitraNormals(mitra_radius);
+	reorientMitraNormals();
+	if (!computeAdaFitNormals()) {
+		trace.endBlock();
+		return 1;
+	}
+	reorientAdaFitNormals();
+	const auto adafitVsII = compareNormalFields(adafit_normals, ii_normals);
+	const auto adafitVsMitra = compareNormalFields(adafit_normals, mitra_normals);
+	std::cout << "Headless normals summary" << std::endl;
+	std::cout << "II normals count: " << ii_normals.size() << std::endl;
+	std::cout << "Mitra normals count: " << mitra_normals.size() << std::endl;
+	std::cout << "AdaFit normals count: " << adafit_normals.size() << std::endl;
+	printNormalComparisonStats("AdaFit vs II", adafitVsII);
+	printNormalComparisonStats("AdaFit vs Mitra", adafitVsMitra);
+	trace.endBlock();
+	return 0;
 }
 
 std::vector<double> operator-(const std::vector<double> &lhs, const std::vector<double> &rhs) {
@@ -1790,6 +1942,13 @@ void myCallback() {
 	ImGui::SliderInt("Visibility radius", &VisibilityRadius, 1, 20);
 	ImGui::SliderFloat("mitra radius", &mitra_radius, 1, 20);
 	ImGui::SliderFloat("sigma", &sigma, 1, 40);
+	ImGui::InputInt("AdaFit k neighbors", &adafitKNeighbors);
+	ImGui::InputText("AdaFit python", inputAdaFitPython, IM_ARRAYSIZE(inputAdaFitPython));
+	ImGui::InputText("AdaFit runner", inputAdaFitScript, IM_ARRAYSIZE(inputAdaFitScript));
+	ImGui::InputText("AdaFit repo", inputAdaFitRepo, IM_ARRAYSIZE(inputAdaFitRepo));
+	ImGui::InputText("AdaFit checkpoint", inputAdaFitCheckpoint, IM_ARRAYSIZE(inputAdaFitCheckpoint));
+	ImGui::InputText("AdaFit cache dir", inputAdaFitCacheDir, IM_ARRAYSIZE(inputAdaFitCacheDir));
+	ImGui::TextWrapped("AdaFit status: %s", adafitLastStatus.c_str());
 	if (ImGui::Button("Visibility")) {
 		computeVisibilityWithPointShow(pointel_idx);
 	}
@@ -1856,6 +2015,13 @@ void myCallback() {
 		reorientMitraNormals();
 		doRedisplayNormalAsColorsRelativeFor(mitra_normals, "Mitra");
 	}
+	if (ImGui::Button("Compute AdaFit normals")) {
+		if (computeAdaFitNormals()) {
+			reorientAdaFitNormals();
+			doRedisplayNormalAsColorsAbsolute();
+			doRedisplayNormalAsColorsRelativeFor(adafit_normals, "AdaFit");
+		}
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Compute normal errors")) {
 		if (Polyhedra::isPolyhedron(polynomial)) {
@@ -1866,9 +2032,12 @@ void myCallback() {
 		                          "visib " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)));
 		computeL2looErrorsNormals(ii_normals, "II");
 		computeL2looErrorsNormals(mitra_normals, "Mitra");
+		if (!adafit_normals.empty()) {
+			computeL2looErrorsNormals(adafit_normals, "AdaFit");
+		}
 		Time = trace.endBlock();
 	}
-	const char *items[] = {"Visibility normals", "Mitra normals", "II normals", "CTriv"};
+	const char *items[] = {"Visibility normals", "Mitra normals", "II normals", "AdaFit normals", "CTriv"};
 	static int item_current = 0;
 	ImGui::Combo("Normals to use for curv.", &item_current, items, IM_ARRAYSIZE(items));
 	if (ImGui::Button("Compute Curvatures")) {
@@ -1879,6 +2048,12 @@ void myCallback() {
 			computeCurvaturesFor(mitra_normals);
 		} else if (item_current == 2) {
 			computeCurvaturesFor(ii_normals);
+		} else if (item_current == 3) {
+			if (adafit_normals.empty()) {
+				std::cout << "AdaFit normals are not available yet." << std::endl;
+			} else {
+				computeCurvaturesFor(adafit_normals);
+			}
 		} else {
 			computeCurvaturesFor(trivial_normals);
 		}
@@ -2066,6 +2241,7 @@ int gpuRun(int argc, char *argv[]) {
 	bool listP = false;
 	bool computeCurvaturesFlag = false;
 	bool computeNormalsFlag = false;
+	bool computeAdaFitFlag = false;
 	bool noFurtherComputation = false;
 	double sigmaTmp = -1.0;
 	int VisibilityRadiusTmp = -1;
@@ -2075,6 +2251,12 @@ int gpuRun(int argc, char *argv[]) {
 	std::string visibComputeMethod = "OMP_GPU";
 	std::string weightChoices = "gaussian";
 	float mitra_radius_tmp = -1.0;
+	std::string adafitPython = inputAdaFitPython;
+	std::string adafitScript = inputAdaFitScript;
+	std::string adafitRepo = inputAdaFitRepo;
+	std::string adafitCheckpoint = inputAdaFitCheckpoint;
+	std::string adafitCacheDir = inputAdaFitCacheDir;
+	int adafitKNeighborsCli = adafitKNeighbors;
 
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
 	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
@@ -2095,6 +2277,8 @@ int gpuRun(int argc, char *argv[]) {
 	app.add_flag("--computeNormals", computeNormalsFlag, "compute visibility normals after visibility computation");
 	app.add_flag("--computeCurvatures", computeCurvaturesFlag,
 	             "compute curvatures after visibility normals computation");
+	app.add_flag("--computeAdaFitNormals", computeAdaFitFlag,
+	             "compute AdaFit normals through the Python bridge after normal initialization");
 	app.add_option("--saveShapeFilename", saveShapeFilename,
 	               "a flag to save the primal surface shape in an OBJ file after computation");
 	app.add_option("--saveVisibility", saveVisibilityFilename, "a filename to save the computed visibility");
@@ -2107,8 +2291,20 @@ int gpuRun(int argc, char *argv[]) {
 	app.add_option("--mitraRadius", mitra_radius_tmp, "radius used for Mitra normal computation (default 4/gridstep)");
 	app.add_option("--weightChoices", weightChoices,
 	               "weight choices to compute visibility normals : gaussian, ring, none (default gaussian, you can select several ones using commas without space)");
+	app.add_option("--adafitPython", adafitPython, "Python executable used to run the AdaFit bridge script");
+	app.add_option("--adafitScript", adafitScript, "Path to python/adafit_runner.py or a compatible bridge script");
+	app.add_option("--adafitRepo", adafitRepo, "Path to a local AdaFit repository checkout");
+	app.add_option("--adafitCheckpoint", adafitCheckpoint, "Path to a trained AdaFit checkpoint");
+	app.add_option("--adafitCacheDir", adafitCacheDir, "Directory used to export the point cloud and import predicted normals");
+	app.add_option("--adafitK", adafitKNeighborsCli, "Neighborhood size passed to the AdaFit preprocessing step");
 
 	CLI11_PARSE(app, argc, argv)
+	copyStringToBuffer(adafitPython, inputAdaFitPython, sizeof(inputAdaFitPython));
+	copyStringToBuffer(adafitScript, inputAdaFitScript, sizeof(inputAdaFitScript));
+	copyStringToBuffer(adafitRepo, inputAdaFitRepo, sizeof(inputAdaFitRepo));
+	copyStringToBuffer(adafitCheckpoint, inputAdaFitCheckpoint, sizeof(inputAdaFitCheckpoint));
+	copyStringToBuffer(adafitCacheDir, inputAdaFitCacheDir, sizeof(inputAdaFitCacheDir));
+	adafitKNeighbors = adafitKNeighborsCli;
 	if (listP) {
 		listPolynomials();
 		return 0;
@@ -2197,6 +2393,7 @@ int gpuRun(int argc, char *argv[]) {
 	for (auto v = 0; v < primal_surface->nbVertices(); v++)
 		primal_surface->position(v) *= gridstep;
 	primal_positions = primal_surface->positions();
+	primal_positions_cache = primal_positions;
 	digitizePointels(primal_positions, pointels);
 	digital_dimensions = getFigSizes();
 	trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
@@ -2245,6 +2442,12 @@ int gpuRun(int argc, char *argv[]) {
 		}
 		computeMitraNormals(mitra_radius);
 		reorientMitraNormals();
+		if (computeAdaFitFlag) {
+			if (!computeAdaFitNormals()) {
+				return 1;
+			}
+			reorientAdaFitNormals();
+		}
 		primal_surface->vertexNormals() = trivial_normals;
 		reorientIINormals();
 		trace.endBlock();
@@ -2299,6 +2502,9 @@ int gpuRun(int argc, char *argv[]) {
 			if (is_polynomial) {
 				computeL2looErrorsNormals(ii_normals, "II");
 				computeL2looErrorsNormals(mitra_normals, "Mitra");
+				if (!adafit_normals.empty()) {
+					computeL2looErrorsNormals(adafit_normals, "AdaFit");
+				}
 			}
 		}
 		if (computeCurvaturesFlag) {
@@ -2319,6 +2525,14 @@ int gpuRun(int argc, char *argv[]) {
 			Time = trace.endBlock();
 			if (is_polynomial) {
 				computeL2looErrorsCurvatures();
+			}
+			if (!adafit_normals.empty()) {
+				trace.beginBlock("Compute AdaFit curvatures");
+				computeCurvaturesFor(adafit_normals);
+				Time = trace.endBlock();
+				if (is_polynomial) {
+					computeL2looErrorsCurvatures();
+				}
 			}
 		}
 		/*if (!saveVisibilityFilename.empty()) {
@@ -2342,6 +2556,12 @@ int main(int argc, char *argv[]) {
 	int VisibilityRadiusTmp = -1;
 	bool listP = false;
 	bool gpuRunFlag = false;
+	std::string adafitPython = inputAdaFitPython;
+	std::string adafitScript = inputAdaFitScript;
+	std::string adafitRepo = inputAdaFitRepo;
+	std::string adafitCheckpoint = inputAdaFitCheckpoint;
+	std::string adafitCacheDir = inputAdaFitCacheDir;
+	int adafitKNeighborsCli = adafitKNeighbors;
 	app.add_option("-i,--input", filename, "an input 3D vol file")->check(CLI::ExistingFile);
 	// app.add_option("-o,--output", outputfilename, "the output OBJ filename");
 	app.add_option("-p,--polynomial", polynomial,
@@ -2361,6 +2581,12 @@ int main(int argc, char *argv[]) {
 	float mitra_radius_tmp = -1.0;
 	app.add_option("-s,--sigma", sigmaTmp, "sigma used for visib normal computation");
 	app.add_flag("--gpuRun", gpuRunFlag, "only work as the job asked for gpuRun function");
+	app.add_option("--adafitPython", adafitPython, "Python executable used to run the AdaFit bridge script");
+	app.add_option("--adafitScript", adafitScript, "Path to python/adafit_runner.py or a compatible bridge script");
+	app.add_option("--adafitRepo", adafitRepo, "Path to a local AdaFit repository checkout");
+	app.add_option("--adafitCheckpoint", adafitCheckpoint, "Path to a trained AdaFit checkpoint");
+	app.add_option("--adafitCacheDir", adafitCacheDir, "Directory used to export the point cloud and import predicted normals");
+	app.add_option("--adafitK", adafitKNeighborsCli, "Neighborhood size passed to the AdaFit preprocessing step");
 
 	bool ignore = false;
 	std::string _;
@@ -2387,6 +2613,12 @@ int main(int argc, char *argv[]) {
 	if (gpuRunFlag) {
 		return gpuRun(argc, argv);
 	}
+	copyStringToBuffer(adafitPython, inputAdaFitPython, sizeof(inputAdaFitPython));
+	copyStringToBuffer(adafitScript, inputAdaFitScript, sizeof(inputAdaFitScript));
+	copyStringToBuffer(adafitRepo, inputAdaFitRepo, sizeof(inputAdaFitRepo));
+	copyStringToBuffer(adafitCheckpoint, inputAdaFitCheckpoint, sizeof(inputAdaFitCheckpoint));
+	copyStringToBuffer(adafitCacheDir, inputAdaFitCacheDir, sizeof(inputAdaFitCacheDir));
+	adafitKNeighbors = adafitKNeighborsCli;
 
 	// React to some options.
 	if (listP) {
@@ -2468,6 +2700,7 @@ int main(int argc, char *argv[]) {
 	for (auto v = 0; v < primal_surface->nbVertices(); v++)
 		primal_surface->position(v) *= gridstep;
 	primal_positions = primal_surface->positions();
+	primal_positions_cache = primal_positions;
 	digitizePointels(primal_positions, pointels);
 	digital_dimensions = getFigSizes();
 	trace.info() << "Surface has " << pointels.size() << " pointels." << std::endl;
@@ -2531,13 +2764,7 @@ int main(int argc, char *argv[]) {
 	// Initialize polyscope
 	if (noInterface) {
 		std::cout << "sigma = " << sigma << std::endl;
-		checkParallelism();
-		trace.beginBlock("Compute visibilities");
-		computeVisibilityOmp(VisibilityRadius);
-		Time = trace.endBlock();
-		//		trace.beginBlock("Compute mean distance visibility");
-		//		computeMeanDistanceVisibility();
-		//		Time = trace.endBlock();
+		return runHeadlessNormalComparison();
 	} else {
 		polyscope::init();
 		psPrimalMesh = polyscope::registerSurfaceMesh("Primal surface",

@@ -9,6 +9,8 @@ set(SOURCES
         gpu/Vec3i.cu
         gpu/testgpucpu.cpp
         gpu/testgpucpu.h
+        src/adafit_bridge.cpp
+        src/adafit_bridge.h
         src/polyhedra.cpp
         src/polyhedra.h
 )
@@ -63,6 +65,7 @@ find_package(OpenMP)
 
 if (OpenMP_CXX_FOUND)
     add_executable(visibilityLattices ${SOURCES})
+    target_compile_definitions(visibilityLattices PRIVATE VISIBILITY_LATTICES_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
     target_link_libraries(visibilityLattices PUBLIC polyscope ${DGTAL_LIBRARIES} OpenMP::OpenMP_CXX)
     if (CUSE_CUDA_VISIBILITY)
     endif ()
