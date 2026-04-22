@@ -1374,11 +1374,17 @@ void doRedisplayNormalAsColorsAbsolute() {
 	for (const auto &n: adafit_normals) {
 		normalAdaFitColors.push_back(0.5f * (n + 1.0f));
 	}
-	psPrimalMesh->addVertexColorQuantity(
-		"Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) +
-		" as colors (absolute)", normalVisibilityColors);
-	psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
-	psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
+	if (!normalVisibilityColors.empty()) {
+		psPrimalMesh->addVertexColorQuantity(
+			"Normals visibility " + weightChoiceToString(static_cast<WeightChoice>(weightCurrentItem)) +
+			" as colors (absolute)", normalVisibilityColors);
+	}
+	if (!normalIIColors.empty()) {
+		psPrimalMesh->addVertexColorQuantity("Normals II as colors (absolute)", normalIIColors);
+	}
+	if (!normalMitraColors.empty()) {
+		psPrimalMesh->addVertexColorQuantity("Normals Mitra as colors (absolute)", normalMitraColors);
+	}
 	if (!adafit_normals.empty()) {
 		psPrimalMesh->addVertexColorQuantity("Normals AdaFit as colors (absolute)", normalAdaFitColors);
 	}
@@ -1395,6 +1401,7 @@ void doRedisplayNormalAsColorsAbsolute() {
 }
 
 void doRedisplayNormalAsColorsRelativeFor(const std::vector<RealVector> &normals, std::string method) {
+	if (normals.empty()) return;
 	glm::mat4 M = polyscope::view::getCameraViewMatrix();
 	std::vector<glm::vec3> colors(normals.size());
 	for (auto i = 0; i < normals.size(); i++) {
