@@ -35,6 +35,7 @@
 \usepackage{environ}
 \usepackage{bbm}
 
+\usepackage[normalem]{ulem}
 \usepackage{changes}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -63,6 +64,9 @@
 \setauthormarkup{}
 \definechangesauthor[name=jo, color=blue]{JO}
 \definechangesauthor[name=rom, color=teal]{ROM}
+
+\newcommand{\stkout}[1]{\ifmmode\text{\sout{\ensuremath{#1}}}\else\sout{#1}\fi}
+\setdeletedmarkup{\stkout{#1}}
 
 \input{./macros}
 
