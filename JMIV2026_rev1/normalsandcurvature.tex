@@ -213,8 +213,9 @@ the singularity for all estimators.
     to compute them. The normals are colored according to their
     orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
     ``Integral Invariant normals`` are computed using a radius of
-        $r=4.5$ \added[id=ROM]{above the line and $r=9$ below}, PCA with a discrete radius of 4 \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=25$ neighbors}, while our
-        normal estimator \replaced[id=ROM]{uses}{are computed using} a deviation of $\sigma=4$, and so a
+        $r=4.5$ \added[id=ROM]{above the line and $r=9$ below}, PCA with a discrete radius of 4
+        \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=4$ neighbors},
+        while our normal estimator \replaced[id=ROM]{uses}{are computed using} a deviation of $\sigma=4$, and so a
         radius of $r=2\sigma=8$, with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
 \end{figure*}
