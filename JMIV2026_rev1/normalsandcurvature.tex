@@ -109,10 +109,22 @@ the normal estimation, so we kept it to 1 for all the tests.
 
 \paragraph{Experimental validation.}
 
-Figure~\ref{fig:normals-estimation} shows an example
-of our normals computed with the \replaced[id=ROM]{Gaussian}{gaussian} kernel compared
-to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
-\replaced[id=ROM]{,}{and} the PCA estimator~\cite{mitra:2003-acm}\added[id=ROM]{and the Adafit network~\cite{zhu:2021-iccv}}.
+Figure~\ref{fig:normals-estimation} shows an example of our normals computed
+with the \replaced[id=ROM]{Gaussian}{gaussian} kernel compared to normals
+computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
+\replaced[id=ROM]{,}{and} the PCA estimator~\cite{mitra:2003-acm}\added[id=ROM]{
+and the Adafit network~\cite{zhu:2021-iccv}. We can observe that
+II and PCA normals have similar behavior : with a small radius, they pick up noise
+and digitization artifacts, but keeps sharp features. With a bigger radius, they
+are more stable on smooth parts, but fail to capture sharp features by smoothing
+them. Adafit normals are more stable overall, but tend to be noisy on the sharp
+features. Moreover, it takes a lot of time to compute them (~XXXm for cps, while
+the other 3 combined are about XXXm), since it is a neural network that needs to
+be evaluated for each point patch. Our visibility normals are stable on smooth
+parts, while capturing the sharp features, without any parameter tuning. The
+only optional parameter is the radius of visibility, by default the local mean
+visibilty, which allows faster computation with results visually the same.}
+
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
 normals computed on a digital smooth surface with respect to the normals computed
