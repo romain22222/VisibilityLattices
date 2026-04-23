@@ -159,6 +159,21 @@ the singularity for all estimators.
     \includegraphics[width=0.19\textwidth]{./pictures/figNormalesDisplayV2/#1}%
 }
 
+\newcommand{\formatImageFigNormalesShowParams}[3]{%
+    \begin{tikzpicture}
+        \node[inner sep=0] (img)
+            {\includegraphics[width=0.19\textwidth]{./pictures/figNormalesDisplayV2/#1}};
+        \node[anchor=north east,
+              fill=white, fill opacity=0.75, text opacity=1,
+              font=\scriptsize\bfseries, inner sep=2pt, rounded corners=2pt]
+            at (img.north east) {#2};
+        \node[anchor=south west,
+              fill=white, fill opacity=0.75, text opacity=1,
+              font=\scriptsize\bfseries, inner sep=2pt, rounded corners=2pt]
+            at (img.south west) {#3};
+    \end{tikzpicture}%
+}
+
 \newcommand{\nameDisplayFigNormal}[1]{\raisebox{18mm}{#1}}
 
 \begin{figure*}
@@ -168,26 +183,26 @@ the singularity for all estimators.
         Shape & II & PCA & Adafit & Ours \\
         \hline
         \nameDisplayFigNormal{Cps} &
-        \formatImageFigNormalesShow{cps-II-combined} &
-        \formatImageFigNormalesShow{cps-PCA-combined} &
+        \formatImageFigNormalesShowParams{cps-II-combined}{$r=4.5$}{$r=9$} &
+        \formatImageFigNormalesShowParams{cps-PCA-combined}{$r=4$}{$r=8$} &
         \formatImageFigNormalesShow{cps-Adafit} &
         \formatImageFigNormalesShow{cps-VN} \\
         \hline
         \nameDisplayFigNormal{Dragon} &
-        \formatImageFigNormalesShow{dragon-II-combined} &
-        \formatImageFigNormalesShow{dragon-PCA-combined} &
+        \formatImageFigNormalesShowParams{dragon-II-combined}{$r=4.5$}{$r=9$} &
+        \formatImageFigNormalesShowParams{dragon-PCA-combined}{$r=4$}{$r=8$} &
         \formatImageFigNormalesShow{dragon-Adafit} &
         \formatImageFigNormalesShow{dragon-VN} \\
         \hline
         \nameDisplayFigNormal{Filigree} &
-        \formatImageFigNormalesShow{filigree-II-combined} &
-        \formatImageFigNormalesShow{filigree-PCA-combined} &
+        \formatImageFigNormalesShowParams{filigree-II-combined}{$r=4.5$}{$r=9$} &
+        \formatImageFigNormalesShowParams{filigree-PCA-combined}{$r=4$}{$r=8$} &
         \formatImageFigNormalesShow{filigree-Adafit} &
         \formatImageFigNormalesShow{filigree-VN} \\
         \hline
         \raisebox{9mm}{Tie Fighter} &
-        \formatImageFigNormalesShow{tie-II-combined} &
-        \formatImageFigNormalesShow{tie-PCA-combined} &
+        \formatImageFigNormalesShowParams{tie-II-combined}{$r=4.5$}{$r=9$} &
+        \formatImageFigNormalesShowParams{tie-PCA-combined}{$r=4$}{$r=8$} &
         \formatImageFigNormalesShow{tie-Adafit} &
         \formatImageFigNormalesShow{tie-VN} \\
         \hline
