@@ -112,7 +112,7 @@ the normal estimation, so we kept it to 1 for all the tests.
 Figure~\ref{fig:normals-estimation} shows an example
 of our normals computed with the \replaced[id=ROM]{Gaussian}{gaussian} kernel compared
 to normals computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
-and the PCA estimator~\cite{mitra:2003-acm}.
+\replaced[id=ROM{,}{and} the PCA estimator~\cite{mitra:2003-acm}\added[id=ROM]{and the Adafit network~\cite{zhu:2021-iccv}}.
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
 normals computed on a digital smooth surface with respect to the normals computed
@@ -156,45 +156,49 @@ the singularity for all estimators.
 \end{figure}
 
 \newcommand{\formatImageFigNormalesShow}[1]{%
-    \includegraphics[width=0.26\textwidth]{./pictures/figNormalesDisplay/#1}%
+    \includegraphics[width=0.19\textwidth]{./pictures/figNormalesDisplayV2/#1}%
 }
 
 \newcommand{\nameDisplayFigNormal}[1]{\raisebox{18mm}{#1}}
 
 \begin{figure*}
     \centering
-    \begin{tabular}{|c||c|c|c|}
+    \begin{tabular}{|c||c|c|c|c|}
         \hline
-        Shape & II & PCA & Ours \\
+        Shape & II & PCA & Adafit & Ours \\
         \hline
         \nameDisplayFigNormal{Cps} &
-        \formatImageFigNormalesShow{cps-IIN-flat} &
-        \formatImageFigNormalesShow{cps-Mitra-flat} &
-        \formatImageFigNormalesShow{cps-VN-flat} \\
+        \formatImageFigNormalesShow{cps-II-combined} &
+        \formatImageFigNormalesShow{cps-PCA-combined} &
+        \formatImageFigNormalesShow{cps-Adafit} &
+        \formatImageFigNormalesShow{cps-VN} \\
         \hline
         \nameDisplayFigNormal{Dragon} &
-        \formatImageFigNormalesShow{dragon-IIN-flat} &
-        \formatImageFigNormalesShow{dragon-Mitra-flat} &
-        \formatImageFigNormalesShow{dragon-VN-flat} \\
+        \formatImageFigNormalesShow{dragon-II-combined} &
+        \formatImageFigNormalesShow{dragon-PCA-combined} &
+        \formatImageFigNormalesShow{dragon-Adafit} &
+        \formatImageFigNormalesShow{dragon-VN} \\
         \hline
         \nameDisplayFigNormal{Filigree} &
-        \formatImageFigNormalesShow{filigree-IIN-flat} &
-        \formatImageFigNormalesShow{filigree-Mitra-flat} &
-        \formatImageFigNormalesShow{filigree-VN-flat} \\
+        \formatImageFigNormalesShow{filigree-II-combined} &
+        \formatImageFigNormalesShow{filigree-PCA-combined} &
+        \formatImageFigNormalesShow{filigree-Adafit} &
+        \formatImageFigNormalesShow{filigree-VN} \\
         \hline
         \raisebox{9mm}{Tie Fighter} &
-        \formatImageFigNormalesShow{tie-IIN-flat} &
-        \formatImageFigNormalesShow{tie-Mitra-flat} &
-        \formatImageFigNormalesShow{tie-VN-flat} \\
+        \formatImageFigNormalesShow{tie-II-combined} &
+        \formatImageFigNormalesShow{tie-PCA-combined} &
+        \formatImageFigNormalesShow{tie-Adafit} &
+        \formatImageFigNormalesShow{tie-VN} \\
         \hline
     \end{tabular}
     \caption{Examples of normals computed on several shapes
     as a color map. First set displays II normals, second set
-    uses the PCA algorithm, and last set uses our visibility algorithm
+    uses the PCA algorithm\added[id=ROM]{, third set uses Adafit normals} and last set uses our visibility algorithm
     to compute them. The normals are colored according to their
     orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
     ``Integral Invariant normals`` are computed using a radius of
-        $r=4.5$, PCA with a discrete radius of 4 (empirical), while our
+        $r=4.5$ \added[id=ROM]{above the line and $r=9$ below}, PCA with a discrete radius of 4 \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=25$ neighbors}, while our
         normal estimator \replaced[id=ROM]{uses}{are computed using} a deviation of $\sigma=4$, and so a
         radius of $r=2\sigma=8$, with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
