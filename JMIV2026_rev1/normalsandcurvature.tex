@@ -114,16 +114,17 @@ with the \replaced[id=ROM]{Gaussian}{gaussian} kernel compared to normals
 computed with the integral invariant (II) estimator~\cite{Lachaud:2017-lnm}
 \replaced[id=ROM]{,}{and} the PCA estimator~\cite{mitra:2003-acm}\added[id=ROM]{
 and the Adafit network~\cite{zhu:2021-iccv}. We can observe that
-II and PCA normals have similar behavior : with a small radius, they pick up noise
-and digitization artifacts, but keeps sharp features. With a bigger radius, they
-are more stable on smooth parts, but fail to capture sharp features by smoothing
-them. Adafit normals are more stable overall, but tend to be noisy on the sharp
-features. Moreover, it takes a lot of time to compute them (~XXXm for cps, while
-the other 3 combined are about XXXm), since it is a neural network that needs to
-be evaluated for each point patch. Our visibility normals are stable on smooth
-parts, while capturing the sharp features, without any parameter tuning. The
-only optional parameter is the radius of visibility, by default the local mean
-visibilty, which allows faster computation with results visually the same.}
+II and PCA normals exhibit a similar trade-off: with a small radius, they pick up noise
+and digitization artifacts, but keep sharp features. With a larger radius, they
+are more stable on smooth parts, but fail to capture sharp features, as they smooth them out.
+Adafit normals are more stable overall, but tend to be noisy near sharp features.
+Furthermore, its computational cost is significantly higher (~XXXm for the cps shape alone, while
+the other three methods combined take about XXXm), since it is a neural network that must
+be evaluated independently for each local patch.
+Our visibility normals are stable on smooth
+parts while capturing sharp features, without any parameter tuning. The
+only optional parameter is the maximum visibility radius, which defaults to the local mean
+visibility distance and allows faster computation while producing visually indistinguishable results.}
 
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
