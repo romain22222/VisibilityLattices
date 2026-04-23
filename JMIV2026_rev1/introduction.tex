@@ -81,7 +81,15 @@
     grounded and practically less reliable, motivating the need for
     methods tailored to digital geometry.
 
-    We propose here a normal estimator defined as the most orthogonal
+    \added[id=ROM]{AI-based normal estimation methods have also been proposed
+    (e.g.\ \cite{guerrero:2018-cgf,benshabat:2020-eccv,li:2022-eccv}). These methods can be
+    effective in practice, but they don't provide theoretical guarantees of convergence or accuracy, especially in
+    the context of digital geometry where the underlying structure is deterministic and grid-based. Plus, they tend to
+    require costly pre-processing steps like splitting the surface into patches. In the paper, we will compare our method
+    to Adafit~\cite{zhu:2021-iccv} as a representative of AI-based normal estimation methods, since it is one of the
+    most recent and accurate methods for normal estimation on point clouds.}
+
+    We propose here \added[id=ROM]{a parameter-free} normal estimator defined as the most orthogonal
     vector to the cone of visibility at the point of interest.
     Visibility is high in smooth regions and the induced visibility
     vectors are good approximations of tangent vectors. On the
