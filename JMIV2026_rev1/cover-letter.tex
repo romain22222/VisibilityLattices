@@ -10,6 +10,42 @@
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage[left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage[breakable, skins]{tcolorbox}
+\usepackage{enumitem}
+
+% ── Reviewer section header ───────────────────────────────────────────────────
+\newcommand{\reviewer}[1]{%
+  \medskip
+  \noindent\textbf{\large Reviewer #1}
+  \smallskip\par
+  \noindent\rule{\linewidth}{0.6pt}
+  \medskip
+}
+
+% ── Remark box (gray) ─────────────────────────────────────────────────────────
+\newtcolorbox{remark}[1]{
+  breakable, enhanced,
+  colback  = gray!12,
+  colframe = gray!55,
+  fontupper= \small\itshape,
+  title    = {\small\bfseries\upshape Remark~#1},
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={colback=gray!55, colframe=gray!55},
+  left=3pt, right=3pt, top=5pt, bottom=3pt,
+}
+
+% ── Response box (teal left bar) ─────────────────────────────────────────────
+\newtcolorbox{response}{
+  breakable, enhanced,
+  colback  = teal!5,
+  colframe = teal!60,
+  leftrule = 3pt, rightrule=0.4pt, toprule=0.4pt, bottomrule=0.4pt,
+  fontupper= \small,
+  title    = {\small\bfseries Response},
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={colback=teal!60, colframe=teal!60},
+  left=6pt, right=3pt, top=5pt, bottom=3pt,
+}
 
 \pagestyle{fancy}
 
@@ -37,30 +73,68 @@ UFR SceM, Campus scientifique \\
 
   Dear editors
 
-  Please find enclosed our paper
+  Please find with the letter the revised paper (one with the changes highlighted, one without).
 
-  ``Visibility on digitized shapes and convergence of a normal estimator''
+  Here are the responses about all the remarks and concerns pointed by the reviewers:
 
-  which we submit to the JMIV special issue on Discrete Geometry and
-  Mathematical Morphology. It is the extension of our DGMM2025 paper
-  "Fast and exact visibility on digitized shapes and application to saliency-aware normal estimation".
+  \reviewer{1}
 
-  As announced in our expression of interest message, we have extended
-  the paper along the following lines:
-  \begin{itemize}
-    \item We have added proofs regarding the convergence of the normal estimator on digitized smooth surfaces.
-    \item In order to add those proofs, we updated the definition of the visibility, now named "$k$-visibility",
-      which is more general and allows to control the regularity of the visibility cone. We have also added a
-      discussion regarding this new definition and its relation to the original one.
-    \item We improved experiments to analyze the behavior of the normal estimator on piecewise-smooth surfaces and
-      with different kernels (uniform, gaussian, ring). and compared it with other normal estimators.
-    \item We have added some illustrations regarding piecewise-smooth surfaces studies alongside reworking older ones.
-    \item The paper is now 18 pages long in 2-column format.
-  \end{itemize}
+  \begin{remark}{1}
+    Usually the visibility problem defines two points as visible if and only if the straight-line
+    segment joining them lies completely in the free (empty) space. Your definition of visibility
+    (page 1, right column, bottom) defines two points as visible if such line segment lies close
+    enough to set X. This seems contradictory with the usual definition (and with the intuition)
+    unless X is the set of empty voxels (but the reader expects that it is the set of occupied voxels)
+    or you address a different problem wrt the classic one. In any case, this needs to be clarified.
+    If the addressed problem is not clear, the overall paper cannot be understood properly.
+  \end{remark}
+  \begin{response}
+    We thank the reviewer for this remark. You can picture the classic definition of visibility applied
+    to our work as follows: instead of considering the surface of the object as the surface of a volume,
+    we consider the surface as a thin layer of voxels (like a shell) and we ask for the visibility to be
+    defined as the existence of a straight-line segment joining two points that lies completely in this thin layer.
+    We added a figure to better illustrate this point (Figure 3 in the revised version) and linked it to the
+    definition of visibility in the paper. We hope this will clarify the definition of visibility we are using in our work.
+  \end{response}
 
-  We believe this extended version of our paper will be a valuable
-  contribution to the JMIV special issue, and we look forward to hearing
-  from you soon.
+  \begin{remark}{2}
+    The second paragraph on page 2, right column, cannot be understood in this place, as the reader
+    does not know how the proposed method works. It can be maybe better moved to the conclusions.
+  \end{remark}
+  \begin{response}
+    We moved this paragraph to the conclusion section, as suggested by the reviewer.
+  \end{response}
+
+  \begin{remark}{3}
+    The paper needs a table of used symbols. Many symbols are used once, without saying that in the rest of
+    the paper such symbol will always denote such entity, and then used several lines or pages later, where
+    the reader has forgotten what they denote. Moreover, the use of symbols is not always consistent.
+  \end{remark}
+  \begin{remark}{4}
+    The digital set is sometimes denoted with X and other times with Z (for example on page 3, left column,
+    both symbols are used). I suggest not to use Z because it is too similar to the set of integer numbers.
+    Symbol K seems to be used with the same meaning as X, Z in the right column of page 3.
+  \end{remark}
+  \begin{remark}{5}
+    Symbol h is used on page 2 (right column, top), on page 4 (right column, bottom) and only on page 6 it
+    is defined as the gridstep (not in main text, but within the caption of fig.6).
+  \end{remark}
+  \begin{response}
+    Considering how many symbols are used in the paper, we think that a table of symbols would be too heavy
+    and would not be really helpful for the reader. However, we added a notation section at the start of the
+    visibility section, where we introduce the main symbols used in the paper and explain what they denote.
+    We also made sure to be consistent with the use of symbols throughout the paper.
+  \end{response}
+
+  \reviewer{2}
+
+  \begin{remark}{1}
+  \end{remark}
+  \begin{response}
+  \end{response}
+
+  We hope this revision and the above answers will satisfy all your
+  requests and concerns, and are looking forward to hearing from you soon.
 
   Best regards
   \bigskip
@@ -69,14 +143,14 @@ UFR SceM, Campus scientifique \\
   \hfill
   \begin{minipage}{0.32\textwidth}
     Romain Negro \\
-    PhD of Computer Science\\
+    PhD in Computer Science\\
     University Savoie Mont Blanc\\
     CNRS, LAMA
   \end{minipage}
   \hfill
   \begin{minipage}{0.32\textwidth}
     Jacques-Olivier Lachaud\\
-    Professor of Computer Science\\
+    Professor in Computer Science\\
     University Savoie Mont Blanc\\
     CNRS, LAMA
   \end{minipage}
