@@ -14,7 +14,10 @@
 \usepackage{enumitem}
 
 % ── Reviewer section header ───────────────────────────────────────────────────
+\newcounter{remarkcount}
+
 \newcommand{\reviewer}[1]{%
+  \setcounter{remarkcount}{1}%
   \medskip
   \noindent\textbf{\large Reviewer #1}
   \smallskip\par
@@ -22,13 +25,14 @@
   \medskip
 }
 
-% ── Remark box (gray) ─────────────────────────────────────────────────────────
-\newtcolorbox{remark}[1]{
+% ── Remark box (gray) — numérotation automatique, reset par \reviewer ─────────
+\newtcolorbox{remark}{
   breakable, enhanced,
+  before={\stepcounter{remarkcount}},
   colback  = gray!12,
   colframe = gray!55,
   fontupper= \small\itshape,
-  title    = {\small\bfseries\upshape Remark~#1},
+  title    = {\small\bfseries\upshape Remark~\theremarkcount},
   attach boxed title to top left={yshift=-2mm, xshift=4mm},
   boxed title style={colback=gray!55, colframe=gray!55},
   left=3pt, right=3pt, top=5pt, bottom=3pt,
@@ -82,7 +86,7 @@ UFR SceM, Campus scientifique \\
 
   \reviewer{1}
 
-  \begin{remark}{1}
+  \begin{remark}
     Usually the visibility problem defines two points as visible if and only if the straight-line
     segment joining them lies completely in the free (empty) space. Your definition of visibility
     (page 1, right column, bottom) defines two points as visible if such line segment lies close
@@ -101,7 +105,7 @@ UFR SceM, Campus scientifique \\
     visibility we are using in our work.
   \end{response}
 
-  \begin{remark}{2}
+  \begin{remark}
     The second paragraph on page 2, right column, cannot be understood in this place, as the reader
     does not know how the proposed method works. It can be maybe better moved to the conclusions.
   \end{remark}
@@ -109,17 +113,17 @@ UFR SceM, Campus scientifique \\
     We moved this paragraph to the conclusion section, as suggested by the reviewer.
   \end{response}
 
-  \begin{remark}{3}
+  \begin{remark}
     The paper needs a table of used symbols. Many symbols are used once, without saying that in the rest of
     the paper such symbol will always denote such entity, and then used several lines or pages later, where
     the reader has forgotten what they denote. Moreover, the use of symbols is not always consistent.
   \end{remark}
-  \begin{remark}{4}
+  \begin{remark}
     The digital set is sometimes denoted with X and other times with Z (for example on page 3, left column,
     both symbols are used). I suggest not to use Z because it is too similar to the set of integer numbers.
     Symbol K seems to be used with the same meaning as X, Z in the right column of page 3.
   \end{remark}
-  \begin{remark}{5}
+  \begin{remark}
     Symbol h is used on page 2 (right column, top), on page 4 (right column, bottom) and only on page 6 it
     is defined as the gridstep (not in main text, but within the caption of fig.6).
   \end{remark}
@@ -130,9 +134,155 @@ UFR SceM, Campus scientifique \\
     We also made sure to be consistent with the use of symbols throughout the paper.
   \end{response}
 
+  \begin{remark}
+    The figures, connecting the points of the digital set with bold line segments (like figs. 1 and 2),
+    are misleading. They lead to think that X is a 1D complex consisting of points and edges, whereas
+    it is a set of points.
+  \end{remark}
+  \begin{remark}
+    The second paragraph of the left column of page 4 seems contraddictory. It says that the input for
+    visibility is a subcomplex, while previously it was a set of points in digital space.
+  \end{remark}
+  \begin{response}
+    There was indeed an inconsistency in the figures: the bold line segments connecting lattice
+    points made the digital set look like a 1D complex of points and edges, rather than a plain set
+    of points. We removed those segments from Figures 1 and 2, and now display only the lattice
+    points together with the 1-cells of the cubical complex to make the distinction clear.
+
+    Regarding the apparent contradiction raised in Remark~\the\numexpr\value{remarkcount}-1\relax:
+    there is no inconsistency between "a set of points in digital space" and "a subcomplex". The
+    key is the \emph{lattice map} (Khalimsky encoding), which assigns to every cell of the cubical
+    complex $\mathcal{C}^d$ a unique point with integer coordinates in $\mathbb{Z}^d$. Through this
+    bijection, any cell subcomplex (in particular the $k$-star $\mathrm{Star}_k(Z)$ of the digital
+    set $Z$) can equivalently be described as a set of points in $\mathbb{Z}^d$.
+  \end{response}
+
+
+  \begin{remark}
+    The lattice map (page 4) must be explained better. Figure 3 does not help, unless it is
+    explained in more detail in the text. The caption talks about 63 cells, but I cannot
+    understand what cells are they in the figure. The process of passing from the cell complex
+    to the intervals must be explained.
+  \end{remark}
+  \begin{response}
+    We took inspiration from the original paper's DGMM presentation of the lattice map, and added
+    a more detailed explanation of how the lattice map works and how it allows to pass from the cell
+    complex to the intervals' representation. We hope this will clarify the concept of lattice map
+    and how it is used in our work.
+  \end{response}
+
+  \begin{remark}
+    Figure 4 (the working example of the algorithm) must be explained in the text, otherwise it is
+    useless. What are Vi , Fi , Ti and Ri appearing in the figure? The algorithm is one of the main
+    contributions of the paper, so the reader must be enabled to understand it.
+  \end{remark}
+  \begin{response}
+    We added a much more detailed explanation of the working example of the algorithm, including a
+    step-by-step description of what is happening in the figure and what the different sets Vi, Fi,
+    Ti and Ri represent.
+  \end{response}
+
+  \begin{remark}
+    Figure 5: the source point (now blue on grey) should be marked in another, more evident, color,
+    for example red. Does this figure show 1-visibility?
+  \end{remark}
+  \begin{response}
+    We redesigned Figure 5 to make the source points more visible (now in red and slightly bigger),
+    and set the visible points in yellow on newer images. We also extended the visibility radius to
+    its maximum value to avoid any confusion about what visibility is being shown in the figure.
+    The figure do show the 1-visibility as noted in the visibility introductory text ("Unless otherwise
+    specified, we will consider visibility with k = 1").
+  \end{response}
+
+  \begin{remark}
+    Page 7, top of left column: the visibility normal is the last eigenvector... The normal should be
+    a unit vector. Do you mean that it is the eigenvector is taken after normalization, or do you
+    guarantee that it 1 has norm = 1? Please clarify.
+  \end{remark}
+  \begin{response}
+    By definition, the eigenvectors of a covariance matrix are unit vectors, so there is no need to
+    normalize them, nor to precise that they are unit vectors.
+  \end{response}
+
+  \begin{remark}
+    Page 7, top of right column: convergence is proven starting from k = 2. Do you mean for any
+    k $\geq$ 2 or for any k $\leq$ 2?
+  \end{remark}
+  \begin{response}
+    We meant for any k $\geq$ 2, as stated in the convergence theorem (Section 4) and implied
+    by the wording. We clarified this point in the text using the notation k $\geq$ 2 instead of k = 2.
+  \end{response}
+
+  \begin{remark}
+    Figure 13: I note that the first three rows and columns present vertical artifacts on some faces,
+    while in the rightmost column (new method) they don’t appear. I think it is worth to investigate
+    why. It is a good feature of the proposed method to avoid such artifacts!
+  \end{remark}
+  \begin{response}
+    Those vertical artifacts are not the only artifacts present in the first three rows and columns
+    of Figure 13, but they are indeed more visible than the others. We added a paragraph in the
+    section discussing the results of Figure 13 to explain that those artifacts are due to the fact that
+    radii of II and PCA normal estimation methods lack the ability to adapt to the local geometry (either
+    being too small and capturing inherent digital noise, or being too large and smoothing out salient features),
+    while our method is able to adapt to the local geometry and thus avoid such artifacts. We also added two
+    versions of radii for these methods in the figure to illustrate this point: one with a small radius (above
+    the diagonal) and one with a large radius (below the diagonal).
+  \end{response}
+
+  \begin{remark}
+    Page 10, top of right column. You should explain what does it mean that the boundary has
+    positive reach (what is the reach?). Here X denotes a compact subset of the real space, it
+    denoted a digital set of points elsewhere.
+  \end{remark}
+  \begin{response}
+    The \emph{reach} of a set $\partial X$ (introduced by Federer, 1959) is the largest $\rho > 0$
+    such that every point within distance $\rho$ of $\partial X$ has a unique nearest point on
+    $\partial X$. Intuitively, it measures how "round" the boundary is: a sphere of radius $r$
+    has reach $r$, while a sharp corner has reach $0$. The condition $\mathrm{reach}(\partial X) > \rho > 0$
+    therefore ensures that the boundary is smooth enough (no sharp features) for the convergence
+    proof to hold.
+    We also clarified the notation issue concerned with $X$ and $Z$ in the paper,
+    and made sure to use $X$ consistently to denote the compact subset of $\mathbb{Z}^d$ and $Z$ to
+    denote the digital sets.
+  \end{response}
+
+  \begin{remark}
+    I did not follow the proof because I don’t have the necessary mathematical knowledge. I hope
+    that the other reviewers can cover this part. The term ”sandwiched” (page 11, right column,
+    line 5 from bottom) should be probably replaced by a more technical one. Page 13, top: what
+    does it mean ”at most” orthogonal? In the caption of Fig. 14, ”1st” should be ”first”.
+  \end{remark}
+  \begin{response}
+    The term "sandwiched" sounds indeed a bit informal, but it is a common term in mathematics
+    to describe a situation where an object is "trapped" between two other objects. In our case, the
+    estimated normal vector is "sandwiched" between the true normal vector and the tangent space of the
+    surface, meaning that it is close to both of them. We fixed the several typos you pointed out.
+  \end{response}
+
   \reviewer{2}
 
-  \begin{remark}{1}
+
+  \begin{remark}
+    There are many places where it could have been more precise. For instance:
+    "there is a straight segment joining them that stays in the close vicinity of
+    the surface" - what is the relevance of this close vicinity and the visibility?
+  \end{remark}
+  \begin{response}
+    
+  \end{response}
+
+  \begin{remark}
+  \end{remark}
+  \begin{response}
+  \end{response}
+  \begin{remark}
+  \end{remark}
+  \begin{response}
+  \end{response}
+
+
+
+  \begin{remark}
   \end{remark}
   \begin{response}
   \end{response}
