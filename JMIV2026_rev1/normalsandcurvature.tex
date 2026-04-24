@@ -118,9 +118,9 @@ II and PCA normals exhibit a similar trade-off: with a small radius, they pick u
 and digitization artifacts, but keep sharp features. With a larger radius, they
 are more stable on smooth parts, but fail to capture sharp features, as they smooth them out.
 Adafit normals are more stable overall, but tend to be noisy near sharp features.
-Furthermore, its computational cost is significantly higher: it takes about 48m for the dragon shape alone, while
+Furthermore, its computational cost is significantly higher: it takes about $48$ min for the dragon shape alone, while
 the other three methods combined (the 2 different radii for each method and the visibility computation included)
-take about 1m. Our visibility normals are stable on smooth parts while capturing sharp features,
+take about $1$ min. Our visibility normals are stable on smooth parts while capturing sharp features,
 without any parameter tuning. The only optional parameter is the maximum visibility radius,
 which defaults to the local mean visibility distance and allows faster computation while
 producing visually indistinguishable results.}
@@ -226,7 +226,7 @@ the singularity for all estimators.
     orientation from the camera's angle as $0.5 \cdot (n_i + \mathbbm{1})$.
     ``Integral Invariant normals`` are computed using a radius of
         $r=4.5$ \added[id=ROM]{above the line and $r=9$ below}, PCA with a discrete radius of 4
-        \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=4$ neighbors},
+        \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=4$  neighbors},
         while our normal estimator \replaced[id=ROM]{uses}{are computed using} a deviation of $\sigma=4$, and so a
         radius of $r=2\sigma=8$, with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
