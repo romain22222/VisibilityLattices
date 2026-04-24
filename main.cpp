@@ -1093,6 +1093,7 @@ enum CenterPointChoice {
 auto centerPointChoice = CenterPointChoice::CENTROID;
 
 void computeMitraNormals(float radius) {
+	trace.beginBlock("Compute Mitra normals");
 	mitra_normals.clear();
 	mitra_normals.reserve(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
@@ -1124,6 +1125,7 @@ void computeMitraNormals(float radius) {
 	if (!noInterface) {
 		psPrimalMesh->addVertexVectorQuantity("Pointel Mitra normals", mitra_normals);
 	}
+	trace.endBlock();
 }
 
 void computeVisibilityNormals() {
