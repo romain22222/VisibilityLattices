@@ -100,7 +100,7 @@ UFR SceM, Campus scientifique \\
     of considering the surface of the object as the surface of a volume, we consider the surface
     as a thin layer of voxels (like a shell) and we ask for the visibility to be defined as the
     existence of a straight-line segment joining two points that lies completely in this thin layer.
-    We added a figure to better illustrate this point (Figure 3 in the revised version) and linked
+    We added a figure to better illustrate this point (Figure~3 in the revised version) and linked
     it to the definition of visibility in the paper. We hope this will clarify the definition of
     visibility we are using in our work.
   \end{response}
@@ -151,7 +151,7 @@ UFR SceM, Campus scientifique \\
 
     Regarding the apparent contradiction raised in Remark~\the\numexpr\value{remarkcount}-1\relax:
     there is no inconsistency between "a set of points in digital space" and "a subcomplex". The
-    key is the \emph{lattice map} (Khalimsky encoding), which assigns to every cell of the cubical
+    key is the lattice map (Khalimsky encoding), which assigns to every cell of the cubical
     complex $\mathcal{C}^d$ a unique point with integer coordinates in $\mathbb{Z}^d$. Through this
     bijection, any cell subcomplex (in particular the $k$-star $\mathrm{Star}_k(Z)$ of the digital
     set $Z$) can equivalently be described as a set of points in $\mathbb{Z}^d$.
@@ -187,11 +187,11 @@ UFR SceM, Campus scientifique \\
     for example red. Does this figure show 1-visibility?
   \end{remark}
   \begin{response}
-    We redesigned Figure 5 to make the source points more visible (now in red and slightly bigger),
-    and set the visible points in yellow on newer images. We also extended the visibility radius to
-    its maximum value to avoid any confusion about what visibility is being shown in the figure.
-    The figure do show the 1-visibility as noted in the visibility introductory text ("Unless otherwise
-    specified, we will consider visibility with k = 1").
+    We redesigned Figure~5 (Figure~6 in the revised version) to make the source points more visible
+    (now in red and slightly bigger), and set the visible points in yellow on newer images. We also
+    extended the visibility radius to its maximum value to avoid any confusion about what visibility
+    is being shown in the figure. The figure do show the 1-visibility as noted in the visibility
+    introductory text ("Unless otherwise specified, we will consider visibility with k = 1").
   \end{response}
 
   \begin{remark}
@@ -221,10 +221,10 @@ UFR SceM, Campus scientifique \\
   \begin{response}
     Those vertical artifacts are not the only artifacts present in the first three rows and columns
     of Figure 13, but they are indeed more visible than the others. We added a paragraph in the
-    section discussing the results of Figure 13 to explain that those artifacts are due to the fact that
-    radii of II and PCA normal estimation methods lack the ability to adapt to the local geometry (either
-    being too small and capturing inherent digital noise, or being too large and smoothing out salient features),
-    while our method is able to adapt to the local geometry and thus avoid such artifacts. We also added two
+    section discussing the results of Figure 13. Inside, we explain that those artifacts are due to the fact that
+    the radii of II and PCA normal estimation methods lack the ability to adapt to the local geometry (either
+    being too small and capturing inherent digital noise, or being too large and smoothing out salient features).
+    However, our method is able to adapt to the local geometry and thus avoid such artifacts. We also added two
     versions of radii for these methods in the figure to illustrate this point: one with a small radius (above
     the diagonal) and one with a large radius (below the diagonal).
   \end{response}
@@ -235,7 +235,7 @@ UFR SceM, Campus scientifique \\
     denoted a digital set of points elsewhere.
   \end{remark}
   \begin{response}
-    The \emph{reach} of a set $\partial X$ (introduced by Federer, 1959) is the largest $\rho > 0$
+    The reach of a set $\partial X$ (introduced by Federer, 1959) is the largest $\rho > 0$
     such that every point within distance $\rho$ of $\partial X$ has a unique nearest point on
     $\partial X$. Intuitively, it measures how "round" the boundary is: a sphere of radius $r$
     has reach $r$, while a sharp corner has reach $0$. The condition $\mathrm{reach}(\partial X) > \rho > 0$
@@ -268,27 +268,224 @@ UFR SceM, Campus scientifique \\
     the surface" - what is the relevance of this close vicinity and the visibility?
   \end{remark}
   \begin{response}
-    
+    The relevance of the "close vicinity" is precisely what makes our definition of visibility
+    specific to digital surfaces. Our framework considers visibility within a tubular
+    neighborhood of the surface: two points $p$ and $q$ are visible if the straight-line segment
+    $[p,q]$ stays at $L_\infty$-distance strictly less than $k$ from the digital set $Z$:
+    it never leaves the tube of thickness $k$ around $Z$. This is equivalent to asking that the
+    segment remains inside the $k$-star $\mathrm{Star}_k(Z)$ of the digital set throughout its
+    length. In other words, the "close vicinity of the surface" is the visibility
+    condition: requiring the segment to stay near the surface and requiring it to be fully visible
+    (in our sense) are one and the same thing.
   \end{response}
 
   \begin{remark}
+    "several days of computation for 1M triangles at the time" - maybe this was
+    true for extreme precision computations in the 1990s? With the current GPU, it
+    takes only milliseconds. So, it could be an overexaggeration that can be
+    removed.
   \end{remark}
   \begin{response}
+    The reviewer is right that modern GPU-accelerated ray tracing can answer approximate
+    visibility queries (whether a single pair of points is mutually visible) in
+    milliseconds. However, the sentence refers to computing the exact, complete visibility
+    complex, in other words, determining all mutually visible pairs across the entire surface, which is a
+    fundamentally different and much harder problem. For $n$ triangles, exact 3D visibility
+    algorithms operate in $O(n^4)$ in the worst case (as recalled in the introduction), leading to
+    roughly $10^{24}$ operations for $n = 10^6$ triangles. On a sequential CPU, and even on a
+    highly parallel GPU, such complexity does not become tractable simply by virtue of faster
+    hardware. We altered the original sentence in the revised introduction to make this distinction
+    explicit and avoid any misinterpretation.
   \end{response}
+
   \begin{remark}
+    I like the second paragraph in the introduction. Still, the shift from
+    traditional visibility to lattices in the third paragraph should be explained
+    more clearly (this includes explaining how lattices are related and what
+    changes/challenges they bring). This will make it very easy to understand.
   \end{remark}
   \begin{response}
+    We added a more detailed explanation of the shift from traditional visibility
+    to lattices in the transition from how the algorithm works to how we exploit
+    the lattice map and the intervals representation page 6 of the changes.
   \end{response}
-
-
 
   \begin{remark}
+    While efficiency is highlighted in the introduction, the only comparison was
+    with BF visibility, and the computation time is almost the same or even higher
+    (for radius=30), as the paper rightly notes. Either tone down the emphasis on
+    efficiency or add better comparisons.
   \end{remark}
   \begin{response}
+    We agree that our method does not outperform the brute-force method in terms of
+    raw computation time, but it is important to note that our method computes the
+    exact, complete visibility complex, while the brute-force method only
+    computes an approximate, partial visibility complex (since it relies on
+    its connectedness assumption to reduce the number of pairs of points it checks)
+    in the same time complexity. In other words, our method achieves the same efficiency
+    as the brute-force method, but for a much stronger notion of visibility. We
+    removed the emphasis on efficiency in the introduction to avoid any confusion.
   \end{response}
 
-  We hope this revision and the above answers will satisfy all your
-  requests and concerns, and are looking forward to hearing from you soon.
+  \begin{remark}
+    I'm not very convinced of the claim on "covariance-based normal estimation
+    methods." Isn't it possible to reuse them on the surface? What exactly doesn't
+    hold for "digitized shapes" and what are their implications? This is important
+    for motivation.
+  \end{remark}
+  \begin{response}
+    The main issue with covariance-based normal estimation methods on digitized shapes is that they rely
+    on the noise being a gaussian perturbation of the underlying smooth surface, which is not the case
+    for digitization processes. In particular, the digitization process can introduce non-gaussian noise
+    and can create sharp features that are not present in the original smooth surface, which can lead to
+    inaccurate normal estimation. We can observe this issue in the results of Figure 13 for the PCA normal
+    estimation method, where it either captures the inherent digital noise (with the oscillations on
+    smaller radii) or smooths out salient features (with larger radii). Our method, on the other hand,
+    is designed to be aware of the local geometry and can adapt to it without parameters. It avoids
+    above issues while providing accurate normal estimation even in the presence of digitization artifacts.
+    We pinpointed this issue in the figure 13 discussion section of the revised version to better motivate
+    our method and highlight its advantages over covariance-based normal estimation methods.
+  \end{response}
+
+  \begin{remark}
+    I believe "Non-Iterative, Feature-Preserving Mesh Smoothing" deserves a
+    citation, as their solutions (the core idea for normal estimation) are somewhat
+    similar.
+  \end{remark}
+  \begin{response}
+    We added a citation to "Non-Iterative, Feature-Preserving Mesh Smoothing" in the introduction section
+    when we discuss the motivation for our method and the related work on normal estimation. We do think
+    that this paper is relevant to our work, as it has similar hypotheses than II. However, our method
+    is different in that it does not require any parameter tuning and is designed to be
+    specifically aware of the local geometry of digitized shapes, which allows it to provide normal estimation
+    independent of the scale and without smoothing out salient features, while still being accurate and convergent.
+  \end{response}
+
+  \begin{remark}
+    I do not fully understand the last paragraph of the introduction. Can you add
+    an example in the discussion?
+  \end{remark}
+  \begin{response}
+    Please note that the last paragraph of the introduction has been moved to the conclusion section,
+    as suggested by the first reviewer. Here is a simple example to illustrate the point: consider
+    a simple triangle in 3D space, and take its decomposition into lattice points. We can use this
+    decomposition as the input for our algorithm instead of the decomposition of a segment. The
+    algorithm will then return the points on the surface where this triangle can be found, which
+    corresponds to the points where this specific triangle can be "placed" on the surface. This
+    illustrates how our method can be used to analyze the local geometry of the surface by looking at
+    the visibility of specific shapes (in this case, a triangle) on the surface.
+  \end{response}
+
+  \begin{remark}
+    I like the idea of visibility by the intersections of integer intervals. However, adding
+    intuitions/motivations will improve readability.
+  \end{remark}
+  \begin{response}
+    Please refer to remark 8 of the first reviewer.
+  \end{response}
+
+  \begin{remark}
+    Considering that there are no page limits (?), I would suggest explaining the
+    algorithms in detail.
+  \end{remark}
+  \begin{remark}
+    It took me quite some time to decode Figure 4. Maybe it can be improved? Or
+    the captions could have been more precise? And maybe annotate by noting exactly
+    what each piece says.
+  \end{remark}
+  \begin{response}
+    Please refer to remark 9 of the first reviewer.
+  \end{response}
+
+  \begin{remark}
+    Does the blue point represent the "source point" in Figure 5? I see a small
+    chirp on the blue point, so I thought the blue point lies on the surface? If
+    yes, then the visible points don't make sense to me.
+  \end{remark}
+  \begin{remark}
+    It is not clear to me why the "visbility does not cross the gap between the
+    two parts" - how does the gap matter for visibility? Or is it because of your
+    threshold that you are ignoring far-away, visible points?
+  \end{remark}
+  \begin{response}
+    Please refer to remark 10 of the first reviewer.
+    Regarding the last remark (the gap and visibility): our definition of visibility is
+    specifically designed to capture visibility along the surface rather than through free
+    space. The key consequence is that two points sitting on two nearby but geometrically
+    disconnected parts of the surface (for instance, on opposite walls of a thin gap or
+    cavity) are not mutually visible in our sense. This is because the straight segment
+    joining them would leave the $k$-star of the surface and cross empty space. This is
+    not a threshold effect: it is a fundamental property of the definition.
+
+    This behavior is precisely what we exploit for normal estimation. When computing the visibility
+    cone at a point $p$, we only collect information from the same connected surface patch; points
+    on the other side of a gap or sharp feature are invisible, so their (potentially contradictory)
+    normal information cannot pollute the estimate at $p$.
+
+    The maximum visibility radius is a separate, optional parameter: it simply
+    caps how far we search for visible points, discarding points that are visible but very distant.
+    Since the normal estimate changes very little once enough nearby visible points are collected,
+    this truncation trades a negligible loss of accuracy for a significant reduction in computation
+    time. We updated Figure~5 (Figure~6 in the revised version) to show visibility pushed to the full extent of
+    the shape (no radius cap), making the gap-blocking and feature-blocking behavior clearly visible.
+  \end{response}
+
+  \begin{remark}
+    I'm not very convinced about the "weighted centroid of the visibile points
+    around" sentence. What happens at sharp corners with some weird distribution
+    around them?
+  \end{remark}
+  \begin{response}
+    The "weird distributions" around sharp corners are indeed a concern for normal estimation, as they
+    can lead to inaccurate estimates if not handled properly. However, our method is designed to be robust
+    to such situations. As the gridstep decreases, the distribution of visible points around sharp corners
+    becomes more regular and disk-like, which allows the weighted centroid to provide a good estimate of
+    the normal direction. Moreover, for points close to salient features, the visibility cone will naturally
+    include more points from the non-salient part of the surface, which helps to mitigate the influence
+    of the salient feature on the normal estimation. In other words, our method leverages the visibility
+    structure to adaptively weight the contribution of visible points, providing accurate normal estimates
+    even in the presence of sharp features and irregular distributions.
+  \end{response}
+
+  \begin{remark}
+    Unfortunately, I feel the experimentation section is too weak. The comparisons
+    are made with very old baseline techniques. There are many recent techniques,
+    especially the neural ones. Did you check how the proposed method compares to
+    them? Actually, this is the second most important concern I have.
+  \end{remark}
+  \begin{response}
+    We focused our comparisons on classical, well-established methods with known theoretical properties
+    (in particular, convergence guarantees) to provide a solid baseline for evaluating our method. We did
+    not find any recent deep learning-based methods specifically designed to compute normals or curvatures
+    from digital surfaces. The closest we found were methods that take point clouds as input to compute
+    normals, but the results displayed in the papers were not impressive (worse than II in our context).
+    However, after performing extensive tests on Adafit, we realized that its results were much better
+    than those proposed in the publications. We therefore decided to add a comparison with Adafit in
+    the experimentation section, in addition to the II and PCA methods already present. We also added
+    a discussion on the results obtained with Adafit as well as its advantages and disadvantages compared
+    to our method. We hope this will strengthen the experimentation section and provide a more comprehensive
+    comparison with existing methods.
+  \end{response}
+
+  \begin{remark}
+    I'm not very convinced about the results shown in Figure 12. I would say the
+    PCA is looking much better, at least for the dragon.
+  \end{remark}
+  \begin{response}
+    Figure~12 is now Figure~13 in the revised version. We added a discussion of the results shown in this figure,
+    including a comparison between our method and PCA. We acknowledge that PCA seems to perform better in some cases
+    (like the tie fighter), but it is important to note that PCA's performance is highly sensitive to the choice of
+    radius: with a small radius, it captures the inherent digital noise and produces oscillations, while with a large
+    radius, it smooths out salient features and loses important geometric details. Our method, on the other hand, is
+    designed to be parameter-free and adapt to the local geometry, providing accurate normal estimation without
+    smoothing out features or being affected by noise. We highlighted this advantage of our method in the discussion
+    of Figure~13 and by including a comparison with both radii inside this figure to provide a more balanced
+    evaluation of the results.
+  \end{response}
+
+  We also made several minor improvements to the paper, including fixing typos, improving the clarity of some
+  explanations, and enhancing the figures for better readability. We hope this revision and the above answers
+  will satisfy all your requests and concerns, and are looking forward to hearing from you soon.
 
   Best regards
   \bigskip
