@@ -128,10 +128,12 @@ UFR SceM, Campus scientifique \\
     is defined as the gridstep (not in main text, but within the caption of fig.6).
   \end{remark}
   \begin{response}
-    Considering how many symbols are used in the paper, we think that a table of symbols would be too heavy
-    and would not be really helpful for the reader. However, we added a notation section at the start of the
-    visibility section, where we introduce the main symbols used in the paper and explain what they denote.
-    We also made sure to be consistent with the use of symbols throughout the paper.
+    We took this comment seriously and added a dedicated notation section at the start of the
+    visibility section, where all main symbols are introduced and defined. We also carefully
+    revised the whole paper to ensure consistent use of symbols throughout.
+    Given the number of concepts involved, a full table of symbols would be quite heavy; we
+    believe the notation section addresses the core concern raised and provides the reader with
+    a clear reference point for the symbols used in the paper.
   \end{response}
 
   \begin{remark}
@@ -149,7 +151,7 @@ UFR SceM, Campus scientifique \\
     of points. We removed those segments from Figures 1 and 2, and now display only the lattice
     points together with the 1-cells of the cubical complex to make the distinction clear.
 
-    Regarding the apparent contradiction raised in Remark~\the\numexpr\value{remarkcount}-1\relax:
+    Regarding the apparent contradiction raised in Remark~7:
     there is no inconsistency between "a set of points in digital space" and "a subcomplex". The
     key is the lattice map (Khalimsky encoding), which assigns to every cell of the cubical
     complex $\mathcal{C}^d$ a unique point with integer coordinates in $\mathbb{Z}^d$. Through this
@@ -165,9 +167,10 @@ UFR SceM, Campus scientifique \\
     to the intervals must be explained.
   \end{remark}
   \begin{response}
-    We took inspiration from the original paper's DGMM presentation of the lattice map, and added
-    a more detailed explanation of how the lattice map works and how it allows to pass from the cell
-    complex to the intervals' representation. We hope this will clarify the concept of lattice map
+    In order to improve Figure~3 (Figure~4 in the revised version), we took inspiration from
+    the original paper's DGMM presentation of the lattice map. We also added a more detailed
+    explanation of how the lattice map works and how it allows to pass from the cell complex
+    to the intervals' representation. We hope this will clarify the concept of lattice map
     and how it is used in our work.
   \end{response}
 
@@ -201,7 +204,7 @@ UFR SceM, Campus scientifique \\
   \end{remark}
   \begin{response}
     By definition, the eigenvectors of a covariance matrix are unit vectors, so there is no need to
-    normalize them, nor to precise that they are unit vectors.
+    normalize them, nor to state that they are unit vectors.
   \end{response}
 
   \begin{remark}
@@ -253,14 +256,18 @@ UFR SceM, Campus scientifique \\
     does it mean ”at most” orthogonal? In the caption of Fig. 14, ”1st” should be ”first”.
   \end{remark}
   \begin{response}
-    The term "sandwiched" sounds indeed a bit informal, but it is a common term in mathematics
-    to describe a situation where an object is "trapped" between two other objects. In our case, the
-    estimated normal vector is "sandwiched" between the true normal vector and the tangent space of the
-    surface, meaning that it is close to both of them. We fixed the several typos you pointed out.
+    The term "sandwiched" is in fact standard in mathematics (it refers to the classical
+    sandwich/squeeze theorem), and concisely captures the situation where the estimated normal
+    is bounded between two well-defined geometric objects. We therefore chose to keep it.
+    Regarding "at most orthogonal" (page 13, top): this was a typo mistake. We replaced it by
+    "as most orthogonal as possible", meaning that the angle between the estimated normal
+    and the true normal tends to 0 as the gridstep $h \to 0$. We also fixed the
+    remaining typos you pointed out, including "1st" $\to$ "first" in the caption of Fig.~14.
   \end{response}
 
-  \reviewer{2}
 
+
+  \reviewer{2}
 
   \begin{remark}
     There are many places where it could have been more precise. For instance:
@@ -381,7 +388,11 @@ UFR SceM, Campus scientifique \\
     intuitions/motivations will improve readability.
   \end{remark}
   \begin{response}
-    Please refer to remark 8 of the first reviewer.
+    Please refer to remark 8-9 of the first reviewer. The improved Figure~4 and the added explanations
+    for Figure~5 should provide more intuition and motivation for the visibility by the intersections
+    of integer intervals. Following this explanation, we also added some explanations on why the use
+    of lattice maps are relevant and how they allow us to efficiently compute visibility on digital
+    surfaces, which should further improve the readability of the paper.
   \end{response}
 
   \begin{remark}
