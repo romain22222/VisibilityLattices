@@ -118,13 +118,12 @@ II and PCA normals exhibit a similar trade-off: with a small radius, they pick u
 and digitization artifacts, but keep sharp features. With a larger radius, they
 are more stable on smooth parts, but fail to capture sharp features, as they smooth them out.
 Adafit normals are more stable overall, but tend to be noisy near sharp features.
-Furthermore, its computational cost is significantly higher (~XXXm for the cps shape alone, while
-the other three methods combined take about XXXm), since it is a neural network that must
-be evaluated independently for each local patch.
-Our visibility normals are stable on smooth
-parts while capturing sharp features, without any parameter tuning. The
-only optional parameter is the maximum visibility radius, which defaults to the local mean
-visibility distance and allows faster computation while producing visually indistinguishable results.}
+Furthermore, its computational cost is significantly higher: it takes about 48m for the dragon shape alone, while
+the other three methods combined (the 2 different radii for each method and the visibility computation included)
+take about 1m. Our visibility normals are stable on smooth parts while capturing sharp features,
+without any parameter tuning. The only optional parameter is the maximum visibility radius,
+which defaults to the local mean visibility distance and allows faster computation while
+producing visually indistinguishable results.}
 
 In order to compare quantitatively the different normal estimators, we compute the
 root-mean-square error (RMSE) and the maximum error $E_{\max}$ of the
