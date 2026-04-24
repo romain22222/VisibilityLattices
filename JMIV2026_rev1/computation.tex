@@ -170,13 +170,22 @@ integer interval sequences, and all the key operations
 (translation, inclusion test, intersection) reduce to simple
 linear-time scans over sorted intervals.}
 
-In general, the algorithm reduces to determining all possible
+\replaced[id=ROM]{In general, the algorithm reduces to determining all possible
 inclusions by translation of sequences of intervals into another
 sequence of intervals (note that for pairwise visibility, it is enough
 to consider all possible inclusions by translation of one interval
 into another sequence of intervals), and then intersecting
 progressively the results. Some results of visible points are
-displayed on Figure~\ref{fig:visibility-results} on 3D shapes.
+displayed on Figure~\ref{fig:visibility-results} on 3D shapes.}{Figure~\ref{fig:visibility-algorithm-evolution} shows an example of
+execution of this algorithm in an elementary case. It reduces to
+determining all the possible inclusions by translation of sequences of
+intervals in another sequence of intervals (note that for
+pairwise visibility, it is enough to consider all the possible
+inclusions by translation of one interval in another sequence of
+intervals), and then intersecting progressively the results. Of
+course, the process is stopped as soon as the intersection is
+empty. Some results of visible points are displayed on
+figure~\ref{fig:visibility-results} on 3d shapes.}
 
 %% In order to compute the visibility, we first compute $\Omega = \text{Star}(C)$. Then for each primal direction of
 %% coordinates at most $r$, we look at all the possible positions this specific direction does link 2 visible points
