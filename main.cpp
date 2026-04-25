@@ -1128,43 +1128,50 @@ void computeMitraNormals(float radius) {
 	trace.endBlock();
 }
 
-void computeVisibilityNormals() {
+void computeVisibilityNormals(bool autoLimiter=true) {
 	visibility_normals.resize(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
 #pragma omp parallel for schedule(dynamic)
 	for (auto pidx = 0; pidx < pointels.size(); ++pidx) {
 		const auto pointel = pointels[pidx];
 		std::vector<Point> visibles;
+		for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
+			auto tmp = kdTree.position(point_idx);
+			if (visibility.isVisible(pointel, tmp))
+				visibles.push_back(tmp);
+		}
+
+		if (autoLimiter) {
+			double avgDist = 0.0;
+			for (const auto &pt: visibles)
+				avgDist += (pointel - pt).norm();
+			if (!visibles.empty()) avgDist /= (double)visibles.size();
+
+			std::vector<Point> filtered;
+			for (const auto &pt: visibles) {
+				if ((pointel - pt).norm() <= avgDist)
+					filtered.push_back(pt);
+			}
+			visibles = filtered;
+		}
 		RealPoint centroid(0, 0, 0);
 		if (centerPointChoice == CenterPointChoice::ITSELF) {
 			centroid = pointel;
-			for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
-				auto tmp = kdTree.position(point_idx);
-				if (visibility.isVisible(pointel, tmp)) {
-					visibles.push_back(tmp);
-				}
-			}
 		} else {
 			double total_w = 0.0;
-			for (auto point_idx: kdTree.pointsInBall(pointel, 2 * sigma)) {
-				auto tmp = kdTree.position(point_idx);
-				if (visibility.isVisible(pointel, tmp)) {
-					//	&& tmp != pointel) {
-					visibles.push_back(tmp);
-					//				centroid += tmp;
-					const double w = weighter((pointel - tmp).squaredNorm());
-					centroid += w * tmp;
-					total_w += w;
-				}
+			for (const auto &pt: visibles) {
+				const double w = weighter((pointel - pt).squaredNorm());
+				centroid += w * pt;
+				total_w += w;
 			}
-			centroid /= total_w; // (double) visibles.size();
+			if (total_w > 0.0) centroid /= total_w;
 		}
+
 		Eigen::Matrix3d cov = Eigen::Matrix3d::Zero();
 		for (const auto &pt: visibles) {
 			auto diff = pt - centroid;
 			for (int i = 0; i < 3; ++i) {
 				for (int j = 0; j < 3; ++j) {
-					//					cov(i, j) += diff[i] * diff[j];
 					cov(i, j) += diff[i] * diff[j] * weighter((pt - pointel).squaredNorm());
 				}
 			}
@@ -1992,13 +1999,18 @@ void myCallback() {
 		computeVisibilityDirectionToSharpFeatures();
 		Time = trace.endBlock();
 	}
+	if (ImGui::Button("Compute Normals old")) {
+		trace.beginBlock("Compute visibilities Normals old");
+		computeVisibilityNormals(false);
+		reorientVisibilityNormals();
+		Time = trace.endBlock();
+		doRedisplayNormalAsColorsRelativeFor(visibility_normals, "Visibility old");
+	}
 	if (ImGui::Button("Compute Normals")) {
 		trace.beginBlock("Compute visibilities Normals");
 		computeVisibilityNormals();
 		reorientVisibilityNormals();
 		Time = trace.endBlock();
-		computeMitraNormals(mitra_radius);
-		reorientMitraNormals();
 		doRedisplayNormalAsColorsAbsolute();
 		doRedisplayNormalAsColorsRelative();
 	}
