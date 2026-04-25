@@ -134,6 +134,8 @@ static char inputAdaFitCacheDir[1024] = VISIBILITY_LATTICES_SOURCE_DIR "/out/ada
 static int adafitKNeighbors = 64;
 std::string adafitLastStatus = "AdaFit not run yet.";
 
+float ratioMD = 1.0;
+
 // Constants
 const auto emptyIE = IntegerVector();
 
@@ -1128,7 +1130,7 @@ void computeMitraNormals(float radius) {
 	trace.endBlock();
 }
 
-void computeVisibilityNormals(bool autoLimiter=true) {
+void computeVisibilityNormals(bool autoLimiter=true, float ratioMD=1.0) {
 	visibility_normals.resize(pointels.size());
 	auto kdTree = LinearKDTree<Point, 3>(pointels);
 #pragma omp parallel for schedule(dynamic)
@@ -1145,7 +1147,7 @@ void computeVisibilityNormals(bool autoLimiter=true) {
 			double avgDist = 0.0;
 			for (const auto &pt: visibles)
 				avgDist += (pointel - pt).norm();
-			if (!visibles.empty()) avgDist /= (double)visibles.size();
+			if (!visibles.empty()) avgDist /= (double)visibles.size() / ratioMD;
 
 			std::vector<Point> filtered;
 			for (const auto &pt: visibles) {
@@ -2006,9 +2008,10 @@ void myCallback() {
 		Time = trace.endBlock();
 		doRedisplayNormalAsColorsRelativeFor(visibility_normals, "Visibility old");
 	}
+	ImGui::SliderFloat("ratioMD", &ratioMD, 0.1, 2.0);
 	if (ImGui::Button("Compute Normals")) {
 		trace.beginBlock("Compute visibilities Normals");
-		computeVisibilityNormals();
+		computeVisibilityNormals(true, ratioMD);
 		reorientVisibilityNormals();
 		Time = trace.endBlock();
 		doRedisplayNormalAsColorsAbsolute();
