@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 #include <cstdio>
 #include <cstring>
 #include <random>
@@ -135,6 +137,9 @@ static int adafitKNeighbors = 64;
 std::string adafitLastStatus = "AdaFit not run yet.";
 
 float ratioMD = 1.0;
+
+// Shape filename for view persistence
+std::string currentShapeFilename;
 
 // Constants
 const auto emptyIE = IntegerVector();
@@ -1464,6 +1469,9 @@ void computeTrueNormalsPolyhedra() {
 }
 
 void computeL2looErrorsNormals(const std::vector<RealVector> &normals, const std::string &normalName) {
+	if (normals.empty()) {
+		return;
+	}
 	angle_dev.clear();
 	angle_dev.resize(normals.size());
 	dummy.resize(normals.size(), 0.0);
@@ -1936,6 +1944,75 @@ void testNearestPoint() {
 	psPrimalMesh->addVertexVectorQuantity("Gradients nearest points vectors", gradients);
 }
 
+
+void saveViewForVolume() {
+	if (currentShapeFilename.empty() || !psPrimalMesh) return;
+	std::filesystem::path base(currentShapeFilename);
+
+	{
+		auto p = base; p.replace_extension(".view");
+		std::ofstream f(p);
+		if (f) f << polyscope::view::getViewAsJson();
+	}
+
+	{
+		auto p = base; p.replace_extension(".settings");
+		std::ofstream f(p);
+		if (!f) return;
+		auto c = psPrimalMesh->getSurfaceColor();
+		f << "surfaceColor=" << c.r << "," << c.g << "," << c.b << "\n";
+		f << "edgeWidth=" << psPrimalMesh->getEdgeWidth() << "\n";
+		f << "material=" << psPrimalMesh->getMaterial() << "\n";
+		f << "transparency=" << psPrimalMesh->getTransparency() << "\n";
+		f << "upDir=" << static_cast<int>(polyscope::view::upDir) << "\n";
+		f << "frontDir=" << static_cast<int>(polyscope::view::frontDir) << "\n";
+		f << "groundPlaneMode=" << static_cast<int>(polyscope::options::groundPlaneMode) << "\n";
+		trace.info() << "Settings saved to " << p << std::endl;
+	}
+}
+
+void tryLoadViewForVolume() {
+	if (currentShapeFilename.empty()) return;
+	std::filesystem::path base(currentShapeFilename);
+
+	{
+		auto p = base; p.replace_extension(".view");
+		std::ifstream f(p);
+		if (f) {
+			std::string json((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+			polyscope::view::setViewFromJson(json, false);
+			trace.info() << "View loaded from " << p << std::endl;
+		}
+	}
+
+	if (!psPrimalMesh) return;
+	{
+		auto p = base; p.replace_extension(".settings");
+		std::ifstream f(p);
+		if (!f) return;
+		std::string line;
+		while (std::getline(f, line)) {
+			auto eq = line.find('=');
+			if (eq == std::string::npos) continue;
+			std::string key = line.substr(0, eq);
+			std::string val = line.substr(eq + 1);
+			auto parseVec3 = [](const std::string &s) -> glm::vec3 {
+				float r = 0, g = 0, b = 0;
+				sscanf(s.c_str(), "%f,%f,%f", &r, &g, &b);
+				return {r, g, b};
+			};
+			if (key == "surfaceColor")    psPrimalMesh->setSurfaceColor(parseVec3(val));
+			else if (key == "edgeWidth")  psPrimalMesh->setEdgeWidth(std::stof(val));
+			else if (key == "material")   psPrimalMesh->setMaterial(val);
+			else if (key == "transparency") psPrimalMesh->setTransparency(std::stof(val));
+			else if (key == "upDir")      polyscope::view::upDir        = static_cast<polyscope::UpDir>(std::stoi(val));
+			else if (key == "frontDir")   polyscope::view::frontDir     = static_cast<polyscope::FrontDir>(std::stoi(val));
+			else if (key == "groundPlaneMode") polyscope::options::groundPlaneMode = static_cast<polyscope::GroundPlaneMode>(std::stoi(val));
+		}
+		trace.info() << "Settings loaded from " << p << std::endl;
+	}
+}
+
 void myCallback() {
 	std::string visibilityFilename;
 	// Select a vertex with the mouse
@@ -2178,11 +2255,20 @@ void myCallback() {
 		smartSaillencyThreshold();
 	}
 
+	if (ImGui::Button("Save view for vol")) {
+		saveViewForVolume();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Try load view for vol")) {
+		tryLoadViewForVolume();
+	}
+
 	// Shortcuts
 	if (ImGui::IsKeyPressed(ImGuiKey_N)) {
 		doRedisplayNormalAsColorsRelative();
 	}
 }
+
 
 void testIntersection() {
 	// 1|2 4|5 7|9
@@ -2690,6 +2776,7 @@ int main(int argc, char *argv[]) {
 		params("thresholdMin", thresholdMin);
 		params("thresholdMax", thresholdMax);
 		binary_image = SH3::makeBinaryImage(filename, params);
+		currentShapeFilename = std::filesystem::absolute(filename).string();
 		K = SH3::getKSpace(binary_image, params);
 		trace.endBlock();
 	}
@@ -2796,6 +2883,7 @@ int main(int argc, char *argv[]) {
 		                                              primal_faces);
 		psPrimalMesh->setSurfaceColor(glm::vec3(0.50, 0.50, 0.75));
 		psPrimalMesh->setEdgeWidth(1.5);
+		tryLoadViewForVolume();
 		polyscope::state::userCallback = myCallback;
 		polyscope::show();
 	}
