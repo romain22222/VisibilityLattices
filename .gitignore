@@ -20,3 +20,6 @@ cmake-build-*
 /rawExperiments/**
 /outputGenerator/**
 shape.vol
+
+*.view
+*.settings
