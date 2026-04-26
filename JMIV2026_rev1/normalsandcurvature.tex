@@ -121,7 +121,7 @@ Adafit normals are more stable overall, but tend to be noisy near sharp features
 Furthermore, its computational cost is significantly higher: it takes about $48$ min for the dragon shape alone, while
 the other three methods combined (the 2 different radii for each method and the visibility computation included)
 take about $30$ min. Our visibility normals are stable on smooth parts while capturing sharp features,
-without any parameter tuning. The only optional parameter is the maximum discrete visibility radius,
+without any parameter tuning or dependency to $h$. The only optional parameter is the maximum discrete visibility radius,
 which allows faster computation while producing visually indistinguishable results.}
 
 In order to compare quantitatively the different normal estimators, we compute the
