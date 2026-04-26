@@ -227,8 +227,8 @@ the singularity for all estimators.
     ``Integral Invariant normals`` are computed using a radius of
         $r=4.5$ \added[id=ROM]{above the line and $r=9$ below}, PCA with a discrete radius of 4
         \added[id=ROM]{above the line and 8 below} (empirical)\added[id=ROM]{, Adafit uses $k=128$  neighbors},
-        while our normal estimator \replaced[id=ROM]{uses}{are computed using} a deviation of $\sigma=4$, and so a
-        radius of $r=2\sigma=8$, with a star of 1 and with a weighted kernel.}
+        while our normal estimator \replaced[id=ROM]{uses capped visibility at $r=30$}{are computed using a deviation of $\sigma=4$, and so a
+        radius of $r=2\sigma=8$}, with a star of 1 and with a weighted kernel.}
     \label{fig:normals-estimation}
 \end{figure*}
 
